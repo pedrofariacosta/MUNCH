@@ -13,23 +13,23 @@ export class LoadingScreen {
     this.onCompleteCallback = null;
     this.autoStart = false;
     
-    // Instancia o gerenciador de favicon e título dinâmico
+    // Favicon e título da aba
     this.faviconManager = new FaviconManager();
     this.faviconManager.setStaticFavicon();
     
-    // Vincula a função de disparo para não perder o escopo
+    // Handler do clique/tecla pra iniciar
     this.triggerStartHandler = (e) => this.handleStartTrigger(e);
   }
 
-  // Reseta a tela para o estado A (inicial, carregamento em loop)
+  // Reseta tela pro estado inicial de loading
   reset() {
     this.readyToStart = false;
     
-    // Remove eventos se estiverem ativos para evitar repetição
+    // Limpa ouvintes de evento pra não duplicar
     window.removeEventListener('keydown', this.triggerStartHandler);
     window.removeEventListener('click', this.triggerStartHandler);
     
-    // Limpa as classes de animação e efeitos
+    // Reseta classes de animação
     this.overlay.classList.remove('exit-fade', 'shake-active');
     this.bottomRightLoader.classList.remove('fade-out');
     this.bigSlimeWrapper.classList.remove('fall-impact');
@@ -37,43 +37,43 @@ export class LoadingScreen {
     this.dust.classList.remove('dust-active');
     this.startPrompt.classList.remove('visible');
     
-    // Garante que a tela de carregamento está visível
+    // Mostra o overlay de loading
     this.overlay.classList.remove('hidden');
   }
 
-  // Inicia a sequência de carregamento
+  // Roda a transição de carregamento
   startTransition(durationMs, onComplete, autoStart = false) {
     this.onCompleteCallback = onComplete;
     this.autoStart = autoStart;
     
     this.reset();
     
-    // Ativa a animação do favicon e o título de carregamento na aba
+    // Começa a animar o favicon e muda o título da aba
     this.faviconManager.startAnimation();
     
-    // Estado A: Mantém o loop tocando pelo tempo simulado de carregamento
+    // Mantém o loading rodando pelo tempo definido
     setTimeout(() => {
       this.completeLoading();
     }, durationMs);
   }
 
-  // Estado B: Conclusão do Carregamento (Transição de Impacto)
+  // Transição de impacto após terminar o carregamento
   completeLoading() {
-    // Para as animações do favicon/título e define a versão definitiva estática
+    // Para a animação do favicon e define o ícone estático
     this.faviconManager.setStaticFavicon();
 
-    // 1. Esconde os mini loaders do canto inferior direito
+    // Esconde o loader mini do canto
     this.bottomRightLoader.classList.add('fade-out');
     
-    // 2. Aciona a queda por gravidade do slime gigante
+    // Faz o slime gigante despencar
     this.bigSlimeWrapper.classList.add('fall-impact');
     
-    // 3. Efeitos visuais no momento exato do impacto (360ms de queda)
+    // Treme a tela e solta poeira no impacto (360ms de queda)
     setTimeout(() => {
       this.triggerImpactEffects();
     }, 360);
 
-    // 4. Final da animação de queda (800ms) -> Transiciona para o Estado C
+    // Libera a tela pro jogador iniciar (800ms)
     setTimeout(() => {
       this.enterReadyState();
     }, 800);
@@ -86,33 +86,31 @@ export class LoadingScreen {
       this.overlay.classList.remove('shake-active');
     }, 150);
 
-    // Expansão da onda de choque
+    // Onda de choque
     this.shockwave.classList.add('shockwave-active');
     
-    // Dispersão de partículas de poeira
+    // Partículas de poeira
     this.dust.classList.add('dust-active');
   }
 
-  // Estado C: Pronto para Jogar (Exibe o prompt para iniciar)
+  // Espera qualquer clique ou tecla pra avançar
   enterReadyState() {
     if (this.autoStart) {
-      // Inicia direto se for uma transição automática de nível (sem aguardar clique)
+      // Se for transição automática (fim de fase), não espera clique
       setTimeout(() => {
         this.exitLoading();
       }, 700);
     } else {
-      // Aguarda o clique ou toque de tecla do jogador
+      // Espera clique ou qualquer tecla
       this.startPrompt.classList.add('visible');
       this.readyToStart = true;
       
-      // Monitora teclado e cliques
       window.addEventListener('keydown', this.triggerStartHandler);
       window.addEventListener('click', this.triggerStartHandler);
     }
   }
 
   handleStartTrigger(e) {
-    // Evita chamadas duplicadas
     if (!this.readyToStart) return;
     
     this.readyToStart = false;
@@ -120,13 +118,13 @@ export class LoadingScreen {
   }
 
   exitLoading() {
-    // Efeito de fade out na tela de carregamento inteira
+    // Faz fade out da tela inteira
     this.overlay.classList.add('exit-fade');
     
-    // Aguarda a transição de opacidade acabar antes de esconder o elemento
+    // Esconde tudo após o fim do fade
     setTimeout(() => {
       this.overlay.classList.add('hidden');
-      this.reset(); // Limpa as classes para evitar memory leaks
+      this.reset(); // Limpa pra evitar memory leak
       
       if (typeof this.onCompleteCallback === 'function') {
         this.onCompleteCallback();

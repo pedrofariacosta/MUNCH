@@ -15,18 +15,18 @@ export class Game {
     this.canvas = document.getElementById('game-canvas');
     this.ctx = this.canvas.getContext('2d');
     
-    // Configura o tamanho interno do Canvas
+    // Tamanho do canvas
     this.canvas.width = CANVAS_SIZE;
     this.canvas.height = CANVAS_SIZE;
     
-    // Estado do jogo e pontuação
+    // Estado e pontuação
     this.state = GAME_STATES.MENU;
     this.stage = 1;
     this.score = 0;
     this.stageScore = 0;
     this.gold = 0;
     this.lives = 3;
-    this.jokers = []; // Relíquias/Coringas equipados (máximo 5)
+    this.jokers = []; // Coringas equipados (max 5)
     
     // Core references
     this.player = null;
@@ -34,7 +34,7 @@ export class Game {
     this.projectiles = [];
     this.floatingTexts = [];
     
-    // Inicialização dos subsistemas do jogo
+    // Inicializa subsistemas
     this.input = new Input();
     this.scoreEngine = new ScoreEngine();
     this.particleSystem = new ParticleSystem();
@@ -49,7 +49,7 @@ export class Game {
   }
 
   init() {
-    // Associa os callbacks da interface gráfica
+    // Callbacks da interface
     this.uiManager.init({
       onStartGame: () => this.startGame(),
       onRestartGame: () => this.startGame(),
@@ -58,7 +58,7 @@ export class Game {
       onExitShop: () => this.exitShop()
     });
 
-    // Inicia a renderização e define o estado inicial como Menu
+    // Estado inicial
     this.state = GAME_STATES.MENU;
     this.uiManager.switchState(this.state);
     
@@ -78,7 +78,7 @@ export class Game {
     this.state = GAME_STATES.LOADING;
     this.uiManager.switchState(this.state);
     
-    // Transição animada de carregamento para a Fase 1
+    // Transição de loading pra Fase 1
     this.loadingScreen.startTransition(1500, () => {
       this.startStage();
     }, true);
@@ -94,10 +94,10 @@ export class Game {
     this.floatingTexts = [];
     this.particleSystem.clear();
     
-    // Inicializa a grade do mapa
+    // Carrega o mapa
     this.mapManager.loadLevel();
     
-    // Instancia ou reseta o jogador no ponto inicial (linha 16, coluna 10)
+    // Spawna ou reseta o player na posição inicial (10, 16)
     if (!this.player) {
       this.player = new Player(10, 16);
     } else {
@@ -105,7 +105,7 @@ export class Game {
     }
     this.player.lives = this.lives;
 
-    // Instancia os 4 fantasmas dentro da jaula central
+    // Fantasmas iniciais
     this.enemies = [
       new Enemy(9, 8, ENEMY_TYPES.BLINKY),  // Vermelho
       new Enemy(11, 8, ENEMY_TYPES.PINKY),  // Rosa
@@ -126,7 +126,7 @@ export class Game {
     }, true);
   }
 
-  // --- Operações da Loja ---
+  // --- Loja ---
 
   buyShopItem(index) {
     const playerState = {
@@ -149,11 +149,11 @@ export class Game {
         1000
       );
       
-      // Recarrega as informações na tela
+      // Atualiza tela da loja
       this.uiManager.renderShop(this.shopSystem.activeOffers, this.gold, this.shopSystem.rerollCost);
       this.updateHUD();
     } else {
-      // Exibe erro na tela se não puder comprar
+      // Flutua mensagem de erro se falhar
       this.addFloatingText(
         CANVAS_SIZE / 2, 
         CANVAS_SIZE / 2 - 40, 
@@ -189,14 +189,14 @@ export class Game {
     this.nextStage();
   }
 
-  // --- Loop Principal do Jogo ---
+  // --- Loop Principal ---
 
   loop(timestamp) {
     if (!this.lastTime) this.lastTime = timestamp;
     const dt = timestamp - this.lastTime;
     this.lastTime = timestamp;
     
-    // Limita o intervalo de atualização para evitar travamentos ao alternar abas
+    // Limita o dt máximo pra não travar o jogo ao mudar de aba
     const cappedDt = Math.min(dt, 100);
 
     this.update(cappedDt);
@@ -207,13 +207,13 @@ export class Game {
 
   update(dt) {
     if (this.state !== GAME_STATES.PLAYING) {
-      // Se não estiver jogando, apenas atualiza partículas e textos flutuantes (menus/loja)
+      // Fora de jogo, só atualiza partículas e texto (loja e menus)
       this.particleSystem.update(dt);
       this.updateFloatingTexts(dt);
       return;
     }
 
-    // 1. Checa a entrada de comandos do jogador
+    // Habilidades e comandos
     if (this.input.isPressed('VAULT')) {
       const activeStats = this.player.getModifiedStats(this.jokers);
       this.player.triggerVault(this.mapManager, this.particleSystem, activeStats);
@@ -228,7 +228,7 @@ export class Game {
       );
     }
 
-    // Lê a direção do teclado e adiciona ao buffer de movimento
+    // Buffer de direção
     const nextDirCode = this.input.getMovementDirection();
     if (nextDirCode) {
       this.player.nextDir = DIRECTIONS[nextDirCode];
@@ -236,20 +236,20 @@ export class Game {
       this.player.nextDir = DIRECTIONS.NONE;
     }
 
-    // 2. Atualiza a contagem do combo e timers de pontuação
+    // Combo e timers
     this.scoreEngine.update(dt);
 
-    // 3. Atualiza o mapa (estados e efeitos dos orbes)
+    // Itens e orbes do mapa
     this.mapManager.update(dt);
 
-    // 4. Atualiza o jogador
+    // Atualiza jogador
     const activeModifiers = this.jokers;
     const activeStats = this.player.getModifiedStats(activeModifiers);
     
     this.player.update(dt, this.mapManager, this.particleSystem, activeModifiers, activeStats);
     this.mapManager.wrapCoordinates(this.player);
 
-    // 5. Atualiza os projéteis ativos
+    // Atualiza tiros ativos
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const proj = this.projectiles[i];
       proj.update(dt, this.mapManager);
@@ -259,7 +259,7 @@ export class Game {
       }
     }
 
-    // 6. Atualiza o comportamento de perseguição dos fantasmas
+    // IA dos fantasmas
     const blinkyGhost = this.enemies.find(e => e.type === ENEMY_TYPES.BLINKY);
     
     this.enemies.forEach(enemy => {
@@ -267,16 +267,16 @@ export class Game {
       this.mapManager.wrapCoordinates(enemy);
     });
 
-    // 7. Processa as colisões e acertos
+    // Colisões e combate
 
-    // Projétil vs Fantasmas
+    // Tiros vs Fantasmas
     this.projectiles.forEach(proj => {
       if (!proj.active) return;
 
       this.enemies.forEach(enemy => {
         if (enemy.state === ENEMY_STATES.EATEN) return;
         
-        // Verificação aproximada por caixa de colisão
+        // Colisão por círculo
         const dist = Math.sqrt(
           Math.pow((proj.x - (enemy.x + TILE_SIZE/2)), 2) + 
           Math.pow((proj.y - (enemy.y + TILE_SIZE/2)), 2)
@@ -286,7 +286,7 @@ export class Game {
           proj.active = false;
           
           // Aplica o atordoamento (stun)
-          const baseStun = 3000; // 3 segundos base
+          const baseStun = 3000; // 3s base
           const duration = baseStun * (activeStats.stunDurationMultiplier || 1);
           enemy.stun(duration);
           
@@ -314,14 +314,14 @@ export class Game {
         activeEnemiesCount: activeEnemiesCount
       };
 
-      // Executa o cálculo Balatro: Chips (Fichas) x Mult (Multiplicador)
+      // Cálculo de pontos (Chips x Mult)
       const scoringResult = this.scoreEngine.addPelletScore(
         pelletEaten.type, 
         this.jokers, 
         scoreContext
       );
 
-      // Dispara habilidades passivas ao comer orbes (Ex: Lucky Seven gerando ouro)
+      // Efeitos passivos dos coringas ao comer orbe
       this.jokers.forEach(j => {
         if (j && typeof j.onEatPellet === 'function') {
           const goldBonus = j.onEatPellet(this);
@@ -334,7 +334,7 @@ export class Game {
       this.score = this.scoreEngine.score;
       this.stageScore = this.scoreEngine.stageScore;
 
-      // Exibe os números do combo e cálculo de pontuação subindo na tela
+      // Texto de pontuação subindo na tela
       this.addFloatingText(
         this.player.x + TILE_SIZE / 2, 
         this.player.y, 
@@ -344,12 +344,12 @@ export class Game {
         `(${scoringResult.chips} x ${scoringResult.mult})`
       );
 
-      // Verifica se a Meta Blind (objetivo de pontuação) foi atingida
+      // Checa se a meta da fase foi batida
       const goal = getBlindScore(this.stage);
       if (this.stageScore >= goal && !this.mapManager.portalSpawned) {
         this.mapManager.spawnPortal();
         
-        // Cria faíscas neon verdes no local do portal
+        // Spawna portal com faíscas verdes
         const portalPx = this.mapManager.portalTile.x * TILE_SIZE + TILE_SIZE/2;
         const portalPy = this.mapManager.portalTile.y * TILE_SIZE + TILE_SIZE/2;
         this.particleSystem.spawnImpactSparks(portalPx, portalPy, COLOR_PALETTE.PORTAL);
@@ -519,54 +519,46 @@ export class Game {
   draw() {
     const shake = this.particleSystem.getShakeOffset();
     
-    ctx.save();
+    this.ctx.save();
     
-    // Desloca o contexto do canvas para criar o tremor de tela
-    ctx.translate(shake.x, shake.y);
+    // Efeito de tremor de tela
+    this.ctx.translate(shake.x, shake.y);
     
-    // Limpa a tela com a cor de fundo
-    ctx.fillStyle = COLOR_PALETTE.BACKGROUND;
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    // Limpa com cor de fundo
+    this.ctx.fillStyle = COLOR_PALETTE.BACKGROUND;
+    this.ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    // Desenha o cenário do mapa
+    // Desenha elementos do jogo
     this.mapManager.draw(this.ctx);
-
-    // Desenha os projéteis
     this.projectiles.forEach(p => p.draw(this.ctx));
-
-    // Desenha os fantasmas
     this.enemies.forEach(enemy => enemy.draw(this.ctx));
 
-    // Desenha o slime do jogador
     if (this.player && this.state === GAME_STATES.PLAYING) {
       this.player.draw(this.ctx);
     }
 
-    // Desenha os sistemas de partículas
     this.particleSystem.draw(this.ctx);
 
-    // Renderiza os textos e pontuações subindo
-    ctx.save();
+    // Pontuações subindo na tela (floating text)
+    this.ctx.save();
     this.floatingTexts.forEach(t => {
       const alpha = Math.max(0, t.life / t.maxLife);
       
-      ctx.globalAlpha = alpha;
-      ctx.textAlign = 'center';
+      this.ctx.globalAlpha = alpha;
+      this.ctx.textAlign = 'center';
       
-      // Texto com o total de pontos adicionados
-      ctx.font = 'bold 12px "Orbitron", sans-serif';
-      ctx.fillStyle = t.color;
-      ctx.fillText(t.text, t.x, t.y);
+      this.ctx.font = 'bold 12px "Orbitron", sans-serif';
+      this.ctx.fillStyle = t.color;
+      this.ctx.fillText(t.text, t.x, t.y);
 
-      // Subtexto detalhando a conta: (Fichas x Multiplicador)
       if (t.subtext) {
-        ctx.font = '9px "Press Start 2P", monospace';
-        ctx.fillStyle = '#6b7280';
-        ctx.fillText(t.subtext, t.x, t.y + 11);
+        this.ctx.font = '9px "Press Start 2P", monospace';
+        this.ctx.fillStyle = '#6b7280';
+        this.ctx.fillText(t.subtext, t.x, t.y + 11);
       }
     });
-    ctx.restore();
+    this.ctx.restore();
 
-    ctx.restore();
+    this.ctx.restore();
   }
 }

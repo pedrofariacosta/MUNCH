@@ -148,8 +148,8 @@
   </div>
 
   <!--
-    Script convencional (NÃO módulo) para rodar sem bloqueio de CORS ao abrir via file://
-    Gerencia a animação: 3s de loading → queda livre e impacto → exibe prompt → manda para o jogo.
+    Script sem tipo module para rodar direto no navegador (sem travar por CORS se abrir via file://)
+    Controla o fluxo: 3s de loading -> queda/impacto -> espera clique -> redireciona.
   -->
   <script>
     window.addEventListener('DOMContentLoaded', function () {
@@ -162,7 +162,7 @@
 
       var readyToStart = false;
 
-      // --- Gerenciador de Favicon Dinâmico e Título (Carregamento) ---
+      // Favicon dinâmico e título na aba
       var canvas = document.createElement('canvas');
       canvas.width = 32;
       canvas.height = 32;
@@ -181,7 +181,7 @@
       var titleInterval = null;
       var time = 0;
       
-      // Desenha o slime em cada frame de animação no canvas do favicon
+      // Renderiza o slime no canvas do favicon
       function drawSlimeFrame(yOffset, squishX, squishY) {
         ctx.clearRect(0, 0, 32, 32);
         ctx.save();
@@ -248,7 +248,7 @@
         faviconLink.href = canvas.toDataURL('image/png');
       }
       
-      // Define a versão de alta legibilidade estática do favicon para quando terminar
+      // Favicon estático de alta resolução pós-loading
       function setStaticFavicon() {
         if (animationInterval) clearInterval(animationInterval);
         if (titleInterval) clearInterval(titleInterval);
@@ -318,7 +318,7 @@
         faviconLink.href = canvas.toDataURL('image/png');
       }
       
-      // Inicia loops de animação do carregamento
+      // Roda a animação de pulo do slime no favicon
       animationInterval = setInterval(function () {
         time += 0.22;
         var yOffset = -Math.abs(Math.sin(time)) * 5;
@@ -356,26 +356,25 @@
         window.removeEventListener('keydown', goToGame);
         window.removeEventListener('click', goToGame);
 
-        // Desaparece a barra de carregamento dos mini-slimes
+        // Faz o fade out da tela de loading
         overlay.classList.add('exit-fade');
 
         setTimeout(function () {
-          window.location.href = 'game.html';
+          window.location.href = 'menu.html';
         }, 500);
       }
 
-      // === O impacto ocorre após os 3 segundos de loading inicial ===
+      // Efeitos de impacto após 3 segundos de loading
       setTimeout(function () {
-        // Conclui o carregamento e muda o título para MUNCH definitivo
         setStaticFavicon();
 
-        // 1. Esconde os mini-slimes
+        // 1. Esconde os mini-slimes do canto
         bottomLoader.classList.add('fade-out');
 
-        // 2. Faz o slime gigante despencar
+        // 2. Faz o slime gigante cair
         bigSlime.classList.add('fall-impact');
 
-        // 3. Efeitos de trepidação, fumaça e choque sincronizados com a batida (360ms de queda)
+        // 3. Efeitos de colisão sincronizados (360ms de queda)
         setTimeout(function () {
           overlay.classList.add('shake-active');
           setTimeout(function () {
@@ -385,7 +384,7 @@
           dust.classList.add('dust-active');
         }, 360);
 
-        // 4. Mostra o aviso para iniciar após o slime parar de quicar (800ms)
+        // 4. Mostra o aviso de clique após o impacto (800ms)
         setTimeout(function () {
           startPrompt.classList.add('visible');
           readyToStart = true;

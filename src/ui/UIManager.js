@@ -3,7 +3,7 @@ import { GAME_STATES } from '../config/constants.js';
 
 export class UIManager {
   constructor() {
-    // Cache DOM Elements
+    // Elementos do DOM
     this.menuScreen = document.getElementById('menu-screen');
     this.gameOverScreen = document.getElementById('game-over-screen');
     this.shopOverlay = document.getElementById('shop-overlay');
@@ -12,7 +12,7 @@ export class UIManager {
     this.btnStart = document.getElementById('btn-start');
     this.btnRestart = document.getElementById('btn-restart');
     
-    // Atalhos dos elementos do HUD
+    // Elementos do HUD
     this.hudScore = document.getElementById('hud-score');
     this.hudChips = document.getElementById('hud-chips');
     this.hudMult = document.getElementById('hud-mult');
@@ -23,16 +23,16 @@ export class UIManager {
     this.goalFill = document.getElementById('goal-fill');
     this.goalText = document.getElementById('goal-text');
     
-    // HUD das habilidades
+    // Slots de habilidades
     this.cooldownVault = document.getElementById('cooldown-vault');
     this.cooldownBlaster = document.getElementById('cooldown-blaster');
     this.slotVault = document.getElementById('slot-vault');
     this.slotBlaster = document.getElementById('slot-blaster');
     
-    // Inventário
+    // Inventário de coringas
     this.inventoryContainer = document.getElementById('inventory-slots');
     
-    // Elementos da loja
+    // Vitrine e controles da loja
     this.shopCardsGrid = document.getElementById('shop-cards');
     this.btnReroll = document.getElementById('btn-reroll');
     this.btnNextLevel = document.getElementById('btn-next-level');
@@ -40,7 +40,7 @@ export class UIManager {
   }
 
   init(gameCallbacks) {
-    // Registra os cliques dos botões
+    // Cliques dos botões
     this.btnStart.addEventListener('click', () => gameCallbacks.onStartGame());
     this.btnRestart.addEventListener('click', () => gameCallbacks.onRestartGame());
     
@@ -50,7 +50,7 @@ export class UIManager {
     this.gameCallbacks = gameCallbacks;
   }
 
-  // Atualiza as informações exibidas no HUD
+  // Atualiza os valores do HUD
   updateHUD(gameContext) {
     const { 
       stage, 
@@ -64,18 +64,18 @@ export class UIManager {
 
     const blindGoal = getBlindScore(stage);
     
-    // Valores numéricos básicos
+    // Stats base
     this.hudStage.innerText = stage;
     this.hudScore.innerText = score.toLocaleString();
     this.hudGold.innerText = gold;
     this.hudLives.innerText = '❤️'.repeat(Math.max(0, lives));
 
-    // Elementos do sistema Balatro (Chips e Mult)
+    // Chips e Mult estilo Balatro
     this.hudChips.innerText = scoreEngine.lastChipsCalculated || 10;
     this.hudMult.innerText = scoreEngine.lastMultCalculated || 1;
     this.hudBlind.innerText = blindGoal.toLocaleString();
 
-    // Efeito visual ativo nos boxes de cálculo quando está pontuando (combo)
+    // Animação de cálculo ativa se estiver no combo
     if (scoreEngine.comboTimer > 0) {
       this.hudChips.classList.add('active');
       this.hudMult.classList.add('active');
@@ -84,28 +84,28 @@ export class UIManager {
       this.hudMult.classList.remove('active');
     }
 
-    // Barra de progresso da meta da fase
+    // Progresso da meta da Blind
     const progressPercent = Math.min(100, (stageScore / blindGoal) * 100);
     this.goalFill.style.width = `${progressPercent}%`;
     this.goalText.innerText = `${Math.floor(stageScore).toLocaleString()} / ${blindGoal.toLocaleString()}`;
 
-    // Tempo de recarga das habilidades
+    // Cooldowns das skills
     if (player) {
       this.updateSkillCooldown(
         player.vaultCooldown, 
-        3000, // Cooldown base do pulo
+        3000, // 3s base
         this.cooldownVault, 
         this.slotVault
       );
       this.updateSkillCooldown(
         player.blasterCooldown, 
-        4000, // Cooldown base do laser
+        4000, // 4s base
         this.cooldownBlaster, 
         this.slotBlaster
       );
     }
 
-    // Inventário de itens passivos (Coringas)
+    // Mostra os coringas equipados
     this.updateInventory(gameContext.jokers);
   }
 
@@ -123,7 +123,7 @@ export class UIManager {
   updateInventory(jokersList) {
     this.inventoryContainer.innerHTML = '';
     
-    // Renderiza sempre os 5 slots na barra
+    // Desenha os 5 slots
     for (let i = 0; i < 5; i++) {
       const slot = document.createElement('div');
       slot.className = 'item-slot-hud';
@@ -133,7 +133,7 @@ export class UIManager {
         slot.classList.add('filled');
         slot.innerText = joker.icon;
         
-        // Detalhes extras do item (tooltip ao passar o mouse)
+        // Tooltip ao passar o mouse
         const tooltip = document.createElement('div');
         tooltip.className = 'tooltip';
         tooltip.innerHTML = `<strong>${joker.name}</strong><br><small>${joker.rarity}</small><br>${joker.desc}`;
@@ -145,7 +145,7 @@ export class UIManager {
     }
   }
 
-  // Renderiza as ofertas de itens disponíveis na loja
+  // Vitrine de cartas na loja
   renderShop(offers, gold, rerollCost) {
     this.shopCardsGrid.innerHTML = '';
     this.rerollCostText.innerText = rerollCost;
@@ -175,9 +175,9 @@ export class UIManager {
     });
   }
 
-  // Controla a exibição das telas sobrepostas
+  // Alterna os overlays do jogo
   switchState(state) {
-    // Esconde todas as telas primeiro
+    // Esconde tudo primeiro
     this.menuScreen.classList.add('hidden');
     this.gameOverScreen.classList.add('hidden');
     this.shopOverlay.classList.add('hidden');
@@ -205,7 +205,7 @@ export class UIManager {
         this.loadingOverlay.classList.remove('hidden');
         break;
       case GAME_STATES.PLAYING:
-        // Nenhuma sobreposição é exibida enquanto a rodada está ativa
+        // Rodada ativa, sem overlay
         break;
     }
   }
