@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUNCH.io — Roguelike Arcade Action</title>
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/ui.css">
+  <link rel="stylesheet" href="./styles/loading.css">
+</head>
+<body>
+
+  <div id="app-container">
+    
+    <!-- 1. Simulação CRT contendo o canvas e as sobreposições de tela -->
+    <div class="screen-wrapper flicker">
+      <div class="crt-overlay"></div>
+      
+      <!-- Canvas de desenho principal -->
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Tela do Menu Principal (Inicia visível) -->
+      <div id="menu-screen" class="overlay-screen">
+        <h1 class="game-title-hud" style="font-size: 40px; margin-bottom: 20px;">MUNCH</h1>
+        <p style="color: #9ca3af; font-size: 13px; max-width: 420px; line-height: 1.6; margin-bottom: 30px;">
+          Devore orbes no labirinto infinito! Consiga pontos exponenciais calculando 
+          <span style="color:var(--color-chips); font-weight:700;">Chips</span> x 
+          <span style="color:var(--color-mult); font-weight:700;">Mult</span> e compre relíquias para sobreviver.
+        </p>
+        
+        <div style="background-color: var(--bg-secondary); border: 2px solid var(--color-border); border-radius: 8px; padding: 15px; text-align: left; margin-bottom: 30px; width: 100%; max-width: 460px;">
+          <h3 style="font-family:var(--font-arcade); font-size: 9px; margin-bottom: 12px; color: #fff;">CONTROLES:</h3>
+          <p style="font-size: 12px; margin-bottom: 8px;"><span style="color:var(--color-gold);">Setas / WASD:</span> Mover Slime na Grade</p>
+          <p style="font-size: 12px; margin-bottom: 8px;"><span style="color:var(--color-gold);">Espaço:</span> Pulo (Vault) - Salta 2 casas (pula paredes/fantasmas)</p>
+          <p style="font-size: 12px;"><span style="color:var(--color-gold);">Z / Shift:</span> Blaster - Dispara laser que atordoa fantasmas</p>
+        </div>
+
+        <button id="btn-start" class="btn-arcade">INICIAR PARTIDA</button>
+      </div>
+
+      <!-- Tela de Carregamento (Inicia oculta, usada em transições de fase) -->
+      <div id="loading-screen" class="overlay-screen loading-screen hidden">
+        <!-- Onda de choque (ativada no impacto) -->
+        <div class="shockwave-ring" id="loading-shockwave"></div>
+        
+        <!-- Partículas de poeira (ativadas no impacto) -->
+        <div class="dust-container" id="loading-dust">
+          <div class="dust-particle dp1"></div>
+          <div class="dust-particle dp2"></div>
+          <div class="dust-particle dp3"></div>
+          <div class="dust-particle dp4"></div>
+          <div class="dust-particle dp5"></div>
+          <div class="dust-particle dp6"></div>
+        </div>
+
+        <!-- Slime Gigante do Centro -->
+        <div class="central-slime-wrapper" id="central-slime-wrapper">
+          <div class="slime-cube-big" id="big-slime">
+            <!-- Rosto furioso (vetor SVG) -->
+            <svg viewBox="0 0 160 160" width="100%" height="100%">
+              <!-- Corpo do slime -->
+              <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff" stroke-width="6" />
+              <!-- Face details (angry eyes) -->
+              <g class="slime-eyes">
+                <!-- Brows (thick, ~28° aggressive inward angle) -->
+                <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+                <path d="M 138 46 L 92 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+                <!-- Left eye (sharp wedge \ pointing inward-down) -->
+                <polygon points="26,66 66,78 26,84" fill="#ffffff" />
+                <circle cx="52" cy="77" r="5.5" fill="#1a1a1a" />
+                <!-- Right eye (sharp wedge / pointing inward-down) -->
+                <polygon points="134,66 94,78 134,84" fill="#ffffff" />
+                <circle cx="108" cy="77" r="5.5" fill="#1a1a1a" />
+              </g>
+              <!-- Nose dots -->
+              <circle cx="75" cy="92" r="2.5" fill="#ffffff" />
+              <circle cx="85" cy="92" r="2.5" fill="#ffffff" />
+              <!-- Snarl mouth with fangs -->
+              <rect x="48" y="105" width="64" height="17" rx="3" fill="#1a1a1a" stroke="#ffffff" stroke-width="3" />
+              <polygon points="56,105 63,114 70,105" fill="#ffffff" />
+              <polygon points="73,105 80,114 87,105" fill="#ffffff" />
+              <polygon points="90,105 97,114 104,105" fill="#ffffff" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Mensagem para começar -->
+        <div class="start-prompt" id="start-prompt">
+          PRESS ANY KEY OR CLICK TO START
+        </div>
+
+        <!-- Indicador de carregamento no canto inferior direito -->
+        <div class="bottom-right-loader" id="bottom-right-loader">
+          <span class="loading-text-label">LOADING...</span>
+          <div class="mini-slimes-container">
+            <div class="mini-slime ms1">
+              <svg viewBox="0 0 48 48" width="100%" height="100%">
+                <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+                <!-- Brows -->
+                <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <!-- Left eye wedge -->
+                <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+                <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Right eye wedge -->
+                <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+                <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Nostrils -->
+                <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+                <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+                <!-- Snarl mouth -->
+                <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+                <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+                <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+              </svg>
+              <div class="mini-dust md1"></div>
+              <div class="mini-dust md2"></div>
+            </div>
+            <div class="mini-slime ms2">
+              <svg viewBox="0 0 48 48" width="100%" height="100%">
+                <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+                <!-- Brows -->
+                <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <!-- Left eye wedge -->
+                <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+                <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Right eye wedge -->
+                <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+                <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Nostrils -->
+                <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+                <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+                <!-- Snarl mouth -->
+                <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+                <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+                <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+              </svg>
+              <div class="mini-dust md1"></div>
+              <div class="mini-dust md2"></div>
+            </div>
+            <div class="mini-slime ms3">
+              <svg viewBox="0 0 48 48" width="100%" height="100%">
+                <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+                <!-- Brows -->
+                <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                <!-- Left eye wedge -->
+                <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+                <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Right eye wedge -->
+                <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+                <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+                <!-- Nostrils -->
+                <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+                <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+                <!-- Snarl mouth -->
+                <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+                <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+                <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+              </svg>
+              <div class="mini-dust md1"></div>
+              <div class="mini-dust md2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela de Loja de Itens -->
+      <div id="shop-overlay" class="overlay-screen hidden">
+        <h2 class="shop-title">LOJA DE CORINGAS</h2>
+        <div class="shop-container">
+          <p style="font-size: 12px; color:#9ca3af; margin-bottom: 8px;">
+            Bata a pontuação da Blind para avançar. Compre upgrades passivos abaixo:
+          </p>
+          
+          <!-- Grid de ofertas da loja -->
+          <div id="shop-cards" class="shop-cards-grid">
+            <!-- Os cards são inseridos dinamicamente via JS -->
+          </div>
+
+          <div class="shop-controls">
+            <button id="btn-reroll" class="btn-arcade" style="border-color: var(--color-gold); color: #fff;">
+              REROLL (<span id="reroll-cost">2</span>g)
+            </button>
+            <button id="btn-next-level" class="btn-arcade" style="border-color: #10b981;">
+              PRÓXIMO MAPA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela de Fim de Jogo (Game Over) -->
+      <div id="game-over-screen" class="overlay-screen hidden">
+        <h1 style="font-family: var(--font-arcade); font-size: 32px; color: var(--color-mult); text-shadow: var(--shadow-mult); margin-bottom: 24px;">GAME OVER</h1>
+        
+        <div style="background-color: var(--bg-secondary); border: 2px solid var(--color-border); padding: 20px; border-radius: 8px; width: 100%; max-width: 320px; margin-bottom: 30px;">
+          <p style="font-size: 12px; color:#9ca3af; margin-bottom: 8px;">Pontuação Final:</p>
+          <h2 id="final-score" style="font-family: var(--font-cyber); font-size: 28px; color: #fff; margin-bottom: 16px;">0</h2>
+          
+          <p style="font-size: 11px; color:#6b7280; margin-bottom: 4px;">Recorde Atual:</p>
+          <h3 id="high-score-over" style="font-family: var(--font-cyber); font-size: 18px; color: var(--color-gold);">0</h3>
+        </div>
+
+        <button id="btn-restart" class="btn-arcade">JOGAR NOVAMENTE</button>
+      </div>
+
+    </div>
+
+    <!-- 2. Painel Lateral (HUD) com pontuações e multiplicadores estilo Balatro -->
+    <div class="sidebar-panel">
+      <div class="game-title-hud">MUNCH.io</div>
+      
+      <!-- Informações da rodada -->
+      <div class="hud-box" style="flex-direction: row; justify-content: space-between; align-items: center;">
+        <span class="hud-box-title">BLIND ATUAL</span>
+        <span style="font-family: var(--font-arcade); font-size: 12px; color:#fff;">MAPA <span id="hud-stage">1</span></span>
+      </div>
+
+      <!-- Painel de Pontuação (Fichas x Multiplicador) -->
+      <div class="hud-box score-dashboard">
+        <span class="hud-box-title" style="align-self: flex-start;">PONTUAÇÃO DO MAPA</span>
+        <span id="hud-score" class="current-score-val">0</span>
+        
+        <!-- Caixa de visualização da conta de pontos -->
+        <div class="balatro-calc">
+          <div id="hud-chips" class="calc-box chips">10</div>
+          <div class="calc-operator">X</div>
+          <div id="hud-mult" class="calc-box mult">1</div>
+        </div>
+
+        <!-- Indicadores do objetivo da fase -->
+        <div style="display:flex; justify-content:space-between; width:100%; font-size:10px; margin-top: 8px;">
+          <span style="color:#6b7280;">META BLIND:</span>
+          <span style="font-family:var(--font-cyber); font-weight:700; color:#fff;" id="hud-blind">1,500</span>
+        </div>
+
+        <div class="goal-bar-container">
+          <div id="goal-fill" class="goal-bar-fill"></div>
+          <div id="goal-text" class="goal-text-overlay">0 / 1,500</div>
+        </div>
+      </div>
+
+      <!-- Indicadores de ouro e vidas -->
+      <div class="hud-box stats-grid">
+        <div class="stat-item gold">
+          <span class="icon">🪙</span>
+          <span id="hud-gold" class="stat-value" style="color:var(--color-gold);">0</span>
+        </div>
+        <div class="stat-item lives">
+          <span class="icon">❤️</span>
+          <span id="hud-lives" class="stat-value">❤️❤️❤️</span>
+        </div>
+      </div>
+
+      <!-- Estado de recarga das habilidades -->
+      <div class="hud-box">
+        <span class="hud-box-title">HABILIDADES</span>
+        <div class="skills-grid">
+          <div id="slot-vault" class="skill-slot ready">
+            <span style="font-weight: 700; color: #fff;">PULO</span>
+            <span class="skill-key">[ESPAÇO]</span>
+            <div class="skill-cooldown-bar">
+              <div id="cooldown-vault" class="skill-cooldown-fill"></div>
+            </div>
+          </div>
+          <div id="slot-blaster" class="skill-slot ready">
+            <span style="font-weight: 700; color: #fff;">LASER</span>
+            <span class="skill-key">[Z / SHIFT]</span>
+            <div class="skill-cooldown-bar">
+              <div id="cooldown-blaster" class="skill-cooldown-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventário com os Coringas/Relíquias ativos -->
+      <div class="hud-box" style="flex-grow: 1;">
+        <span class="hud-box-title" style="margin-bottom: 4px;">CORINGAS / RELÍQUIAS (MAX 5)</span>
+        <div id="inventory-slots" class="inventory-slots">
+          <!-- Os coringas são renderizados via JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Inicializador do motor do jogo -->
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

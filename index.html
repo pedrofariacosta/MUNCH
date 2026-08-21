@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUNCH — Carregando...</title>
+  <link rel="stylesheet" href="./styles/loading.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #000000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tela de Carregamento Cinematográfica (tela cheia) -->
+  <div id="loading-screen" class="loading-screen">
+    <!-- Onda de choque -->
+    <div class="shockwave-ring" id="loading-shockwave"></div>
+
+    <!-- Partículas de poeira -->
+    <div class="dust-container" id="loading-dust">
+      <div class="dust-particle dp1"></div>
+      <div class="dust-particle dp2"></div>
+      <div class="dust-particle dp3"></div>
+      <div class="dust-particle dp4"></div>
+      <div class="dust-particle dp5"></div>
+      <div class="dust-particle dp6"></div>
+    </div>
+
+    <!-- Slime Gigante do Centro -->
+    <div class="central-slime-wrapper" id="central-slime-wrapper">
+      <div class="slime-cube-big" id="big-slime">
+        <svg viewBox="0 0 160 160" width="100%" height="100%">
+          <!-- Corpo do slime -->
+          <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff" stroke-width="6" />
+          <g class="slime-eyes">
+            <!-- Sobrancelhas (linhas grossas com inclinação de ~28° para o centro) -->
+            <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+            <path d="M 138 46 L 92 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+            <!-- Olho esquerdo (cunha afiada inclinada para baixo/centro) -->
+            <polygon points="26,66 66,78 26,84" fill="#ffffff" />
+            <circle cx="52" cy="77" r="5.5" fill="#1a1a1a" />
+            <!-- Olho direito (cunha afiada inclinada para baixo/centro) -->
+            <polygon points="134,66 94,78 134,84" fill="#ffffff" />
+            <circle cx="108" cy="77" r="5.5" fill="#1a1a1a" />
+          </g>
+          <!-- Narinas -->
+          <circle cx="75" cy="92" r="2.5" fill="#ffffff" />
+          <circle cx="85" cy="92" r="2.5" fill="#ffffff" />
+          <!-- Boca de rosnado com dentes -->
+          <rect x="48" y="105" width="64" height="17" rx="3" fill="#1a1a1a" stroke="#ffffff" stroke-width="3" />
+          <polygon points="56,105 63,114 70,105" fill="#ffffff" />
+          <polygon points="73,105 80,114 87,105" fill="#ffffff" />
+          <polygon points="90,105 97,114 104,105" fill="#ffffff" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Prompt para iniciar -->
+    <div class="start-prompt" id="start-prompt">
+      PRESS ANY KEY OR CLICK TO START
+    </div>
+
+    <!-- Indicador de carregamento no canto inferior direito -->
+    <div class="bottom-right-loader" id="bottom-right-loader">
+      <span class="loading-text-label">LOADING...</span>
+      <div class="mini-slimes-container">
+        <!-- Mini Slime 1 -->
+        <div class="mini-slime ms1">
+          <svg viewBox="0 0 48 48" width="100%" height="100%">
+            <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+            <!-- Sobrancelhas -->
+            <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <!-- Olho esquerdo -->
+            <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+            <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Olho direito -->
+            <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+            <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Narinas -->
+            <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+            <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+            <!-- Boca de rosnado -->
+            <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+            <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+            <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+          </svg>
+          <div class="mini-dust md1"></div>
+          <div class="mini-dust md2"></div>
+        </div>
+        <!-- Mini Slime 2 -->
+        <div class="mini-slime ms2">
+          <svg viewBox="0 0 48 48" width="100%" height="100%">
+            <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+            <!-- Sobrancelhas -->
+            <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <!-- Olho esquerdo -->
+            <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+            <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Olho direito -->
+            <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+            <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Narinas -->
+            <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+            <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+            <!-- Boca de rosnado -->
+            <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+            <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+            <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+          </svg>
+          <div class="mini-dust md1"></div>
+          <div class="mini-dust md2"></div>
+        </div>
+        <!-- Mini Slime 3 -->
+        <div class="mini-slime ms3">
+          <svg viewBox="0 0 48 48" width="100%" height="100%">
+            <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
+            <!-- Sobrancelhas -->
+            <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+            <!-- Olho esquerdo -->
+            <polygon points="8,20 20,24 8,26" fill="#ffffff" />
+            <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Olho direito -->
+            <polygon points="40,20 28,24 40,26" fill="#ffffff" />
+            <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
+            <!-- Narinas -->
+            <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
+            <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
+            <!-- Boca de rosnado -->
+            <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
+            <polygon points="17,32 20,36 23,32" fill="#ffffff" />
+            <polygon points="25,32 28,36 31,32" fill="#ffffff" />
+          </svg>
+          <div class="mini-dust md1"></div>
+          <div class="mini-dust md2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    Script convencional (NÃO módulo) para rodar sem bloqueio de CORS ao abrir via file://
+    Gerencia a animação: 3s de loading → queda livre e impacto → exibe prompt → manda para o jogo.
+  -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var overlay       = document.getElementById('loading-screen');
+      var shockwave     = document.getElementById('loading-shockwave');
+      var dust          = document.getElementById('loading-dust');
+      var bigSlime      = document.getElementById('central-slime-wrapper');
+      var startPrompt   = document.getElementById('start-prompt');
+      var bottomLoader  = document.getElementById('bottom-right-loader');
+
+      var readyToStart = false;
+
+      function goToGame() {
+        if (!readyToStart) return;
+        readyToStart = false;
+        window.removeEventListener('keydown', goToGame);
+        window.removeEventListener('click', goToGame);
+
+        // Desaparece a barra de carregamento dos mini-slimes
+        overlay.classList.add('exit-fade');
+
+        setTimeout(function () {
+          window.location.href = 'game.html';
+        }, 500);
+      }
+
+      // === O impacto ocorre após os 3 segundos de loading inicial ===
+      setTimeout(function () {
+        // 1. Esconde os mini-slimes
+        bottomLoader.classList.add('fade-out');
+
+        // 2. Faz o slime gigante despencar
+        bigSlime.classList.add('fall-impact');
+
+        // 3. Efeitos de trepidação, fumaça e choque sincronizados com a batida (360ms de queda)
+        setTimeout(function () {
+          overlay.classList.add('shake-active');
+          setTimeout(function () {
+            overlay.classList.remove('shake-active');
+          }, 150);
+          shockwave.classList.add('shockwave-active');
+          dust.classList.add('dust-active');
+        }, 360);
+
+        // 4. Mostra o aviso para iniciar após o slime parar de quicar (800ms)
+        setTimeout(function () {
+          startPrompt.classList.add('visible');
+          readyToStart = true;
+          window.addEventListener('keydown', goToGame);
+          window.addEventListener('click', goToGame);
+        }, 800);
+
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

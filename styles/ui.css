@@ -1,0 +1,374 @@
+/* UI Dashboard Side Panel */
+.sidebar-panel {
+  width: 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--bg-secondary);
+  border: 3px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Header branding */
+.game-title-hud {
+  font-family: var(--font-arcade);
+  font-size: 18px;
+  color: #fff;
+  text-align: center;
+  text-shadow: var(--shadow-neon);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from { text-shadow: 0 0 5px rgba(59, 130, 246, 0.3), 0 0 10px rgba(59, 130, 246, 0.2); }
+  to { text-shadow: 0 0 15px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4); }
+}
+
+/* Section Box */
+.hud-box {
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.hud-box-title {
+  font-family: var(--font-arcade);
+  font-size: 9px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Score display with chips x mult */
+.score-dashboard {
+  align-items: center;
+  gap: 4px;
+}
+
+.current-score-val {
+  font-family: var(--font-cyber);
+  font-size: 26px;
+  font-weight: 900;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Balatro Scoring Panel */
+.balatro-calc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.calc-box {
+  flex: 1;
+  padding: 6px;
+  border-radius: 4px;
+  text-align: center;
+  font-family: var(--font-cyber);
+  font-weight: 700;
+  font-size: 16px;
+  transition: transform 0.1s ease;
+}
+
+.calc-box.chips {
+  background-color: rgba(6, 182, 212, 0.15);
+  border: 1px solid var(--color-chips);
+  color: #22d3ee;
+  box-shadow: inset 0 0 5px rgba(6, 182, 212, 0.2);
+}
+
+.calc-box.mult {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--color-mult);
+  color: #f87171;
+  box-shadow: inset 0 0 5px rgba(239, 68, 68, 0.2);
+}
+
+.calc-box.chips.active {
+  transform: scale(1.1);
+  background-color: rgba(6, 182, 212, 0.35);
+}
+
+.calc-box.mult.active {
+  transform: scale(1.1);
+  background-color: rgba(239, 68, 68, 0.35);
+}
+
+.calc-operator {
+  font-family: var(--font-arcade);
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Goal indicator bar */
+.goal-bar-container {
+  width: 100%;
+  height: 12px;
+  background-color: #0b0b13;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 4px;
+  position: relative;
+}
+
+.goal-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.goal-text-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  font-family: var(--font-arcade);
+  font-size: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+}
+
+/* Stats info */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.stat-item .icon {
+  font-family: var(--font-arcade);
+  font-size: 10px;
+}
+
+.stat-item.gold .icon { color: var(--color-gold); }
+.stat-item.lives .icon { color: var(--color-mult); }
+.stat-value {
+  font-family: var(--font-cyber);
+  font-weight: 700;
+}
+
+/* Cooldown slots styling */
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.skill-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  background-color: #0b0b13;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.skill-key {
+  font-family: var(--font-arcade);
+  font-size: 7px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.skill-cooldown-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.skill-cooldown-fill {
+  height: 100%;
+  background-color: var(--color-accent);
+  width: 100%;
+  transition: width 0.1s linear;
+}
+
+.skill-slot.ready .skill-cooldown-fill {
+  background-color: #10b981;
+}
+
+/* Jokers inventory grid */
+.inventory-slots {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+  min-height: 52px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.item-slot-hud {
+  width: 44px;
+  height: 54px;
+  background-color: #0b0b13;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  position: relative;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.item-slot-hud.filled {
+  border-style: solid;
+  border-color: var(--color-accent);
+  background-color: var(--bg-secondary);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+}
+
+.item-slot-hud .tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(6, 6, 10, 0.95);
+  border: 1px solid var(--color-border);
+  padding: 8px;
+  width: 160px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #fff;
+  z-index: 100;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+.item-slot-hud:hover .tooltip {
+  visibility: visible;
+}
+
+/* Shop UI Overlay */
+.shop-title {
+  font-family: var(--font-arcade);
+  font-size: 24px;
+  color: var(--color-gold);
+  text-shadow: 0 0 10px rgba(234, 179, 8, 0.4);
+  margin-bottom: 24px;
+}
+
+.shop-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+.shop-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Joker Shop Card */
+.shop-card {
+  background-color: var(--bg-tertiary);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 180px;
+}
+
+.shop-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-gold);
+  box-shadow: 0 5px 15px rgba(234, 179, 8, 0.25);
+}
+
+.shop-card.sold-out {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.shop-card-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+.shop-card-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.shop-card-desc {
+  font-size: 10px;
+  color: #9ca3af;
+  flex-grow: 1;
+}
+
+.shop-card-cost {
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  color: var(--color-gold);
+  background-color: rgba(234, 179, 8, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.shop-controls {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* Score popup container on canvas overlay (optional) */
+.canvas-score-popup {
+  position: absolute;
+  color: #fff;
+  font-family: var(--font-cyber);
+  font-weight: 900;
+  font-size: 14px;
+  pointer-events: none;
+  animation: score-float 1s forwards ease-out;
+}
+
+@keyframes score-float {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+}

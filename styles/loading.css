@@ -1,0 +1,328 @@
+/* loading.css */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000 !important; /* Absolute black */
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: opacity 0.5s ease-out;
+}
+
+.loading-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Exit fade transition */
+.loading-screen.exit-fade {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Central Slime Styling */
+.central-slime-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(-120vh); /* Initial position offscreen */
+  z-index: 100;
+}
+
+.slime-cube-big {
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+}
+
+/* Eye blink animation inside SVG elements */
+.slime-eyes {
+  transform-origin: center 78px;
+  animation: eye-blink-anim 4.5s infinite;
+}
+
+@keyframes eye-blink-anim {
+  0%, 90%, 94%, 100% { transform: scaleY(1); }
+  92% { transform: scaleY(0.05); }
+}
+
+/* Fall impact animation class */
+.fall-impact {
+  animation: drop-down 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+@keyframes drop-down {
+  0% {
+    transform: translateY(-120vh) scaleY(1.4) scaleX(0.6);
+  }
+  45% {
+    transform: translateY(0) scaleY(1.4) scaleX(0.6);
+  }
+  50% {
+    transform: translateY(0) scaleY(0.4) scaleX(1.6); /* Squash extreme */
+  }
+  65% {
+    transform: translateY(-30px) scaleY(1.2) scaleX(0.8); /* Rebound stretch */
+  }
+  80% {
+    transform: translateY(0) scaleY(0.85) scaleX(1.15); /* Secondary bounce */
+  }
+  92% {
+    transform: translateY(-5px) scaleY(1.05) scaleX(0.95);
+  }
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+}
+
+/* Screen Shake effect */
+.shake-active {
+  animation: screen-shake-anim 0.15s ease-out;
+}
+
+@keyframes screen-shake-anim {
+  0%, 100% { transform: translate(0, 0); }
+  10%, 90% { transform: translate(-5px, 3px); }
+  20%, 80% { transform: translate(5px, -3px); }
+  30%, 70% { transform: translate(-3px, -5px); }
+  40%, 60% { transform: translate(3px, 5px); }
+  50% { transform: translate(-5px, 5px); }
+}
+
+/* Shockwave expansion */
+.shockwave-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 95;
+}
+
+.shockwave-active {
+  animation: expand-shockwave 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes expand-shockwave {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(25);
+    opacity: 0;
+  }
+}
+
+/* Dust particles container */
+.dust-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 160px;
+  height: 160px;
+  pointer-events: none;
+  z-index: 96;
+}
+
+.dust-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #ffffff;
+  opacity: 0;
+}
+
+/* Positioning initial burst coordinates near base of landing (y ≈ 140px, x left is ≈ 10px, x right is ≈ 150px) */
+.dp1 { left: 10px; top: 140px; }
+.dp2 { left: 20px; top: 140px; }
+.dp3 { left: 5px; top: 140px; }
+.dp4 { right: 10px; top: 140px; }
+.dp5 { right: 20px; top: 140px; }
+.dp6 { right: 5px; top: 140px; }
+
+.dust-active .dp1 { animation: dp1-anim 0.5s ease-out forwards; }
+.dust-active .dp2 { animation: dp2-anim 0.5s ease-out forwards; }
+.dust-active .dp3 { animation: dp3-anim 0.5s ease-out forwards; }
+.dust-active .dp4 { animation: dp4-anim 0.5s ease-out forwards; }
+.dust-active .dp5 { animation: dp5-anim 0.5s ease-out forwards; }
+.dust-active .dp6 { animation: dp6-anim 0.5s ease-out forwards; }
+
+@keyframes dp1-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-80px, -30px) scale(0); opacity: 0; }
+}
+@keyframes dp2-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-50px, -60px) scale(0); opacity: 0; }
+}
+@keyframes dp3-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-100px, -15px) scale(0); opacity: 0; }
+}
+@keyframes dp4-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(80px, -30px) scale(0); opacity: 0; }
+}
+@keyframes dp5-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(50px, -60px) scale(0); opacity: 0; }
+}
+@keyframes dp6-anim {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(100px, -15px) scale(0); opacity: 0; }
+}
+
+/* Start game prompt */
+.start-prompt {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: #ffffff;
+  margin-top: 36px;
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 1.8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease-in;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.start-prompt.visible {
+  opacity: 1;
+  animation: prompt-pulse 1.5s infinite alternate;
+}
+
+@keyframes prompt-pulse {
+  0% {
+    opacity: 0.3;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* Bottom-right Loading Indicator Panel */
+.bottom-right-loader {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+  transition: opacity 0.3s ease-out;
+}
+
+.bottom-right-loader.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-text-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 15px;
+  color: #ffffff;
+  letter-spacing: 2px;
+  animation: text-glow-pulse 1s infinite alternate;
+}
+
+@keyframes text-glow-pulse {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.mini-slimes-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  height: 75px; /* Give room for jumping */
+}
+
+/* Mini Slimes Layout & Wave Jumps */
+.mini-slime {
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  position: relative;
+  transform-origin: bottom center;
+}
+
+/* Jump Timings */
+.ms1 { animation: jump-anim 1.2s infinite ease-in-out; }
+.ms2 { animation: jump-anim 1.2s infinite ease-in-out 0.2s; }
+.ms3 { animation: jump-anim 1.2s infinite ease-in-out 0.4s; }
+
+@keyframes jump-anim {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+  8% {
+    transform: translateY(0) scaleY(0.7) scaleX(1.3); /* Squash preparatory */
+  }
+  32% {
+    transform: translateY(-24px) scaleY(1.3) scaleX(0.7); /* Jump stretch */
+  }
+  48% {
+    transform: translateY(-24px) scaleY(1) scaleX(1); /* Peak normal */
+  }
+  64% {
+    transform: translateY(0) scaleY(1.2) scaleX(0.8); /* Falling stretch */
+  }
+  74% {
+    transform: translateY(0) scaleY(0.6) scaleX(1.4); /* Impact squash */
+  }
+  88% {
+    transform: translateY(0) scaleY(1.1) scaleX(0.9); /* Elastic rebound */
+  }
+}
+
+/* Mini Dust lines */
+.mini-dust {
+  position: absolute;
+  bottom: -2px;
+  width: 5px;
+  height: 2px;
+  background-color: #ffffff;
+  opacity: 0;
+}
+
+.md1 { left: -5px; }
+.md2 { right: -5px; }
+
+.ms1 .md1 { animation: mini-dust-l 1.2s infinite ease-in-out; }
+.ms1 .md2 { animation: mini-dust-r 1.2s infinite ease-in-out; }
+.ms2 .md1 { animation: mini-dust-l 1.2s infinite ease-in-out 0.2s; }
+.ms2 .md2 { animation: mini-dust-r 1.2s infinite ease-in-out 0.2s; }
+.ms3 .md1 { animation: mini-dust-l 1.2s infinite ease-in-out 0.4s; }
+.ms3 .md2 { animation: mini-dust-r 1.2s infinite ease-in-out 0.4s; }
+
+@keyframes mini-dust-l {
+  0%, 70% { opacity: 0; transform: scaleX(0); }
+  74% { opacity: 1; transform: scaleX(1) translateX(-1px); }
+  85%, 100% { opacity: 0; transform: scaleX(0) translateX(-4px); }
+}
+@keyframes mini-dust-r {
+  0%, 70% { opacity: 0; transform: scaleX(0); }
+  74% { opacity: 1; transform: scaleX(1) translateX(1px); }
+  85%, 100% { opacity: 0; transform: scaleX(0) translateX(4px); }
+}
