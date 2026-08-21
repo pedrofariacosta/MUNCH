@@ -110,7 +110,7 @@
     [0,2,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,2,0], // Wrap portal nas extremidades (linha 7)
     [1,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,1],
     [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
-    [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
     [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
     [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
     [1,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,1],
@@ -187,6 +187,7 @@
       this.ghosts = [];
 
       this.frightenedTimer = 0;
+      this.debugMode = true; // Ativo por padrão para permitir investigação visual instantânea
 
       this.init();
     }
@@ -195,6 +196,13 @@
       // Eventos teclado
       window.addEventListener('keydown', (e) => {
         if (!this.player) return;
+
+        // F3 alterna o Painel de Depuração Visual na tela
+        if (e.code === 'F3') {
+          e.preventDefault();
+          this.debugMode = !this.debugMode;
+          return;
+        }
 
         // Armazena no buffer de entrada (Input Buffer) do jogador
         if (e.code === 'ArrowUp' || e.code === 'KeyW') this.player.setInput(DIRECTIONS.UP);
@@ -247,8 +255,8 @@
       }
       this.totalPellets = this.remainingPellets; // Guarda o total para a barra de progresso
 
-      // Cria jogador
-      this.player = new Player(9, 10);
+      // Cria jogador na posicao (9, 8) - corredor central livre
+      this.player = new Player(9, 8);
 
       // Cria inimigos conforme a fase (dificuldade progressiva)
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
@@ -580,7 +588,7 @@
       if (this.lives <= 0) {
         this.triggerGameOver();
       } else {
-        this.player.resetPosition(9, 10);
+        this.player.resetPosition(9, 8);
         this.ghosts.forEach((g, i) => {
           if (g) g.resetPosition(8 + i, 7);
         });
@@ -867,6 +875,49 @@
         }
       });
       this.ctx.restore();
+
+      // Painel de Depuração Visual
+      if (this.debugMode && this.player) {
+        this.drawDebugOverlay();
+      }
+    }
+
+    drawDebugOverlay() {
+      const p = this.player;
+      if (!p) return;
+
+      this.ctx.save();
+      this.ctx.fillStyle = 'rgba(8, 8, 12, 0.88)';
+      this.ctx.fillRect(8, 8, 360, 136);
+      this.ctx.strokeStyle = '#00E5FF';
+      this.ctx.lineWidth = 1.5;
+      this.ctx.strokeRect(8, 8, 360, 136);
+
+      this.ctx.font = 'bold 10px monospace';
+      this.ctx.fillStyle = '#00E5FF';
+      this.ctx.fillText(`[MUNCH DEPURADOR VISUAL] (F3: Alternar)`, 16, 24);
+
+      const targetCenterX = (p.gridX + p.dir.x) * TILE_SIZE;
+      const targetCenterY = (p.gridY + p.dir.y) * TILE_SIZE;
+      this.ctx.fillText(`Grade: (${p.gridX}, ${p.gridY}) | Pixels: (${Math.round(p.x)}, ${Math.round(p.y)})`, 16, 42);
+      this.ctx.fillText(`Alvo: (${Math.round(targetCenterX)}, ${Math.round(targetCenterY)}) | Movendo: ${p.isMoving() ? 'SIM' : 'NÃO'}`, 16, 58);
+
+      const dirStr = Object.keys(DIRECTIONS).find(k => DIRECTIONS[k] === p.dir) || 'NONE';
+      const bufStr = Object.keys(DIRECTIONS).find(k => DIRECTIONS[k] === p.inputBufferDir) || 'NONE';
+      this.ctx.fillText(`Direção: ${dirStr} | Buffer: ${bufStr} (${Math.round(p.inputBufferTime)}ms)`, 16, 74);
+
+      const checkX = p.gridX + p.dir.x;
+      const checkY = p.gridY + p.dir.y;
+      const canWalk = this.isWalkable(checkX, checkY);
+      const tileVal = (checkY >= 0 && checkY < GRID_HEIGHT && checkX >= 0 && checkX < GRID_WIDTH) ? this.map[checkY][checkX] : 'FORA';
+
+      this.ctx.fillStyle = canWalk ? '#00FF66' : '#FF3366';
+      this.ctx.fillText(`Frente (${checkX}, ${checkY}): ${canWalk ? 'LIVRE' : 'PAREDE'} (Tipo: ${tileVal})`, 16, 90);
+
+      this.ctx.fillStyle = '#FFE600';
+      this.ctx.fillText(`Última parada: ${p.lastStopReason || 'Nenhuma'}`, 16, 110);
+
+      this.ctx.restore();
     }
 
     gameLoop(currentTime) {
@@ -882,19 +933,17 @@
     }
   }
 
-  // ── Player (Slime 2.5D Dinâmico) ──
+  // ── Player (Slime 2.5D Dinâmico - Engine Contínua Arcade) ──
   class Player {
     constructor(gridX, gridY) {
       this.gridX = gridX;
       this.gridY = gridY;
       
+      // Coordenadas em pixel (alinhadas ao canto superior esquerdo do tile)
       this.x = gridX * TILE_SIZE;
       this.y = gridY * TILE_SIZE;
-      
-      this.targetX = this.x;
-      this.targetY = this.y;
 
-      this.speed = 0.16;
+      this.speed = 0.14; // Pixels por milissegundo (velocidade confortável e precisa)
       this.dir = DIRECTIONS.RIGHT;
       
       // Squash & Stretch
@@ -903,16 +952,27 @@
       this.angle = 0;
       this.walkTimer = 0;
 
-      // Pulo
+      // Pulo (Vault)
       this.isJumping = false;
       this.jumpDuration = 250;
       this.jumpTimeLeft = 0;
       this.jumpStart = { x: 0, y: 0 };
+      this.jumpTarget = { x: 0, y: 0 };
       this.jumpProgress = 0;
 
       // Input Buffer
       this.inputBufferDir = DIRECTIONS.NONE;
       this.inputBufferTime = 0;
+      this.lastStopReason = '';
+    }
+
+    checkEatPellet(game) {
+      if (!game || !game.map || this.gridY < 0 || this.gridY >= GRID_HEIGHT || this.gridX < 0 || this.gridX >= GRID_WIDTH) return;
+      const currentTile = game.map[this.gridY][this.gridX];
+      if (currentTile > 1) {
+        game.map[this.gridY][this.gridX] = 0;
+        game.addPoints(currentTile);
+      }
     }
 
     // Verifica se duas direções são exatamente opostas (giro de 180°)
@@ -921,10 +981,8 @@
     }
 
     setInput(dir) {
-      // Inversão imediata de 180°: calcula precisamente o tile reverso para evitar engasgos (invisible wall)
-      if (this.isMoving() && this.dir !== DIRECTIONS.NONE && this.isOpposite(this.dir, dir)) {
-        this.targetX = this.targetX - this.dir.x * TILE_SIZE;
-        this.targetY = this.targetY - this.dir.y * TILE_SIZE;
+      // Inversão Imediata (180°): altera a direção instantaneamente no mesmo frame
+      if (this.dir !== DIRECTIONS.NONE && this.isOpposite(this.dir, dir)) {
         this.dir = dir;
         this.angle = dir.angle;
         this.inputBufferDir = DIRECTIONS.NONE;
@@ -933,7 +991,7 @@
       }
 
       this.inputBufferDir = dir;
-      this.inputBufferTime = 150; // Buffer de 150ms
+      this.inputBufferTime = 300; // Janela de buffer de 300ms
     }
 
     resetPosition(gridX, gridY) {
@@ -941,33 +999,31 @@
       this.gridY = gridY;
       this.x = gridX * TILE_SIZE;
       this.y = gridY * TILE_SIZE;
-      this.targetX = this.x;
-      this.targetY = this.y;
       this.dir = DIRECTIONS.NONE;
       this.isJumping = false;
       this.squishX = 1;
       this.squishY = 1;
       this.inputBufferDir = DIRECTIONS.NONE;
       this.inputBufferTime = 0;
+      this.lastStopReason = '';
     }
 
     isMoving() {
-      return this.x !== this.targetX || this.y !== this.targetY;
+      return this.dir !== DIRECTIONS.NONE && !this.isJumping;
     }
 
     jumpTo(targetGridX, targetGridY) {
       this.isJumping = true;
       this.jumpTimeLeft = this.jumpDuration;
       this.jumpStart = { x: this.x, y: this.y };
+      this.jumpTarget = { x: targetGridX * TILE_SIZE, y: targetGridY * TILE_SIZE };
       
       this.gridX = targetGridX;
       this.gridY = targetGridY;
-      this.targetX = this.gridX * TILE_SIZE;
-      this.targetY = this.gridY * TILE_SIZE;
     }
 
     update(dt, game) {
-      // 1. Cooldown de Input Buffer
+      // 1. Contagem do tempo limite do Input Buffer
       if (this.inputBufferTime > 0) {
         this.inputBufferTime -= dt;
         if (this.inputBufferTime <= 0) {
@@ -975,26 +1031,32 @@
         }
       }
 
-      // 2. Logica do Salto
+      // 2. Lógica do Salto (Pulo / Vault)
       if (this.isJumping) {
         this.jumpTimeLeft -= dt;
         this.jumpProgress = 1 - Math.max(0, this.jumpTimeLeft) / this.jumpDuration;
 
-        this.x = this.jumpStart.x + (this.targetX - this.jumpStart.x) * this.jumpProgress;
-        this.y = this.jumpStart.y + (this.targetY - this.jumpStart.y) * this.jumpProgress;
+        this.x = this.jumpStart.x + (this.jumpTarget.x - this.jumpStart.x) * this.jumpProgress;
+        this.y = this.jumpStart.y + (this.jumpTarget.y - this.jumpStart.y) * this.jumpProgress;
+
+        this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
+        this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
 
         const scaleEffect = Math.sin(this.jumpProgress * Math.PI) * 0.4;
         this.squishX = 1 + scaleEffect;
         this.squishY = 1 + scaleEffect;
 
         if (this.jumpTimeLeft <= 0) {
-          this.x = this.targetX;
-          this.y = this.targetY;
+          this.x = this.jumpTarget.x;
+          this.y = this.jumpTarget.y;
+          this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
+          this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
           this.isJumping = false;
           
           this.squishX = 1.25;
           this.squishY = 0.75;
           
+          this.checkEatPellet(game);
           game.triggerScreenShake(3);
           game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 6, '#ffffff');
         }
@@ -1004,104 +1066,132 @@
       this.squishX += (1 - this.squishX) * 0.15;
       this.squishY += (1 - this.squishY) * 0.15;
 
-      // 3. Corner Snapping / Auto-Alinhamento ao mover
-      if (this.isMoving()) {
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
-        const dist = Math.hypot(dx, dy);
-        const step = this.speed * dt;
+      // Se o Slime estiver parado, tenta iniciar movimento a partir do buffer
+      if (this.dir === DIRECTIONS.NONE) {
+        if (this.inputBufferDir !== DIRECTIONS.NONE) {
+          const nextGridX = this.gridX + this.inputBufferDir.x;
+          const nextGridY = this.gridY + this.inputBufferDir.y;
+          if (game.isWalkable(nextGridX, nextGridY)) {
+            this.dir = this.inputBufferDir;
+            this.angle = this.dir.angle;
+            this.inputBufferDir = DIRECTIONS.NONE;
+            this.inputBufferTime = 0;
+          } else {
+            this.inputBufferDir = DIRECTIONS.NONE;
+            this.inputBufferTime = 0;
+          }
+        }
+        if (this.dir === DIRECTIONS.NONE) return; // Permanece parado no centro do tile
+      }
 
-        this.walkTimer += dt * 0.015;
-        this.squishX = 1 + Math.sin(this.walkTimer) * 0.05;
-        this.squishY = 1 - Math.sin(this.walkTimer) * 0.05;
+      // 3. Movimentação Contínua baseada em Velocidade (Auto-Walk Arcade Engine)
+      let step = this.speed * dt;
 
-        // Snapping perpendicular com tolerância de 8px
-        if (this.inputBufferDir !== DIRECTIONS.NONE && this.inputBufferDir !== this.dir) {
-          const isPerpendicular = (this.dir.x !== 0 && this.inputBufferDir.y !== 0) || (this.dir.y !== 0 && this.inputBufferDir.x !== 0);
-          if (isPerpendicular) {
-            const closestGridX = Math.round(this.x / TILE_SIZE);
-            const closestGridY = Math.round(this.y / TILE_SIZE);
-            const distToCenter = Math.hypot(this.x - closestGridX * TILE_SIZE, this.y - closestGridY * TILE_SIZE);
+      // Animação de deformação (gelatina) enquanto anda
+      this.walkTimer += dt * 0.015;
+      this.squishX = 1 + Math.sin(this.walkTimer) * 0.05;
+      this.squishY = 1 - Math.sin(this.walkTimer) * 0.05;
 
-            if (distToCenter <= 8) { // Snapping mais generoso (8px de tolerância)
-              const checkX = closestGridX + this.inputBufferDir.x;
-              const checkY = closestGridY + this.inputBufferDir.y;
-              if (game.isWalkable(checkX, checkY)) {
-                // Alinha eixo oposto perfeitamente ao grid
-                this.x = closestGridX * TILE_SIZE;
-                this.y = closestGridY * TILE_SIZE;
-                this.gridX = closestGridX;
-                this.gridY = closestGridY;
+      while (step > 0 && this.dir !== DIRECTIONS.NONE) {
+        // Centro do próximo tile para onde estamos nos movendo
+        const targetCenter = {
+          x: (this.gridX + this.dir.x) * TILE_SIZE,
+          y: (this.gridY + this.dir.y) * TILE_SIZE
+        };
 
-                // Transiciona para a nova direção
-                this.dir = this.inputBufferDir;
-                this.targetX = checkX * TILE_SIZE;
-                this.targetY = checkY * TILE_SIZE;
-                this.angle = this.dir.angle;
+        // Distância até o próximo centro de tile
+        const distToTargetCenter = Math.hypot(targetCenter.x - this.x, targetCenter.y - this.y);
 
-                this.inputBufferDir = DIRECTIONS.NONE;
-                this.inputBufferTime = 0;
-                return;
+        if (step < distToTargetCenter) {
+          // Snap de curva instantânea "na hora": se acabou de passar do centro do tile (dist <= 14px) e apertou a curva
+          if (this.inputBufferDir !== DIRECTIONS.NONE && this.inputBufferDir !== this.dir) {
+            const isPerpendicular = (this.dir.x !== 0 && this.inputBufferDir.y !== 0) || (this.dir.y !== 0 && this.inputBufferDir.x !== 0);
+            if (isPerpendicular) {
+              const tileCenter = { x: this.gridX * TILE_SIZE, y: this.gridY * TILE_SIZE };
+              const distToCenter = Math.hypot(tileCenter.x - this.x, tileCenter.y - this.y);
+
+              if (distToCenter <= 14) {
+                const bufGridX = this.gridX + this.inputBufferDir.x;
+                const bufGridY = this.gridY + this.inputBufferDir.y;
+                if (game.isWalkable(bufGridX, bufGridY)) {
+                  this.x = tileCenter.x;
+                  this.y = tileCenter.y;
+                  this.dir = this.inputBufferDir;
+                  this.angle = this.dir.angle;
+                  this.inputBufferDir = DIRECTIONS.NONE;
+                  this.inputBufferTime = 0;
+                  this.checkEatPellet(game);
+                  continue;
+                }
               }
             }
           }
-        }
 
-        if (step >= dist) {
-          this.x = this.targetX;
-          this.y = this.targetY;
-          this.gridX = Math.round(this.x / TILE_SIZE);
-          this.gridY = Math.round(this.y / TILE_SIZE);
+          // Deslocamento normal dentro do segmento atual
+          this.x += this.dir.x * step;
+          this.y += this.dir.y * step;
+          step = 0;
+        } else {
+          // Atingiu ou ultrapassou o centro do próximo tile!
+          step -= distToTargetCenter;
+          this.x = targetCenter.x;
+          this.y = targetCenter.y;
+          
+          this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
+          this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
 
           // Wrap portals (linha 7)
           if (this.gridY === 7) {
             if (this.gridX < 0) {
               this.gridX = GRID_WIDTH - 1;
               this.x = this.gridX * TILE_SIZE;
-              this.targetX = this.x;
             } else if (this.gridX >= GRID_WIDTH) {
               this.gridX = 0;
               this.x = 0;
-              this.targetX = 0;
             }
           }
 
-          // Come pastilhas
-          const currentTile = game.map[this.gridY][this.gridX];
-          if (currentTile > 1) {
-            game.map[this.gridY][this.gridX] = 0;
-            game.addPoints(currentTile);
-          }
-        } else {
-          this.x += (dx / dist) * step;
-          this.y += (dy / dist) * step;
-        }
-      }
+          // Devora a pastilha no centro do novo tile
+          this.checkEatPellet(game);
 
-      // Escolhe proxima direcao quando parado
-      if (!this.isMoving()) {
-        if (this.inputBufferDir !== DIRECTIONS.NONE) {
-          const checkX = this.gridX + this.inputBufferDir.x;
-          const checkY = this.gridY + this.inputBufferDir.y;
-          if (game.isWalkable(checkX, checkY)) {
-            this.dir = this.inputBufferDir;
-            this.targetX = checkX * TILE_SIZE;
-            this.targetY = checkY * TILE_SIZE;
-            this.angle = this.dir.angle;
-            this.inputBufferDir = DIRECTIONS.NONE;
-            this.inputBufferTime = 0;
-            return;
+          // ── MÁQUINA DE DECISÃO NO CENTRO DO TILE (INTERSECTION ENGINE) ──
+          
+          // Prioridade 1: Mudar para a nova direção buffered se a casa adjacente estiver LIVRE
+          let directionChanged = false;
+          if (this.inputBufferDir !== DIRECTIONS.NONE) {
+            const bufGridX = this.gridX + this.inputBufferDir.x;
+            const bufGridY = this.gridY + this.inputBufferDir.y;
+            
+            if (game.isWalkable(bufGridX, bufGridY)) {
+              this.dir = this.inputBufferDir;
+              this.angle = this.dir.angle;
+              this.inputBufferDir = DIRECTIONS.NONE;
+              this.inputBufferTime = 0;
+              directionChanged = true;
+            } else {
+              // Se o buffer aponta para uma parede no cruzamento, descarta o comando sem parar o slime
+              this.inputBufferDir = DIRECTIONS.NONE;
+              this.inputBufferTime = 0;
+            }
           }
-        }
 
-        if (this.dir !== DIRECTIONS.NONE) {
-          const checkX = this.gridX + this.dir.x;
-          const checkY = this.gridY + this.dir.y;
-          if (game.isWalkable(checkX, checkY)) {
-            this.targetX = checkX * TILE_SIZE;
-            this.targetY = checkY * TILE_SIZE;
-          } else {
-            this.dir = DIRECTIONS.NONE;
+          // Prioridade 2 e 3: Manter rota ou parar se houver parede na frente
+          if (!directionChanged) {
+            const nextGridX = this.gridX + this.dir.x;
+            const nextGridY = this.gridY + this.dir.y;
+
+            if (!game.isWalkable(nextGridX, nextGridY)) {
+              // Prioridade 3: Parede na frente -> Trava no centro exato do tile e zera a velocidade
+              this.x = this.gridX * TILE_SIZE;
+              this.y = this.gridY * TILE_SIZE;
+              
+              const tileVal = (nextGridY >= 0 && nextGridY < GRID_HEIGHT && nextGridX >= 0 && nextGridX < GRID_WIDTH) ? game.map[nextGridY][nextGridX] : 'FORA';
+              this.lastStopReason = `Parede na frente (${nextGridX}, ${nextGridY}) [Tipo: ${tileVal}]`;
+              console.log(`[MUNCH DEBUG] Slime colidiu com parede na grade (${this.gridX}, ${this.gridY}). ${this.lastStopReason}`);
+              
+              this.dir = DIRECTIONS.NONE;
+              step = 0;
+            }
           }
         }
       }
@@ -1356,16 +1446,16 @@
       );
 
       // Manda invisível pro centro
-      this.x = 9 * TILE_SIZE;
+      this.x = 8 * TILE_SIZE;
       this.y = 7 * TILE_SIZE;
       this.targetX = this.x;
       this.targetY = this.y;
-      this.gridX = 9;
+      this.gridX = 8;
       this.gridY = 7;
 
       game.triggerScreenShake(6);
       game.updateHUD();
-      game.checkWinningCondition();
+      game.checkPelletClear();
     }
 
     update(dt, game) {
@@ -1374,7 +1464,7 @@
         this.respawnTimer -= dt;
         if (this.respawnTimer <= 0) {
           this.state = 'normal';
-          this.resetPosition(9, 7);
+          this.resetPosition(8, 7);
         }
         return;
       }
@@ -1428,7 +1518,7 @@
             }
           }
 
-          if (this.state === 'eaten' && this.gridX === 9 && this.gridY === 7) {
+          if (this.state === 'eaten' && this.gridX === 8 && this.gridY === 7) {
             this.state = 'normal';
           }
           
@@ -1448,13 +1538,15 @@
       }
 
       if (!this.isMoving()) {
-        // Se comido, volta pra jaula central (9, 7)
+        // Se comido, volta pro corredor central (8, 7)
         if (this.state === 'eaten') {
-          const path = this.findPath(this.gridX, this.gridY, 9, 7, game);
+          const path = this.findPath(this.gridX, this.gridY, 8, 7, game);
           if (path.length > 0) {
             this.dir = path[0];
             this.targetX = (this.gridX + this.dir.x) * TILE_SIZE;
             this.targetY = (this.gridY + this.dir.y) * TILE_SIZE;
+          } else {
+            this.resetPosition(8, 7);
           }
           return;
         }
@@ -1686,25 +1778,15 @@
           ctx.lineWidth = 2.5;
           ctx.stroke();
 
-          // Facetas internas anguladas — linhas finas douradas cruzadas
-          ctx.strokeStyle = '#FFE600';
-          ctx.lineWidth = 1.2;
+          // Facetas internas anguladas em tom metálico sutil
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(0, -10);
-          ctx.lineTo(8, 0);
-          ctx.lineTo(0, 10);
-          ctx.lineTo(-8, 0);
+          ctx.moveTo(0, -9);
+          ctx.lineTo(7, 0);
+          ctx.lineTo(0, 9);
+          ctx.lineTo(-7, 0);
           ctx.closePath();
-          ctx.stroke();
-
-          // Cruz central geométrica dourada
-          ctx.beginPath();
-          ctx.moveTo(0, -10);
-          ctx.lineTo(0, 10);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(-8, 0);
-          ctx.lineTo(8, 0);
           ctx.stroke();
         }
       }

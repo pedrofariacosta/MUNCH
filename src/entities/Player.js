@@ -17,7 +17,7 @@ export class Player {
     this.nextDir = DIRECTIONS.NONE;
     
     // Parâmetros principais do jogador
-    this.speed = ENTITY_SPEEDS.PLAYER; // Velocidade em pixels por milissegundo
+    this.speed = 0.14; // Velocidade em pixels por milissegundo
     this.lives = 3;
     this.maxLives = 3;
     
@@ -109,60 +109,95 @@ export class Player {
     this.squishX += (1 - this.squishX) * 0.15;
     this.squishY += (1 - this.squishY) * 0.15;
 
-    // 3. Movimentação comum (baseada em blocos da grade)
-    if (this.isMoving()) {
-      // Continua se movendo em direção ao alvo
-      const dx = this.targetX - this.x;
-      const dy = this.targetY - this.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const step = this.speed * dt;
-
-      // Efeito de gelatina ao andar (contração/expansão periódica)
-      this.walkAnimTimer += dt * 0.015;
-      this.squishX = 1 + Math.sin(this.walkAnimTimer) * 0.06;
-      this.squishY = 1 - Math.sin(this.walkAnimTimer) * 0.06;
-
-      if (step >= dist) {
-        // Chegou ao destino
-        this.x = this.targetX;
-        this.y = this.targetY;
-        this.gridX = Math.round(this.x / TILE_SIZE);
-        this.gridY = Math.round(this.y / TILE_SIZE);
-        this.alignWithGrid();
-      } else {
-        // Caminha um pouco mais perto
-        this.x += (dx / dist) * step;
-        this.y += (dy / dist) * step;
-      }
-    }
-
-    // Determina a direção se estiver parado
-    if (!this.isMoving()) {
-      // Aplica a direção secundária (próxima tecla pressionada)
+    // 3. Movimentação Contínua baseada em Velocidade (Auto-Walk Arcade Engine)
+    if (this.dir === DIRECTIONS.NONE) {
       if (this.nextDir !== DIRECTIONS.NONE) {
-        const nextTargetX = (this.gridX + this.nextDir.x) * TILE_SIZE;
-        const nextTargetY = (this.gridY + this.nextDir.y) * TILE_SIZE;
-        
-        if (mapManager.isTileWalkable(this.gridX + this.nextDir.x, this.gridY + this.nextDir.y)) {
+        const nextGridX = this.gridX + this.nextDir.x;
+        const nextGridY = this.gridY + this.nextDir.y;
+        if (mapManager.isTileWalkable(nextGridX, nextGridY)) {
           this.dir = this.nextDir;
-          this.targetX = nextTargetX;
-          this.targetY = nextTargetY;
           this.angle = this.dir.angle;
-          return;
+          this.nextDir = DIRECTIONS.NONE;
+        } else {
+          this.nextDir = DIRECTIONS.NONE;
         }
       }
+      if (this.dir === DIRECTIONS.NONE) return;
+    }
 
-      // Continua se movendo na direção atual se o caminho estiver livre
-      if (this.dir !== DIRECTIONS.NONE) {
-        const nextTargetX = (this.gridX + this.dir.x) * TILE_SIZE;
-        const nextTargetY = (this.gridY + this.dir.y) * TILE_SIZE;
+    let step = this.speed * dt;
 
-        if (mapManager.isTileWalkable(this.gridX + this.dir.x, this.gridY + this.dir.y)) {
-          this.targetX = nextTargetX;
-          this.targetY = nextTargetY;
-          this.angle = this.dir.angle;
-        } else {
-          this.dir = DIRECTIONS.NONE; // Para se bater na parede
+    // Efeito de gelatina ao andar (contração/expansão periódica)
+    this.walkAnimTimer += dt * 0.015;
+    this.squishX = 1 + Math.sin(this.walkAnimTimer) * 0.06;
+    this.squishY = 1 - Math.sin(this.walkAnimTimer) * 0.06;
+
+    while (step > 0 && this.dir !== DIRECTIONS.NONE) {
+      const targetCenter = {
+        x: (this.gridX + this.dir.x) * TILE_SIZE,
+        y: (this.gridY + this.dir.y) * TILE_SIZE
+      };
+
+      const distToTargetCenter = Math.hypot(targetCenter.x - this.x, targetCenter.y - this.y);
+
+      if (step < distToTargetCenter) {
+        if (this.nextDir !== DIRECTIONS.NONE && this.nextDir !== this.dir) {
+          const isPerpendicular = (this.dir.x !== 0 && this.nextDir.y !== 0) || (this.dir.y !== 0 && this.nextDir.x !== 0);
+          if (isPerpendicular) {
+            const tileCenter = { x: this.gridX * TILE_SIZE, y: this.gridY * TILE_SIZE };
+            const distToCenter = Math.hypot(tileCenter.x - this.x, tileCenter.y - this.y);
+
+            if (distToCenter <= 14) {
+              const bufGridX = this.gridX + this.nextDir.x;
+              const bufGridY = this.gridY + this.nextDir.y;
+              if (mapManager.isTileWalkable(bufGridX, bufGridY)) {
+                this.x = tileCenter.x;
+                this.y = tileCenter.y;
+                this.dir = this.nextDir;
+                this.angle = this.dir.angle;
+                this.nextDir = DIRECTIONS.NONE;
+                continue;
+              }
+            }
+          }
+        }
+
+        this.x += this.dir.x * step;
+        this.y += this.dir.y * step;
+        step = 0;
+      } else {
+        step -= distToTargetCenter;
+        this.x = targetCenter.x;
+        this.y = targetCenter.y;
+        
+        this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
+        this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
+
+        let directionChanged = false;
+        if (this.nextDir !== DIRECTIONS.NONE) {
+          const bufGridX = this.gridX + this.nextDir.x;
+          const bufGridY = this.gridY + this.nextDir.y;
+          
+          if (mapManager.isTileWalkable(bufGridX, bufGridY)) {
+            this.dir = this.nextDir;
+            this.angle = this.dir.angle;
+            this.nextDir = DIRECTIONS.NONE;
+            directionChanged = true;
+          } else {
+            this.nextDir = DIRECTIONS.NONE;
+          }
+        }
+
+        if (!directionChanged) {
+          const nextGridX = this.gridX + this.dir.x;
+          const nextGridY = this.gridY + this.dir.y;
+
+          if (!mapManager.isTileWalkable(nextGridX, nextGridY)) {
+            this.x = this.gridX * TILE_SIZE;
+            this.y = this.gridY * TILE_SIZE;
+            this.dir = DIRECTIONS.NONE;
+            step = 0;
+          }
         }
       }
     }
