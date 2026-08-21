@@ -1,3 +1,5 @@
+import { FaviconManager } from './FaviconManager.js';
+
 export class LoadingScreen {
   constructor() {
     this.overlay = document.getElementById('loading-screen');
@@ -10,6 +12,10 @@ export class LoadingScreen {
     this.readyToStart = false;
     this.onCompleteCallback = null;
     this.autoStart = false;
+    
+    // Instancia o gerenciador de favicon e título dinâmico
+    this.faviconManager = new FaviconManager();
+    this.faviconManager.setStaticFavicon();
     
     // Vincula a função de disparo para não perder o escopo
     this.triggerStartHandler = (e) => this.handleStartTrigger(e);
@@ -42,6 +48,9 @@ export class LoadingScreen {
     
     this.reset();
     
+    // Ativa a animação do favicon e o título de carregamento na aba
+    this.faviconManager.startAnimation();
+    
     // Estado A: Mantém o loop tocando pelo tempo simulado de carregamento
     setTimeout(() => {
       this.completeLoading();
@@ -50,6 +59,9 @@ export class LoadingScreen {
 
   // Estado B: Conclusão do Carregamento (Transição de Impacto)
   completeLoading() {
+    // Para as animações do favicon/título e define a versão definitiva estática
+    this.faviconManager.setStaticFavicon();
+
     // 1. Esconde os mini loaders do canto inferior direito
     this.bottomRightLoader.classList.add('fade-out');
     
