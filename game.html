@@ -29,6 +29,9 @@
         <div class="progress-bar" id="hudProgressBar"></div>
       </div>
       
+      <!-- Bandeja de Relíquias (HUD Tray) -->
+      <div class="relics-tray" id="relicsTray"></div>
+      
       <div class="balatro-scoring">
         <!-- Caixa de Fichas (Chips) -->
         <div class="score-box chips-box" id="chipsBox">
@@ -124,6 +127,19 @@
       </div>
       
       <button class="btn-arcade-modal blue-theme" id="btnNextBlind">Próxima Blind</button>
+    </div>
+  </div>
+
+  <!-- Modal de Draft Shop (Escolha de Relíquia) -->
+  <div class="overlay-modal" id="modalDraftShop">
+    <div class="modal-content draft-modal-content">
+      <h2 class="modal-title win">RODADA CONCLUÍDA</h2>
+      <p class="modal-subtitle">ESCOLHA UMA RELÍQUIA PARA A SUA RUN</p>
+      
+      <!-- Container das cartas lado a lado -->
+      <div class="draft-cards-container" id="draftCardsContainer">
+        <!-- Cartas serão inseridas via Javascript -->
+      </div>
     </div>
   </div>
 

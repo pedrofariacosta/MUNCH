@@ -534,3 +534,189 @@ body::after {
 .btn-arcade-modal.blue-theme:hover {
   box-shadow: 0 6px 0 var(--border-color), 0 0 15px var(--cyan-glow);
 }
+
+/* Bandeja de Relíquias no HUD */
+.relics-tray {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 15px;
+  flex-wrap: wrap;
+}
+
+.relic-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  position: relative;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.relic-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.relic-badge.comum:hover { border-color: #ffffff; box-shadow: 0 0 8px rgba(255,255,255,0.2); }
+.relic-badge.incomum:hover { border-color: var(--cyan-primary); box-shadow: 0 0 8px var(--cyan-glow); }
+.relic-badge.raro:hover { border-color: var(--yellow-primary); box-shadow: 0 0 8px var(--yellow-glow); }
+
+/* Tooltip retrô */
+.relic-badge::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -56px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: #08080d;
+  border: 1.5px solid var(--border-color);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 9px;
+  white-space: pre;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 200;
+  transition: all 0.15s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+.relic-badge:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  bottom: -62px;
+}
+
+/* Container de Cartas Draft */
+.draft-modal-content {
+  width: 620px;
+  max-width: 95%;
+  padding: 30px;
+}
+
+.draft-cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* Estilo da Carta Relíquia */
+.relic-card {
+  flex: 1;
+  max-width: 260px;
+  background: #0d0d13;
+  border: 2px solid #2a2a3a;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+  animation: card-slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes card-slide-in {
+  0% { transform: translateY(30px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Diferentes raridades */
+.relic-card.comum {
+  border-color: #8e8e8e;
+  box-shadow: 0 0 10px rgba(142, 142, 142, 0.15);
+}
+.relic-card.incomum {
+  border-color: var(--cyan-primary);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+.relic-card.raro {
+  border-color: var(--yellow-primary);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.25);
+}
+
+.relic-card:hover {
+  transform: translateY(-8px) scale(1.03);
+}
+
+.relic-card.comum:hover {
+  border-color: #ffffff;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.3);
+}
+
+.relic-card.incomum:hover {
+  border-color: #00ffff;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+}
+
+.relic-card.raro:hover {
+  border-color: #ffff00;
+  box-shadow: 0 0 25px rgba(255, 230, 0, 0.5);
+}
+
+/* Detalhes internos da carta */
+.relic-card-rarity {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.relic-card.comum .relic-card-rarity { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+.relic-card.incomum .relic-card-rarity { background: rgba(0, 229, 255, 0.15); color: var(--cyan-primary); }
+.relic-card.raro .relic-card-rarity { background: rgba(255, 230, 0, 0.15); color: var(--yellow-primary); }
+
+.relic-card-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.1));
+}
+
+.relic-card-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.relic-card-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: auto;
+}
+
+/* Estilo para habilidades bloqueadas no rodapé */
+.skill-indicator.blocked {
+  opacity: 0.5;
+  border-color: rgba(255, 46, 46, 0.3);
+  background: rgba(255, 46, 46, 0.02);
+}
+.skill-indicator.blocked .skill-key {
+  color: var(--red-primary);
+}
+.skill-indicator.blocked .skill-charges {
+  color: var(--red-primary);
+}
+.skill-indicator.blocked .skill-bar-fill {
+  background: #202024;
+  box-shadow: none;
+}
+

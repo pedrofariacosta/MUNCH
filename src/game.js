@@ -117,6 +117,115 @@
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ];
 
+  // Pool de cartas/relíquias roguelike
+  const CARD_POOL = [
+    // --- Habilidades Básicas ---
+    {
+      id: "unlock_jump",
+      name: "MOLA DE PRESSÃO",
+      rarity: "Comum",
+      desc: "+1 Carga de Pulo (Vault). Permite saltar por cima de paredes e inimigos.",
+      apply: (game) => {
+        game.vaultMaxCharges += 1;
+        game.vaultCharges = game.vaultMaxCharges;
+      }
+    },
+    {
+      id: "unlock_blaster",
+      name: "CANHÃO GEOMÉTRICO",
+      rarity: "Comum",
+      desc: "+1 Carga de Tiro (Blaster). Dispara laser que destrói inimigos.",
+      apply: (game) => {
+        game.blasterMaxCharges += 1;
+        game.blasterCharges = game.blasterMaxCharges;
+      }
+    },
+    {
+      id: "quick_reflexes",
+      name: "CIRCUITO RÁPIDO",
+      rarity: "Incomum",
+      desc: "Reduz o tempo de recarga de todas as habilidades em 30%.",
+      apply: (game) => {
+        game.cooldownMultiplier *= 0.7;
+      }
+    },
+    {
+      id: "extra_heart",
+      name: "NÚCLEO RESERVA",
+      rarity: "Comum",
+      desc: "+1 Vida máxima e recupera todas as vidas perdidas.",
+      apply: (game) => {
+        game.maxLives = (game.maxLives || 2) + 1;
+        game.lives = game.maxLives;
+      }
+    },
+
+    // --- Sinergias Balatro (+Chips / +Mult / xMult) ---
+    {
+      id: "steel_slime",
+      name: "SLIME DE AÇO",
+      rarity: "Incomum",
+      desc: "Pastilhas normais concedem +15 Fichas extras.",
+      apply: (game) => {
+        game.pelletChipBonus += 15;
+      }
+    },
+    {
+      id: "combo_frenzy",
+      name: "MULTIPLICADOR RAIVOSO",
+      rarity: "Raro",
+      desc: "Eliminar um inimigo com o Blaster concede +3 Mult permanente na rodada.",
+      apply: (game) => {
+        game.killMultBonus += 3;
+      }
+    },
+    {
+      id: "golden_teeth",
+      name: "DENTES DE OURO",
+      rarity: "Incomum",
+      desc: "Moedas especiais concedem x1.5 Mult ao serem consumidas.",
+      apply: (game) => {
+        game.goldenMultFactor *= 1.5;
+      }
+    },
+
+    // --- Regras Especiais (Gambonanza) ---
+    {
+      id: "slime_trail",
+      name: "RASTRO VISCOSO",
+      rarity: "Raro",
+      desc: "Pular deixa uma poça que reduz a velocidade dos inimigos que passarem por ela em 50%.",
+      apply: (game) => {
+        game.hasStickyJump = true;
+      }
+    }
+  ];
+
+  // Classe para gerenciar poças pegajosas deixadas por pulos (Rastro Viscoso)
+  class StickyPool {
+    constructor(gridX, gridY, duration = 5000) {
+      this.gridX = gridX;
+      this.gridY = gridY;
+      this.timeLeft = duration;
+      this.x = gridX * TILE_SIZE;
+      this.y = gridY * TILE_SIZE;
+    }
+    update(dt) {
+      this.timeLeft -= dt;
+    }
+    draw(ctx) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.3)';
+      ctx.beginPath();
+      ctx.arc(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, TILE_SIZE/2.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
   // Engine principal
   class Game {
     constructor() {
@@ -156,7 +265,8 @@
       this.gameState = GAME_STATES.PLAYING;
       this.ante = 1;
       this.blind = 1;
-      this.lives = 3;
+      this.maxLives = 2; // Vida máxima inicial da run
+      this.lives = 2; // Começa com 2 corações
       this.gold = 0;
       this.phase = 1;
 
@@ -167,16 +277,26 @@
       this.remainingPellets = 0;
       this.phaseClearTimer = 0;
 
-      // Habilidades
-      this.vaultMaxCharges = 2;
-      this.vaultCharges = 2;
+      // Habilidades bloqueadas inicialmente
+      this.vaultMaxCharges = 0;
+      this.vaultCharges = 0;
       this.vaultCooldown = 0;
-      this.vaultMaxCooldown = 3000;
+      this.vaultMaxCooldown = 7000; // Recarga estendida de 7.0s
 
-      this.blasterMaxCharges = 1;
-      this.blasterCharges = 1;
+      this.blasterMaxCharges = 0;
+      this.blasterCharges = 0;
       this.blasterCooldown = 0;
-      this.blasterMaxCooldown = 4000;
+      this.blasterMaxCooldown = 10000; // Recarga estendida de 10.0s
+
+      // Estado do inventário de relíquias e modificadores roguelike
+      this.activeRelics = [];
+      this.pelletChipBonus = 0;
+      this.killMultBonus = 0;
+      this.goldenMultFactor = 1.0;
+      this.hasStickyJump = false;
+      this.cooldownMultiplier = 1.0;
+      this.stickyPools = [];
+      this.pelletsEatenForVault = 0;
 
       this.map = [];
       this.particles = [];
@@ -272,12 +392,16 @@
       this.chips = 0;
       this.mult = 1;
 
-      this.vaultCharges = this.vaultMaxCharges;
+       this.vaultCharges = this.vaultMaxCharges;
       this.vaultCooldown = 0;
       this.blasterCharges = this.blasterMaxCharges;
       this.blasterCooldown = 0;
+      
+      this.stickyPools = [];
+      this.pelletsEatenForVault = 0;
 
       this.updateHUD();
+      this.updateRelicsTray();
     }
 
     // Gera os inimigos conforme a fase atual — escalabilidade de dificuldade
@@ -332,6 +456,12 @@
       const targetGridY = this.player.gridY + this.player.dir.y * jumpDistance;
 
       if (this.isWalkable(targetGridX, targetGridY)) {
+        // Rastro Viscoso (Poças de Pulo)
+        if (this.hasStickyJump) {
+          this.stickyPools.push(new StickyPool(this.player.gridX, this.player.gridY));
+          this.stickyPools.push(new StickyPool(targetGridX, targetGridY));
+        }
+
         this.vaultCharges--;
         this.player.jumpTo(targetGridX, targetGridY);
         this.triggerScreenShake(4);
@@ -424,26 +554,97 @@
       this.hudLives.innerText = '❤️'.repeat(Math.max(0, this.lives));
       this.hudGold.innerText = this.gold;
 
-      this.vaultChargesEl.innerText = `${this.vaultCharges}/${this.vaultMaxCharges}`;
-      this.blasterChargesEl.innerText = `${this.blasterCharges}/${this.blasterMaxCharges}`;
-
-      if (this.vaultCharges < this.vaultMaxCharges) {
-        const cldPct = 100 - (this.vaultCooldown / this.vaultMaxCooldown) * 100;
-        this.vaultCooldownFill.style.width = cldPct + '%';
+      // Vault (Pulo)
+      if (this.vaultMaxCharges === 0) {
+        document.querySelector('#skillVault .skill-key').innerText = '[ESPAÇO] BLOQUEADO';
+        this.vaultChargesEl.innerText = 'BLOQUEADO';
+        this.vaultCooldownFill.style.width = '0%';
+        this.skillVault.classList.add('blocked');
         this.skillVault.classList.remove('ready');
       } else {
-        this.vaultCooldownFill.style.width = '100%';
-        this.skillVault.classList.add('ready');
+        document.querySelector('#skillVault .skill-key').innerText = '[ESPAÇO] PULO';
+        this.vaultChargesEl.innerText = `${this.vaultCharges}/${this.vaultMaxCharges}`;
+        this.skillVault.classList.remove('blocked');
+        
+        if (this.vaultCharges < this.vaultMaxCharges) {
+          const currentMaxCld = this.vaultMaxCooldown * (this.cooldownMultiplier || 1.0);
+          const cldPct = 100 - (this.vaultCooldown / currentMaxCld) * 100;
+          this.vaultCooldownFill.style.width = Math.max(0, Math.min(100, cldPct)) + '%';
+          this.skillVault.classList.remove('ready');
+        } else {
+          this.vaultCooldownFill.style.width = '100%';
+          this.skillVault.classList.add('ready');
+        }
       }
 
-      if (this.blasterCharges < this.blasterMaxCharges) {
-        const cldPct = 100 - (this.blasterCooldown / this.blasterMaxCooldown) * 100;
-        this.blasterCooldownFill.style.width = cldPct + '%';
+      // Blaster (Tiro)
+      if (this.blasterMaxCharges === 0) {
+        document.querySelector('#skillBlaster .skill-key').innerText = '[F] BLOQUEADO';
+        this.blasterChargesEl.innerText = 'BLOQUEADO';
+        this.blasterCooldownFill.style.width = '0%';
+        this.skillBlaster.classList.add('blocked');
         this.skillBlaster.classList.remove('ready');
       } else {
-        this.blasterCooldownFill.style.width = '100%';
-        this.skillBlaster.classList.add('ready');
+        document.querySelector('#skillBlaster .skill-key').innerText = '[F] TIRO';
+        this.blasterChargesEl.innerText = `${this.blasterCharges}/${this.blasterMaxCharges}`;
+        this.skillBlaster.classList.remove('blocked');
+
+        if (this.blasterCharges < this.blasterMaxCharges) {
+          const currentMaxCld = this.blasterMaxCooldown * (this.cooldownMultiplier || 1.0);
+          const cldPct = 100 - (this.blasterCooldown / currentMaxCld) * 100;
+          this.blasterCooldownFill.style.width = Math.max(0, Math.min(100, cldPct)) + '%';
+          this.skillBlaster.classList.remove('ready');
+        } else {
+          this.blasterCooldownFill.style.width = '100%';
+          this.skillBlaster.classList.add('ready');
+        }
       }
+    }
+
+    updateRelicsTray() {
+      const tray = document.getElementById('relicsTray');
+      if (!tray) return;
+      tray.innerHTML = '';
+
+      this.activeRelics.forEach(card => {
+        const badge = document.createElement('div');
+        badge.className = `relic-badge ${card.rarity.toLowerCase()}`;
+        
+        let icon = '💎';
+        if (card.id === 'unlock_jump') icon = '🦘';
+        else if (card.id === 'unlock_blaster') icon = '🔫';
+        else if (card.id === 'quick_reflexes') icon = '⚡';
+        else if (card.id === 'extra_heart') icon = '❤️';
+        else if (card.id === 'steel_slime') icon = '🛡️';
+        else if (card.id === 'combo_frenzy') icon = '🔥';
+        else if (card.id === 'golden_teeth') icon = '🪙';
+        else if (card.id === 'slime_trail') icon = '🦠';
+
+        badge.innerHTML = icon;
+        badge.setAttribute('data-tooltip', `${card.name}\n${card.desc}`);
+        tray.appendChild(badge);
+      });
+    }
+
+    resetRunState() {
+      this.activeRelics = [];
+      this.pelletChipBonus = 0;
+      this.killMultBonus = 0;
+      this.goldenMultFactor = 1.0;
+      this.hasStickyJump = false;
+      this.cooldownMultiplier = 1.0;
+      
+      this.vaultMaxCharges = 0;
+      this.blasterMaxCharges = 0;
+      this.vaultCharges = 0;
+      this.blasterCharges = 0;
+      
+      this.maxLives = 2;
+      this.lives = 2;
+      this.gold = 0;
+      this.phase = 1;
+      this.ante = 1;
+      this.blind = 1;
     }
 
     scorePop(box) {
@@ -458,10 +659,19 @@
       let scoreColor = '#ffffff';
       let tag = '';
 
+      if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
+        this.pelletsEatenForVault = (this.pelletsEatenForVault || 0) + 1;
+        if (this.pelletsEatenForVault >= 30) {
+          this.vaultCharges++;
+          this.vaultCooldown = 0;
+          this.pelletsEatenForVault = 0;
+        }
+      }
+
       if (pelletType === 2) {
-        earnedChips = 10;
+        earnedChips = 10 + (this.pelletChipBonus || 0);
         scoreColor = '#ffffff';
-        tag = '+10 FICHAS';
+        tag = `+${earnedChips} FICHAS`;
         this.chips += earnedChips;
         this.scorePop(this.chipsBox);
       } else if (pelletType === 3) {
@@ -471,6 +681,12 @@
         tag = '+50 FICHAS // +1 MULT';
         this.chips += earnedChips;
         this.mult += earnedMult;
+        if (this.goldenMultFactor && this.goldenMultFactor > 1.0) {
+          const oldMult = this.mult;
+          this.mult = Math.round(this.mult * this.goldenMultFactor);
+          const multDiff = this.mult - oldMult;
+          tag = `+50 FICHAS // x${this.goldenMultFactor} MULT OURO (+${multDiff} Mult!)`;
+        }
         this.scorePop(this.chipsBox);
         this.scorePop(this.multBox);
       } else if (pelletType === 4) {
@@ -507,11 +723,10 @@
       this.checkPelletClear();
     }
 
-    // Checa se o mapa está limpo (todas as pastilhas coletadas)
     checkPelletClear() {
       if (this.remainingPellets <= 0 && this.gameState === GAME_STATES.PLAYING) {
         this.gameState = GAME_STATES.PHASE_CLEAR;
-        this.phaseClearTimer = 500; // Congela 0.5s antes de mostrar o modal
+        this.phaseClearTimer = 1500; // Congela 1.5s com efeitos especiais
         this.triggerScreenShake(12);
 
         // Explosão colorida de vitória
@@ -529,13 +744,56 @@
       }
     }
 
-    // Mostra o modal de vitória após o breve congelamento
-    showWinModal() {
+    // Mostra a Loja de Draft de Relíquias
+    showDraftShopModal() {
       this.gameState = GAME_STATES.WIN_MODAL;
-      document.getElementById('winModalScore').innerText = Math.round(this.score).toLocaleString();
-      document.getElementById('winModalTarget').innerText = this.targetScore.toLocaleString();
-      document.getElementById('winModalGold').innerText = `+${this.ante * 5}`;
-      this.modalWin.classList.add('visible');
+      const container = document.getElementById('draftCardsContainer');
+      container.innerHTML = '';
+
+      // Escolhe 2 cartas aleatórias e distintas do CARD_POOL
+      const shuffled = [...CARD_POOL].sort(() => 0.5 - Math.random());
+      const selectedCards = shuffled.slice(0, 2);
+
+      selectedCards.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = `relic-card ${card.rarity.toLowerCase()}`;
+
+        let icon = '💎';
+        if (card.id === 'unlock_jump') icon = '🦘';
+        else if (card.id === 'unlock_blaster') icon = '🔫';
+        else if (card.id === 'quick_reflexes') icon = '⚡';
+        else if (card.id === 'extra_heart') icon = '❤️';
+        else if (card.id === 'steel_slime') icon = '🛡️';
+        else if (card.id === 'combo_frenzy') icon = '🔥';
+        else if (card.id === 'golden_teeth') icon = '🪙';
+        else if (card.id === 'slime_trail') icon = '🦠';
+
+        cardEl.innerHTML = `
+          <div class="relic-card-rarity">${card.rarity}</div>
+          <div class="relic-card-icon">${icon}</div>
+          <div class="relic-card-name">${card.name}</div>
+          <div class="relic-card-desc">${card.desc}</div>
+        `;
+
+        cardEl.addEventListener('click', () => {
+          this.selectDraftCard(card);
+        });
+
+        container.appendChild(cardEl);
+      });
+
+      document.getElementById('modalDraftShop').classList.add('visible');
+    }
+
+    selectDraftCard(card) {
+      document.getElementById('modalDraftShop').classList.remove('visible');
+      this.activeRelics.push(card);
+      card.apply(this);
+      
+      this.triggerScreenShake(8);
+      this.updateRelicsTray();
+      
+      this.nextRound();
     }
 
     nextRound() {
@@ -547,7 +805,6 @@
         this.ante++;
       }
 
-      this.modalWin.classList.remove('visible');
       this.gameState = GAME_STATES.PLAYING;
       this.loadLevel();
     }
@@ -569,11 +826,7 @@
 
     restartGame() {
       this.modalGameOver.classList.remove('visible');
-      this.ante = 1;
-      this.blind = 1;
-      this.phase = 1;
-      this.lives = 3;
-      this.gold = 0;
+      this.resetRunState();
       this.gameState = GAME_STATES.PLAYING;
       this.loadLevel();
     }
@@ -631,7 +884,7 @@
         this.particles.forEach(p => { if (p) p.update(dt); });
         this.particles = this.particles.filter(p => p && p.active && !p.toRemove);
         if (this.phaseClearTimer <= 0) {
-          this.showWinModal();
+          this.showDraftShopModal();
         }
         return;
       }
@@ -639,21 +892,29 @@
       if (this.gameState !== GAME_STATES.PLAYING) return;
 
       // 1. Cooldown de pulo
-      if (this.vaultCharges < this.vaultMaxCharges) {
+      if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
         this.vaultCooldown += dt;
-        if (this.vaultCooldown >= this.vaultMaxCooldown) {
+        const currentMaxCld = this.vaultMaxCooldown * (this.cooldownMultiplier || 1.0);
+        if (this.vaultCooldown >= currentMaxCld) {
           this.vaultCharges++;
           this.vaultCooldown = 0;
         }
       }
 
       // 2. Cooldown de disparo
-      if (this.blasterCharges < this.blasterMaxCharges) {
+      if (this.blasterMaxCharges > 0 && this.blasterCharges < this.blasterMaxCharges) {
         this.blasterCooldown += dt;
-        if (this.blasterCooldown >= this.blasterMaxCooldown) {
+        const currentMaxCld = this.blasterMaxCooldown * (this.cooldownMultiplier || 1.0);
+        if (this.blasterCooldown >= currentMaxCld) {
           this.blasterCharges++;
           this.blasterCooldown = 0;
         }
+      }
+
+      // Atualização das poças viscosas (Rastro Viscoso)
+      if (this.stickyPools) {
+        this.stickyPools.forEach(p => p.update(dt));
+        this.stickyPools = this.stickyPools.filter(p => p.timeLeft > 0);
       }
 
       // 3. Temporizador de pânico (frightened)
@@ -821,6 +1082,11 @@
             }
           }
         }
+      }
+
+      // Rastro Viscoso (Poças de Pulo)
+      if (this.stickyPools) {
+        this.stickyPools.forEach(p => p.draw(this.ctx));
       }
 
       // Sombra do jogador pulando
@@ -1431,7 +1697,8 @@
 
       // Recompensas imediatas
       game.chips += 200;
-      game.mult += 2;
+      const extraMult = 2 + (game.killMultBonus || 0);
+      game.mult += extraMult;
       
       const oldScore = game.score;
       game.score = game.chips * game.mult;
@@ -1442,7 +1709,7 @@
         deathY - 12,
         `QUEBRADO! +${Math.round(diff).toLocaleString()}`,
         '#FFE600',
-        `+200 Fichas x2 Mult`
+        `+200 Fichas +${extraMult} Mult`
       );
 
       // Manda invisível pro centro
@@ -1485,6 +1752,21 @@
 
       // Calcula velocidade atual
       let currentSpeed = this.speed + (game.ante * 0.008);
+
+      // Checa se está sobre uma poça viscosa (Rastro Viscoso)
+      let isSteppingOnSticky = false;
+      if (game.stickyPools) {
+        for (const pool of game.stickyPools) {
+          if (pool.gridX === this.gridX && pool.gridY === this.gridY) {
+            isSteppingOnSticky = true;
+            break;
+          }
+        }
+      }
+      if (isSteppingOnSticky) {
+        currentSpeed *= 0.5; // Frenagem de 50%
+      }
+
       if (this.state === 'dash') {
         currentSpeed = this.speed * 2.8; // Investida super veloz
       } else if (this.state === 'frightened') {

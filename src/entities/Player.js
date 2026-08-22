@@ -18,8 +18,8 @@ export class Player {
     
     // Parâmetros principais do jogador
     this.speed = 0.14; // Velocidade em pixels por milissegundo
-    this.lives = 3;
-    this.maxLives = 3;
+    this.lives = 2;
+    this.maxLives = 2;
     
     // Estado das habilidades
     this.vaultCooldown = 0;
