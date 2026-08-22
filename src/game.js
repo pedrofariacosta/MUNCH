@@ -119,85 +119,153 @@
 
   // Pool de cartas/relíquias roguelike
   const CARD_POOL = [
-    // --- Habilidades Básicas ---
     {
-      id: "unlock_jump",
-      name: "MOLA DE PRESSÃO",
+      id: "relic_jump_module",
+      name: "MOLA HIDRÁULICA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
-      desc: "+1 Carga de Pulo (Vault). Permite saltar por cima de paredes e inimigos.",
+      desc: "+1 Carga Máxima de Pulo. Permite saltar paredes e inimigos.",
+      icon: "🦘",
       apply: (game) => {
         game.vaultMaxCharges += 1;
         game.vaultCharges = game.vaultMaxCharges;
+      },
+      revert: (game) => {
+        game.vaultMaxCharges = Math.max(0, game.vaultMaxCharges - 1);
+        game.vaultCharges = Math.min(game.vaultCharges, game.vaultMaxCharges);
       }
     },
     {
-      id: "unlock_blaster",
-      name: "CANHÃO GEOMÉTRICO",
+      id: "relic_blaster_core",
+      name: "CANHÃO DE PLASMA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
-      desc: "+1 Carga de Tiro (Blaster). Dispara laser que destrói inimigos.",
+      desc: "+1 Carga Máxima de Disparo. Atordoa inimigos em linha reta.",
+      icon: "🔫",
       apply: (game) => {
         game.blasterMaxCharges += 1;
         game.blasterCharges = game.blasterMaxCharges;
+      },
+      revert: (game) => {
+        game.blasterMaxCharges = Math.max(0, game.blasterMaxCharges - 1);
+        game.blasterCharges = Math.min(game.blasterCharges, game.blasterMaxCharges);
       }
     },
     {
-      id: "quick_reflexes",
-      name: "CIRCUITO RÁPIDO",
+      id: "relic_overclock",
+      name: "OVERCLOCK DE SISTEMA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Incomum",
       desc: "Reduz o tempo de recarga de todas as habilidades em 30%.",
+      icon: "⚡",
       apply: (game) => {
         game.cooldownMultiplier *= 0.7;
+      },
+      revert: (game) => {
+        game.cooldownMultiplier /= 0.7;
       }
     },
     {
-      id: "extra_heart",
-      name: "NÚCLEO RESERVA",
+      id: "relic_backup_battery",
+      name: "BATERIA RESERVA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
-      desc: "+1 Vida máxima e recupera todas as vidas perdidas.",
+      desc: "+1 Vida Máxima e recupera todas as vidas perdidas.",
+      icon: "❤️",
       apply: (game) => {
         game.maxLives = (game.maxLives || 2) + 1;
         game.lives = game.maxLives;
+      },
+      revert: (game) => {
+        game.maxLives = Math.max(1, game.maxLives - 1);
+        game.lives = Math.min(game.lives, game.maxLives);
       }
     },
-
-    // --- Sinergias Balatro (+Chips / +Mult / xMult) ---
     {
-      id: "steel_slime",
-      name: "SLIME DE AÇO",
+      id: "relic_steel_coating",
+      name: "REVESTIMENTO DE AÇO",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Comum",
+      desc: "Pastilhas normais concedem +20 Fichas base.",
+      icon: "🛡️",
+      apply: (game) => {
+        game.pelletChipBonus += 20;
+      },
+      revert: (game) => {
+        game.pelletChipBonus -= 20;
+      }
+    },
+    {
+      id: "relic_sharp_drift",
+      name: "DRIFT PERFEITO",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
-      desc: "Pastilhas normais concedem +15 Fichas extras.",
-      apply: (game) => {
-        game.pelletChipBonus += 15;
-      }
+      desc: "Mudar de direção na quina exata concede +2 Mult na rodada.",
+      icon: "🌀",
+      apply: (game) => {},
+      revert: (game) => {}
     },
     {
-      id: "combo_frenzy",
-      name: "MULTIPLICADOR RAIVOSO",
-      rarity: "Raro",
-      desc: "Eliminar um inimigo com o Blaster concede +3 Mult permanente na rodada.",
-      apply: (game) => {
-        game.killMultBonus += 3;
-      }
-    },
-    {
-      id: "golden_teeth",
-      name: "DENTES DE OURO",
+      id: "relic_bounty_hunter",
+      name: "CAÇADOR DE NAIPES",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
-      desc: "Moedas especiais concedem x1.5 Mult ao serem consumidas.",
+      desc: "Destruir um inimigo com Blaster concede +5 Mult permanente no round.",
+      icon: "🔥",
       apply: (game) => {
-        game.goldenMultFactor *= 1.5;
+        game.killMultBonus += 5;
+      },
+      revert: (game) => {
+        game.killMultBonus -= 5;
       }
     },
-
-    // --- Regras Especiais (Gambonanza) ---
     {
-      id: "slime_trail",
-      name: "RASTRO VISCOSO",
-      rarity: "Raro",
-      desc: "Pular deixa uma poça que reduz a velocidade dos inimigos que passarem por ela em 50%.",
+      id: "relic_gold_alchemist",
+      name: "ALQUIMIA DOURADA",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Rara",
+      desc: "Moedas especiais concedem x1.75 Mult ao serem consumidas.",
+      icon: "🪙",
+      apply: (game) => {
+        game.goldenMultFactor *= 1.75;
+      },
+      revert: (game) => {
+        game.goldenMultFactor /= 1.75;
+      }
+    },
+    {
+      id: "relic_slime_puddle",
+      name: "LODO VISCOSO",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Incomum",
+      desc: "Pular deixa poças de lodo que reduzem velocidade inimiga em 50% por 4s.",
+      icon: "🦠",
       apply: (game) => {
         game.hasStickyJump = true;
+      },
+      revert: (game) => {
+        game.hasStickyJump = game.activeRelics.some(r => r.id === 'relic_slime_puddle');
       }
+    },
+    {
+      id: "relic_railgun",
+      name: "TIRO PERFURANTE",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Rara",
+      desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes.",
+      icon: "☄️",
+      apply: (game) => {},
+      revert: (game) => {}
+    },
+    {
+      id: "relic_magnetic_pull",
+      name: "VÁCUO MAGNÉTICO",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Rara",
+      desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime.",
+      icon: "🧲",
+      apply: (game) => {},
+      revert: (game) => {}
     }
   ];
 
@@ -241,6 +309,8 @@
 
       // HUD
       this.hudBlindTarget = document.getElementById('hudBlindTarget');
+      this.hudBlindBadge = document.getElementById('hudBlindBadge');
+      this.hudRelicsCount = document.getElementById('relicsCount');
       this.hudCurrentScore = document.getElementById('hudCurrentScore');
       this.hudProgressBar = document.getElementById('hudProgressBar');
       this.hudChipsValue = document.getElementById('hudChipsValue');
@@ -307,7 +377,8 @@
       this.ghosts = [];
 
       this.frightenedTimer = 0;
-      this.debugMode = true; // Ativo por padrão para permitir investigação visual instantânea
+      this.debugMode = false; // Inativo por padrão, so abre caso aperte F3
+      this.overchargeShockwave = null;
 
       this.init();
     }
@@ -355,7 +426,10 @@
       });
 
       // Modais
-      this.btnNextBlind.addEventListener('click', () => this.nextRound());
+      this.btnNextBlind.addEventListener('click', () => {
+        this.modalWin.classList.remove('visible');
+        this.showDraftShopModal();
+      });
       this.btnRestart.addEventListener('click', () => this.restartGame());
 
       this.loadLevel();
@@ -387,7 +461,7 @@
       this.frightenedTimer = 0;
       this.phaseClearTimer = 0;
 
-      this.targetScore = this.ante * 1500 + (this.blind - 1) * 1000;
+      this.targetScore = this.getTargetScore(this.ante, this.blind);
       this.score = 0;
       this.chips = 0;
       this.mult = 1;
@@ -402,6 +476,84 @@
 
       this.updateHUD();
       this.updateRelicsTray();
+    }
+
+    getTargetScore(ante, blind) {
+      if (ante === 1) {
+        if (blind === 1) return 2000;
+        if (blind === 2) return 4000;
+        if (blind === 3) return 8000;
+      }
+      if (ante === 2) {
+        if (blind === 1) return 15000;
+        if (blind === 2) return 25000;
+        if (blind === 3) return 45000;
+      }
+      // Antes superiores (ante >= 3)
+      const base = blind === 1 ? 15000 : (blind === 2 ? 25000 : 45000);
+      return Math.round(base * Math.pow(2.2, ante - 2));
+    }
+
+    checkWinCondition() {
+      if (this.gameState === GAME_STATES.PLAYING && this.score >= this.targetScore) {
+        this.gameState = GAME_STATES.PHASE_CLEAR;
+        this.phaseClearTimer = 1500; // Congela 1.5s com efeitos especiais
+        this.triggerScreenShake(12);
+
+        // Dá ouro pelo término da blind
+        this.gold += this.ante * 5;
+
+        // Explosão de confetes e partículas douradas
+        for (let i = 0; i < 40; i++) {
+          this.particles.push(new Particle(
+            this.canvas.width / 2,
+            this.canvas.height / 2,
+            Math.random() > 0.5 ? '#FFE600' : `hsl(${Math.random() * 360}, 100%, 60%)`, // Dourado + cores vibrantes
+            Math.random() * 4 + 3,
+            (Math.random() - 0.5) * 8,
+            (Math.random() - 0.5) * 8,
+            1200
+          ));
+        }
+      }
+    }
+
+    triggerBoardOvercharge() {
+      this.overchargeShockwave = {
+        x: this.canvas.width / 2,
+        y: this.canvas.height / 2,
+        radius: 0,
+        maxRadius: Math.hypot(this.canvas.width, this.canvas.height),
+        speed: 0.8, // pixels por ms
+        active: true
+      };
+
+      this.triggerScreenShake(10);
+
+      this.remainingPellets = 0;
+      for (let r = 0; r < GRID_HEIGHT; r++) {
+        for (let c = 0; c < GRID_WIDTH; c++) {
+          if (BASE_MAP[r][c] >= 2) {
+            this.map[r][c] = 5; // Reaparece como Pastilha Energizada
+            this.remainingPellets++;
+          }
+        }
+      }
+
+      // Spawna Moeda Especial Dourada (tipo 3) em (9, 8) Y=8, X=9
+      if (this.isWalkable(9, 8)) {
+        this.map[8][9] = 3;
+        this.remainingPellets++;
+      }
+
+      this.totalPellets = this.remainingPellets;
+
+      this.addFloatingText(
+        this.canvas.width / 2,
+        this.canvas.height / 2 - 20,
+        "RECARGA DO LABIRINTO!",
+        "#FF00FF"
+      );
     }
 
     // Gera os inimigos conforme a fase atual — escalabilidade de dificuldade
@@ -484,7 +636,8 @@
       const startX = this.player.x + TILE_SIZE/2;
       const startY = this.player.y + TILE_SIZE/2;
 
-      this.projectiles.push(new Laser(startX, startY, shootDir));
+      const isRailgun = this.activeRelics.some(r => r.id === 'relic_railgun');
+      this.projectiles.push(new Laser(startX, startY, shootDir, isRailgun));
       this.triggerScreenShake(3);
 
       for (let i = 0; i < 6; i++) {
@@ -539,10 +692,23 @@
     updateHUD() {
       if (!this.hudBlindTarget) return;
 
-      if (this.totalPellets > 0) {
-        this.hudBlindTarget.innerText = `FALTAM: ${this.remainingPellets}`;
-        const pct = Math.min(100, ((this.totalPellets - this.remainingPellets) / this.totalPellets) * 100);
-        this.hudProgressBar.style.width = pct + '%';
+      let blindName = 'SMALL BLIND';
+      if (this.blind === 2) blindName = 'BIG BLIND';
+      else if (this.blind === 3) blindName = 'BOSS BLIND';
+
+      // Painel esquerdo: badge + meta + score
+      if (this.hudBlindBadge) {
+        this.hudBlindBadge.innerText = `ANTE ${this.ante} // ${blindName}`;
+      }
+      this.hudBlindTarget.innerText = this.targetScore.toLocaleString();
+      
+      const pct = Math.min(100, (this.score / this.targetScore) * 100);
+      this.hudProgressBar.style.width = pct + '%';
+      
+      if (pct >= 100) {
+        this.hudProgressBar.classList.add('gold-pulsing');
+      } else {
+        this.hudProgressBar.classList.remove('gold-pulsing');
       }
 
       this.hudCurrentScore.innerText = Math.round(this.score).toLocaleString();
@@ -550,19 +716,24 @@
       this.hudChipsValue.innerText = Math.round(this.chips).toLocaleString();
       this.hudMultValueEl.innerText = Math.round(this.mult);
 
-      this.hudRoundIndicator.innerText = `ANTE ${this.ante} // BLIND ${this.blind}`;
-      this.hudLives.innerText = '❤️'.repeat(Math.max(0, this.lives));
+      this.hudRoundIndicator.innerText = `ANTE ${this.ante} // ${blindName}`;
+      this.hudLives.innerText = '\u2764\uFE0F'.repeat(Math.max(0, this.lives));
       this.hudGold.innerText = this.gold;
+
+      // Relics count label
+      if (this.hudRelicsCount) {
+        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
+      }
 
       // Vault (Pulo)
       if (this.vaultMaxCharges === 0) {
-        document.querySelector('#skillVault .skill-key').innerText = '[ESPAÇO] BLOQUEADO';
+        document.querySelector('#skillVault .skill-key').innerText = '[ESPACO] BLOQUEADO';
         this.vaultChargesEl.innerText = 'BLOQUEADO';
         this.vaultCooldownFill.style.width = '0%';
         this.skillVault.classList.add('blocked');
         this.skillVault.classList.remove('ready');
       } else {
-        document.querySelector('#skillVault .skill-key').innerText = '[ESPAÇO] PULO';
+        document.querySelector('#skillVault .skill-key').innerText = '[ESPACO] PULO';
         this.vaultChargesEl.innerText = `${this.vaultCharges}/${this.vaultMaxCharges}`;
         this.skillVault.classList.remove('blocked');
         
@@ -606,24 +777,32 @@
       if (!tray) return;
       tray.innerHTML = '';
 
-      this.activeRelics.forEach(card => {
-        const badge = document.createElement('div');
-        badge.className = `relic-badge ${card.rarity.toLowerCase()}`;
-        
-        let icon = '💎';
-        if (card.id === 'unlock_jump') icon = '🦘';
-        else if (card.id === 'unlock_blaster') icon = '🔫';
-        else if (card.id === 'quick_reflexes') icon = '⚡';
-        else if (card.id === 'extra_heart') icon = '❤️';
-        else if (card.id === 'steel_slime') icon = '🛡️';
-        else if (card.id === 'combo_frenzy') icon = '🔥';
-        else if (card.id === 'golden_teeth') icon = '🪙';
-        else if (card.id === 'slime_trail') icon = '🦠';
+      for (let i = 0; i < 5; i++) {
+        const slot = document.createElement('div');
+        if (i < this.activeRelics.length) {
+          const card = this.activeRelics[i];
+          const rarityClass = card.rarity === 'Rara' ? 'rara' : card.rarity.toLowerCase();
+          slot.className = `relic-badge occupied ${rarityClass}`;
+          slot.innerHTML = `
+            ${card.icon}
+            <div class="relic-tooltip">
+              <div class="tooltip-rarity ${rarityClass}">${card.rarity.toUpperCase()}</div>
+              <div class="tooltip-name">${card.name}</div>
+              <div class="tooltip-category">${card.category}</div>
+              <div class="tooltip-desc">${card.desc}</div>
+            </div>
+          `;
+        } else {
+          slot.className = 'relic-badge empty';
+          slot.innerHTML = '';
+        }
+        tray.appendChild(slot);
+      }
 
-        badge.innerHTML = icon;
-        badge.setAttribute('data-tooltip', `${card.name}\n${card.desc}`);
-        tray.appendChild(badge);
-      });
+      // Update relics count label
+      if (this.hudRelicsCount) {
+        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
+      }
     }
 
     resetRunState() {
@@ -702,6 +881,12 @@
             g.state = 'frightened';
           }
         });
+      } else if (pelletType === 5) {
+        earnedChips = (10 + (this.pelletChipBonus || 0)) * 2;
+        scoreColor = '#FF00FF';
+        tag = `+${earnedChips} FICHAS ENERGIZADAS!`;
+        this.chips += earnedChips;
+        this.scorePop(this.chipsBox);
       }
 
       const oldScore = this.score;
@@ -720,28 +905,188 @@
 
       this.remainingPellets--;
       this.updateHUD();
-      this.checkPelletClear();
-    }
+      this.checkWinCondition();
 
-    checkPelletClear() {
       if (this.remainingPellets <= 0 && this.gameState === GAME_STATES.PLAYING) {
-        this.gameState = GAME_STATES.PHASE_CLEAR;
-        this.phaseClearTimer = 1500; // Congela 1.5s com efeitos especiais
-        this.triggerScreenShake(12);
-
-        // Explosão colorida de vitória
-        for (let i = 0; i < 40; i++) {
-          this.particles.push(new Particle(
-            this.canvas.width / 2,
-            this.canvas.height / 2,
-            `hsl(${Math.random() * 360}, 100%, 60%)`,
-            Math.random() * 4 + 3,
-            (Math.random() - 0.5) * 8,
-            (Math.random() - 0.5) * 8,
-            1200
-          ));
+        if (this.score < this.targetScore) {
+          this.triggerBoardOvercharge();
         }
       }
+    }
+
+    getWeightedRandomCard(excludeList = []) {
+      const candidates = CARD_POOL.filter(card => {
+        if (excludeList.some(c => c.id === card.id)) return false;
+        
+        // Exclude if it's already in activeRelics AND is of unique effect
+        const isUnique = ['relic_overclock', 'relic_slime_puddle', 'relic_railgun', 'relic_magnetic_pull', 'relic_gold_alchemist'].includes(card.id);
+        if (isUnique && this.activeRelics.some(r => r.id === card.id)) return false;
+        
+        return true;
+      });
+
+      if (candidates.length === 0) return null;
+
+      const comuns = candidates.filter(c => c.rarity === 'Comum');
+      const incomuns = candidates.filter(c => c.rarity === 'Incomum');
+      const raras = candidates.filter(c => c.rarity === 'Rara');
+
+      const r = Math.random();
+      let chosenRarity = 'Comum';
+      if (r < 0.10) {
+        chosenRarity = 'Rara';
+      } else if (r < 0.40) {
+        chosenRarity = 'Incomum';
+      } else {
+        chosenRarity = 'Comum';
+      }
+
+      let selectedGroup = [];
+      if (chosenRarity === 'Rara') {
+        selectedGroup = raras.length > 0 ? raras : (incomuns.length > 0 ? incomuns : comuns);
+      } else if (chosenRarity === 'Incomum') {
+        selectedGroup = incomuns.length > 0 ? incomuns : (comuns.length > 0 ? comuns : raras);
+      } else {
+        selectedGroup = comuns.length > 0 ? comuns : (incomuns.length > 0 ? incomuns : raras);
+      }
+
+      if (selectedGroup.length === 0) return null;
+      return selectedGroup[Math.floor(Math.random() * selectedGroup.length)];
+    }
+
+    spawnCardParticles(cardElement) {
+      const rect = cardElement.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2 + window.scrollX;
+      const centerY = rect.top + rect.height / 2 + window.scrollY;
+      
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'fixed';
+        p.style.left = centerX + 'px';
+        p.style.top = centerY + 'px';
+        p.style.width = '6px';
+        p.style.height = '6px';
+        p.style.backgroundColor = Math.random() > 0.5 ? '#FFE600' : '#FFB703';
+        p.style.borderRadius = '50%';
+        p.style.zIndex = '10000';
+        p.style.pointerEvents = 'none';
+        p.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+        document.body.appendChild(p);
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 6;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        
+        requestAnimationFrame(() => {
+          p.style.transform = `translate(${vx * 35}px, ${vy * 35}px) scale(0)`;
+          p.style.opacity = '0';
+        });
+        
+        setTimeout(() => p.remove(), 500);
+      }
+    }
+
+    animateCardToTray(cardElement, targetSlotElement, callback) {
+      const cardRect = cardElement.getBoundingClientRect();
+      const trayRect = targetSlotElement.getBoundingClientRect();
+      
+      const clone = document.createElement('div');
+      clone.className = cardElement.className;
+      clone.innerHTML = cardElement.innerHTML;
+      
+      clone.style.animation = 'none';
+      clone.style.position = 'fixed';
+      clone.style.top = (cardRect.top + window.scrollY) + 'px';
+      clone.style.left = (cardRect.left + window.scrollX) + 'px';
+      clone.style.width = cardRect.width + 'px';
+      clone.style.height = cardRect.height + 'px';
+      clone.style.margin = '0';
+      clone.style.zIndex = '9999';
+      clone.style.transformOrigin = 'top left';
+      clone.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+      
+      document.body.appendChild(clone);
+      
+      requestAnimationFrame(() => {
+        clone.style.top = (trayRect.top + window.scrollY) + 'px';
+        clone.style.left = (trayRect.left + window.scrollX) + 'px';
+        clone.style.width = '32px';
+        clone.style.height = '44px';
+        clone.style.opacity = '0.3';
+        clone.style.transform = 'scale(0.2)';
+      });
+      
+      setTimeout(() => {
+        clone.remove();
+        callback();
+      }, 600);
+    }
+
+    showReplacementUI(newCard, selectedEl) {
+      const container = document.getElementById('draftCardsContainer');
+      container.innerHTML = '';
+      container.closest('.draft-modal-content').classList.add('replacement-mode');
+      
+      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'BANDEJA CHEIA // ESCOLHA UMA RELIQUIA PARA SUBSTITUIR';
+
+      this.activeRelics.forEach((relic, idx) => {
+        const cardEl = document.createElement('div');
+        const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
+        cardEl.className = `relic-card active-relic-option ${rarityClass}`;
+        cardEl.innerHTML = `
+          <div class="relic-card-rarity">${relic.rarity}</div>
+          <div class="relic-card-icon">${relic.icon}</div>
+          <div class="relic-card-name">${relic.name}</div>
+          <div class="relic-card-desc">${relic.desc}</div>
+          <div class="btn-replace-action">SUBSTITUIR</div>
+        `;
+        
+        cardEl.addEventListener('click', () => {
+          this.spawnCardParticles(selectedEl || cardEl);
+          
+          relic.revert(this);
+          
+          this.activeRelics.splice(idx, 1);
+          this.activeRelics.push(newCard);
+          newCard.apply(this);
+          
+          const traySlot = document.getElementById('relicsTray').children[idx] || document.getElementById('relicsTray');
+          this.animateCardToTray(selectedEl || cardEl, traySlot, () => {
+            this.modalWin.classList.remove('visible');
+            document.getElementById('modalDraftShop').classList.remove('visible');
+            this.triggerScreenShake(8);
+            this.updateRelicsTray();
+            this.nextRound();
+          });
+        });
+        
+        container.appendChild(cardEl);
+      });
+      
+      const divider = document.createElement('div');
+      divider.className = 'replacement-divider';
+      divider.innerText = '- - - OU - - -';
+      container.appendChild(divider);
+
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'btn-discard-new';
+      skipBtn.innerText = 'RECUSAR E DESCARTAR NOVA RELIQUIA';
+      skipBtn.addEventListener('click', () => {
+        document.getElementById('modalDraftShop').classList.remove('visible');
+        this.nextRound();
+      });
+      
+      container.appendChild(skipBtn);
+    }
+
+    formatCardDesc(desc) {
+      return desc
+        .replace(/(\+?\d+\s*Fichas)/g, '<span class="highlight-chips">$1</span>')
+        .replace(/(\+?\d+\s*Mult)/g, '<span class="highlight-mult">$1</span>')
+        .replace(/(x\d+\.?\d*\s*Mult)/g, '<span class="highlight-xmult">$1</span>')
+        .replace(/(Pulo)/g, '<span class="highlight-jump">$1</span>')
+        .replace(/(Disparo)/g, '<span class="highlight-shoot">$1</span>');
     }
 
     // Mostra a Loja de Draft de Relíquias
@@ -749,34 +1094,57 @@
       this.gameState = GAME_STATES.WIN_MODAL;
       const container = document.getElementById('draftCardsContainer');
       container.innerHTML = '';
+      container.closest('.draft-modal-content').classList.remove('replacement-mode');
+      
+      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'ESCOLHA UMA RELIQUIA PARA A SUA RUN';
 
-      // Escolhe 2 cartas aleatórias e distintas do CARD_POOL
-      const shuffled = [...CARD_POOL].sort(() => 0.5 - Math.random());
-      const selectedCards = shuffled.slice(0, 2);
+      // Sorteia 2 cartas ponderadas e distintas
+      const card1 = this.getWeightedRandomCard([]);
+      const card2 = this.getWeightedRandomCard(card1 ? [card1] : []);
+
+      const selectedCards = [];
+      if (card1) selectedCards.push(card1);
+      if (card2) selectedCards.push(card2);
 
       selectedCards.forEach(card => {
         const cardEl = document.createElement('div');
-        cardEl.className = `relic-card ${card.rarity.toLowerCase()}`;
+        const rarityClass = card.rarity === 'Rara' ? 'rara' : card.rarity.toLowerCase();
+        cardEl.className = `relic-card ${rarityClass}`;
 
-        let icon = '💎';
-        if (card.id === 'unlock_jump') icon = '🦘';
-        else if (card.id === 'unlock_blaster') icon = '🔫';
-        else if (card.id === 'quick_reflexes') icon = '⚡';
-        else if (card.id === 'extra_heart') icon = '❤️';
-        else if (card.id === 'steel_slime') icon = '🛡️';
-        else if (card.id === 'combo_frenzy') icon = '🔥';
-        else if (card.id === 'golden_teeth') icon = '🪙';
-        else if (card.id === 'slime_trail') icon = '🦠';
+        const formattedDesc = this.formatCardDesc(card.desc);
 
         cardEl.innerHTML = `
           <div class="relic-card-rarity">${card.rarity}</div>
-          <div class="relic-card-icon">${icon}</div>
+          <div class="relic-card-icon">${card.icon}</div>
           <div class="relic-card-name">${card.name}</div>
-          <div class="relic-card-desc">${card.desc}</div>
+          <div class="relic-card-desc">${formattedDesc}</div>
         `;
 
+        // 3D dynamic tilt and holographic sheen on mousemove
+        cardEl.addEventListener('mousemove', (e) => {
+          const rect = cardEl.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateY = ((x - centerX) / centerX) * 15;
+          const rotateX = ((centerY - y) / centerY) * 15;
+          cardEl.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+          
+          const pctX = (x / rect.width) * 100;
+          const pctY = (y / rect.height) * 100;
+          cardEl.style.setProperty('--sheen-x', `${pctX}%`);
+          cardEl.style.setProperty('--sheen-y', `${pctY}%`);
+        });
+
+        cardEl.addEventListener('mouseleave', () => {
+          cardEl.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1)';
+          cardEl.style.setProperty('--sheen-x', '50%');
+          cardEl.style.setProperty('--sheen-y', '50%');
+        });
+
         cardEl.addEventListener('click', () => {
-          this.selectDraftCard(card);
+          this.selectDraftCard(card, cardEl);
         });
 
         container.appendChild(cardEl);
@@ -785,19 +1153,30 @@
       document.getElementById('modalDraftShop').classList.add('visible');
     }
 
-    selectDraftCard(card) {
-      document.getElementById('modalDraftShop').classList.remove('visible');
+    selectDraftCard(card, cardEl) {
+      if (this.activeRelics.length >= 5) {
+        this.showReplacementUI(card, cardEl);
+        return;
+      }
+
+      this.spawnCardParticles(cardEl);
+
       this.activeRelics.push(card);
       card.apply(this);
-      
-      this.triggerScreenShake(8);
-      this.updateRelicsTray();
-      
-      this.nextRound();
+
+      // Encontra o slot correspondente para a animação de voar
+      const slotIndex = this.activeRelics.length - 1;
+      const targetSlot = document.getElementById('relicsTray').children[slotIndex] || document.getElementById('relicsTray');
+
+      this.animateCardToTray(cardEl, targetSlot, () => {
+        document.getElementById('modalDraftShop').classList.remove('visible');
+        this.triggerScreenShake(8);
+        this.updateRelicsTray();
+        this.nextRound();
+      });
     }
 
     nextRound() {
-      this.gold += this.ante * 5;
       this.phase++;
       this.blind++;
       if (this.blind > 3) {
@@ -874,9 +1253,19 @@
       );
 
       this.updateHUD();
+      this.checkWinCondition();
     }
 
     update(dt) {
+      // Atualiza onda de choque se ativa
+      if (this.overchargeShockwave && this.overchargeShockwave.active) {
+        this.overchargeShockwave.radius += this.overchargeShockwave.speed * dt;
+        if (this.overchargeShockwave.radius >= this.overchargeShockwave.maxRadius) {
+          this.overchargeShockwave.active = false;
+          this.overchargeShockwave = null;
+        }
+      }
+
       // Congelamento breve após limpar o mapa
       if (this.gameState === GAME_STATES.PHASE_CLEAR) {
         this.phaseClearTimer -= dt;
@@ -884,7 +1273,11 @@
         this.particles.forEach(p => { if (p) p.update(dt); });
         this.particles = this.particles.filter(p => p && p.active && !p.toRemove);
         if (this.phaseClearTimer <= 0) {
-          this.showDraftShopModal();
+          this.gameState = GAME_STATES.WIN_MODAL;
+          document.getElementById('winModalScore').innerText = Math.round(this.score).toLocaleString();
+          document.getElementById('winModalTarget').innerText = Math.round(this.targetScore).toLocaleString();
+          document.getElementById('winModalGold').innerText = this.gold.toString();
+          this.modalWin.classList.add('visible');
         }
         return;
       }
@@ -1079,6 +1472,25 @@
               this.ctx.fill();
               this.ctx.shadowBlur = 0;
               this.ctx.restore();
+            } else if (tile === 5) {
+              // Pastilha Energizada: Losango Neon Roxo/Rosa Pulsante (#FF00FF)
+              const pulse = 1 + Math.sin(performance.now() * 0.012) * 0.2;
+              const radius = 6 * pulse;
+              
+              this.ctx.save();
+              this.ctx.fillStyle = '#FF00FF';
+              this.ctx.shadowColor = '#FF00FF';
+              this.ctx.shadowBlur = 8 * pulse;
+              
+              this.ctx.beginPath();
+              this.ctx.moveTo(cx, cy - radius);
+              this.ctx.lineTo(cx + radius, cy);
+              this.ctx.lineTo(cx, cy + radius);
+              this.ctx.lineTo(cx - radius, cy);
+              this.ctx.closePath();
+              this.ctx.fill();
+              
+              this.ctx.restore();
             }
           }
         }
@@ -1087,6 +1499,19 @@
       // Rastro Viscoso (Poças de Pulo)
       if (this.stickyPools) {
         this.stickyPools.forEach(p => p.draw(this.ctx));
+      }
+
+      // Onda de Choque do Overcharge
+      if (this.overchargeShockwave && this.overchargeShockwave.active) {
+        this.ctx.save();
+        this.ctx.strokeStyle = 'rgba(255, 255, 200, 0.5)';
+        this.ctx.lineWidth = 20;
+        this.ctx.shadowColor = '#FFE600';
+        this.ctx.shadowBlur = 12;
+        this.ctx.beginPath();
+        this.ctx.arc(this.overchargeShockwave.x, this.overchargeShockwave.y, this.overchargeShockwave.radius, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.restore();
       }
 
       // Sombra do jogador pulando
@@ -1233,11 +1658,46 @@
     }
 
     checkEatPellet(game) {
-      if (!game || !game.map || this.gridY < 0 || this.gridY >= GRID_HEIGHT || this.gridX < 0 || this.gridX >= GRID_WIDTH) return;
-      const currentTile = game.map[this.gridY][this.gridX];
-      if (currentTile > 1) {
-        game.map[this.gridY][this.gridX] = 0;
-        game.addPoints(currentTile);
+      if (!game || !game.map) return;
+      
+      const hasMagnet = game.activeRelics.some(r => r.id === 'relic_magnetic_pull');
+      const searchRadius = hasMagnet ? 1 : 0;
+
+      for (let dy = -searchRadius; dy <= searchRadius; dy++) {
+        for (let dx = -searchRadius; dx <= searchRadius; dx++) {
+          const checkX = this.gridX + dx;
+          const checkY = this.gridY + dy;
+
+          if (checkY >= 0 && checkY < GRID_HEIGHT && checkX >= 0 && checkX < GRID_WIDTH) {
+            const currentTile = game.map[checkY][checkX];
+            if (currentTile > 1) {
+              const distance = Math.hypot(dx, dy);
+              if (distance <= 1.5) {
+                game.map[checkY][checkX] = 0;
+                game.addPoints(currentTile);
+
+                if (distance > 0) {
+                  const startX = checkX * TILE_SIZE + TILE_SIZE/2;
+                  const startY = checkY * TILE_SIZE + TILE_SIZE/2;
+                  const playerX = this.x + TILE_SIZE/2;
+                  const playerY = this.y + TILE_SIZE/2;
+
+                  for (let i = 0; i < 3; i++) {
+                    game.particles.push(new Particle(
+                      startX,
+                      startY,
+                      '#00E5FF',
+                      2,
+                      (playerX - startX) * 0.01 + (Math.random() - 0.5),
+                      (playerY - startY) * 0.01 + (Math.random() - 0.5),
+                      200
+                    ));
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -1387,6 +1847,13 @@
                   this.inputBufferDir = DIRECTIONS.NONE;
                   this.inputBufferTime = 0;
                   this.checkEatPellet(game);
+
+                  if (game.activeRelics.some(r => r.id === 'relic_sharp_drift')) {
+                    game.mult += 2;
+                    game.updateHUD();
+                    game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
+                    game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
+                  }
                   continue;
                 }
               }
@@ -1434,6 +1901,13 @@
               this.inputBufferDir = DIRECTIONS.NONE;
               this.inputBufferTime = 0;
               directionChanged = true;
+
+              if (game.activeRelics.some(r => r.id === 'relic_sharp_drift')) {
+                game.mult += 2;
+                game.updateHUD();
+                game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
+                game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
+              }
             } else {
               // Se o buffer aponta para uma parede no cruzamento, descarta o comando sem parar o slime
               this.inputBufferDir = DIRECTIONS.NONE;
@@ -1584,13 +2058,14 @@
 
   // ── Projétil Laser ──
   class Laser {
-    constructor(x, y, dir) {
+    constructor(x, y, dir, isRailgun = false) {
       this.x = x;
       this.y = y;
       this.dir = dir;
       this.speed = 0.45;
       this.active = true;
       this.toRemove = false;
+      this.isRailgun = isRailgun;
     }
 
     update(dt, game) {
@@ -1615,10 +2090,12 @@
 
         const dist = Math.hypot(this.x - (ghost.x + TILE_SIZE/2), this.y - (ghost.y + TILE_SIZE/2));
         if (dist < TILE_SIZE / 2) {
-          this.active = false;
-          this.toRemove = true;
           ghost.die(game);
-          break;
+          if (!this.isRailgun) {
+            this.active = false;
+            this.toRemove = true;
+            break;
+          }
         }
       }
     }
@@ -1628,10 +2105,17 @@
       ctx.translate(this.x, this.y);
       ctx.rotate(this.dir.angle);
       
-      ctx.shadowColor = '#FFE600';
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-10, -2.5, 20, 5);
+      if (this.isRailgun) {
+        ctx.shadowColor = '#FF00FF'; // Brilho neon rosa para railgun
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-15, -4, 30, 8); // Laser mais espesso
+      } else {
+        ctx.shadowColor = '#FFE600';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-10, -2.5, 20, 5);
+      }
       
       ctx.restore();
     }
@@ -1722,7 +2206,7 @@
 
       game.triggerScreenShake(6);
       game.updateHUD();
-      game.checkPelletClear();
+      game.checkWinCondition();
     }
 
     update(dt, game) {
@@ -1752,6 +2236,11 @@
 
       // Calcula velocidade atual
       let currentSpeed = this.speed + (game.ante * 0.008);
+
+      // Boss Blind de Ante Ímpar: Inimigos +15% mais velozes
+      if (game.blind === 3 && game.ante % 2 === 1) {
+        currentSpeed *= 1.15;
+      }
 
       // Checa se está sobre uma poça viscosa (Rastro Viscoso)
       let isSteppingOnSticky = false;
@@ -1810,7 +2299,9 @@
             const checkY = this.gridY + this.dir.y;
             if (!game.isWalkable(checkX, checkY)) {
               this.state = 'normal';
-              this.dashCooldown = 1500; // Impede outra investida imediatamente
+              // Boss Blind de Ante Par: investe com o dobro de frequência (metade do cooldown)
+              const baseCooldown = (game.blind === 3 && game.ante % 2 === 0) ? 750 : 1500;
+              this.dashCooldown = baseCooldown; // Impede outra investida imediatamente
             }
           }
         } else {

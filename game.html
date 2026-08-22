@@ -20,28 +20,34 @@
     
     <!-- 1. Header Superior (HUD Balatro Style) -->
     <header class="hud-header">
-      <div class="hud-meta-group">
-        <span class="hud-blind-target" id="hudBlindTarget">META: 1,500</span>
+      <!-- Painel Esquerdo: Meta + Score -->
+      <div class="hud-panel hud-score-panel">
+        <div class="hud-blind-badge" id="hudBlindBadge">ANTE 1 // SMALL BLIND</div>
+        <div class="hud-target-line">
+          <span class="hud-target-label">META:</span>
+          <span class="hud-target-value" id="hudBlindTarget">1,500</span>
+        </div>
         <div class="hud-current-score" id="hudCurrentScore">0</div>
+        <div class="progress-container">
+          <div class="progress-bar" id="hudProgressBar"></div>
+        </div>
       </div>
       
-      <div class="progress-container">
-        <div class="progress-bar" id="hudProgressBar"></div>
+      <!-- Bandeja de Relíquias (Centro) -->
+      <div class="hud-relics-wrapper">
+        <div class="hud-relics-label">JOKERS <span class="relics-count" id="relicsCount">(0/5)</span></div>
+        <div class="relics-tray" id="relicsTray"></div>
       </div>
       
-      <!-- Bandeja de Relíquias (HUD Tray) -->
-      <div class="relics-tray" id="relicsTray"></div>
-      
+      <!-- Painel Direito: Chips x Mult -->
       <div class="balatro-scoring">
-        <!-- Caixa de Fichas (Chips) -->
         <div class="score-box chips-box" id="chipsBox">
           <span class="score-box-label">Fichas</span>
           <span class="score-box-value" id="hudChipsValue">0</span>
         </div>
         
-        <span class="calc-operator">×</span>
+        <span class="calc-operator">&times;</span>
         
-        <!-- Caixa de Multiplicador (Mult) -->
         <div class="score-box mult-box" id="multBox">
           <span class="score-box-label">Mult</span>
           <span class="score-box-value" id="hudMultValue">1</span>
@@ -78,7 +84,7 @@
         <!-- Habilidade Pulo (Vault) -->
         <div class="skill-indicator" id="skillVault">
           <div class="skill-info">
-            <span class="skill-key">[ESPAÇO] PULO</span>
+            <span class="skill-key">[ESPACO] PULO</span>
             <span class="skill-charges" id="vaultCharges">2/2</span>
           </div>
           <div class="skill-bar-wrapper">
@@ -109,7 +115,7 @@
   <div class="overlay-modal" id="modalWin">
     <div class="modal-content">
       <h2 class="modal-title win">Rodada Vencida!</h2>
-      <p class="modal-subtitle">Você atingiu a meta da Blind com maestria. Prepare-se para o próximo desafio!</p>
+      <p class="modal-subtitle">Voce atingiu a meta da Blind com maestria. Prepare-se para o proximo desafio!</p>
       
       <div class="modal-stats-box">
         <div class="modal-stat-row">
@@ -126,15 +132,15 @@
         </div>
       </div>
       
-      <button class="btn-arcade-modal blue-theme" id="btnNextBlind">Próxima Blind</button>
+      <button class="btn-arcade-modal blue-theme" id="btnNextBlind">Proxima Blind</button>
     </div>
   </div>
 
   <!-- Modal de Draft Shop (Escolha de Relíquia) -->
   <div class="overlay-modal" id="modalDraftShop">
     <div class="modal-content draft-modal-content">
-      <h2 class="modal-title win">RODADA CONCLUÍDA</h2>
-      <p class="modal-subtitle">ESCOLHA UMA RELÍQUIA PARA A SUA RUN</p>
+      <h2 class="modal-title win">RODADA COMPLETA</h2>
+      <p class="modal-subtitle">ESCOLHA UMA RELIQUIA PARA A SUA RUN</p>
       
       <!-- Container das cartas lado a lado -->
       <div class="draft-cards-container" id="draftCardsContainer">
