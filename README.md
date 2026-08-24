@@ -1,82 +1,112 @@
-# MUNCH — Arcade Action Roguelike
+# MUNCH
 
-**Munch** é um jogo indie de ação e estratégia roguelike executado 100% no lado do cliente (Client-Side) e projetado para hospedagem gratuita e contínua via **GitHub Pages**.
+Um arcade roguelike de labirinto onde você controla um Slime rabugento que devora pastilhas, atordoa inimigos e coleciona cartas entre as fases pra montar combos absurdos de pontuação.
 
-O game funde a movimentação rápida de labirinto clássico (estilo *Pac-Man*) com a progressão exponencial de pontuação inspirada em *Balatro*.
+O jogo mistura ação em tempo real dentro do labirinto com um sistema de progressão por cartas. Cada run é diferente, e a graça tá em descobrir quais combinações de cartas quebram o jogo mais rápido.
 
----
-
-## 🕹️ Como Jogar (Controles)
-
-- **Setas / WASD:** Navegação em tempo real pela grade do labirinto.
-- **Espaço / X:** **Pulo (Vault)** — Salta instantaneamente 2 casas à frente na direção atual. Útil para ultrapassar paredes finas ou pular por cima de fantasmas. *(Possui tempo de recarga).*
-- **Z / Shift:** **Disparo (Blaster)** — Dispara um projétil linear de choque que atordoa temporariamente qualquer fantasma atingido. *(Possui tempo de recarga).*
+Roda 100% no navegador, sem backend, sem framework — só HTML, CSS e JavaScript vanilla. Dá pra hospedar de graça no GitHub Pages.
 
 ---
 
-## 📈 Sistema de Pontuação (Chips x Mult)
+## Controles
 
-Assim como em *Balatro*, a pontuação de cada pastilha comida é calculada dinamicamente:
-$$\text{Pontos} = (\text{Chips Base} + \text{Chips de Coringas}) \times (\text{Mult Base} + \text{Mult de Coringas})$$
+| Tecla | Ação |
+|---|---|
+| Setas / WASD | Movimentação pelo labirinto |
+| Espaço / X | Pulo (Vault) — salta 2 casas à frente, passando por cima de paredes e inimigos |
+| Z / Shift | Disparo (Blaster) — projétil que atordoa inimigos em linha reta |
+| F3 | Painel de debug (posição, grid, direção, etc.) |
 
-- **Pastilha Normal:** 10 Chips x 1 Mult
-- **Pastilha Dourada:** 50 Chips x 2 Mult
-- **Super Pastilha:** 100 Chips x 4 Mult
-- **Devorar Fantasma Atordoado:** 300 Chips x 5 Mult $\times$ Combo acumulado.
-- **Combo:** Comer pastilhas rapidamente mantém um combo (durabilidade de 3.5 segundos). Relíquias especiais tiram proveito do multiplicador de combo.
-
----
-
-## 🛒 Loja & Progressão Roguelike
-
-1. **Meta de Blind:** Cada fase (Blind) possui uma meta de pontuação (ex: Fase 1 pede 1.500 pontos, Fase 2 pede 4.000, etc.).
-2. **Portal:** Ao atingir a pontuação alvo, um **Portal Verde** se abre no centro do mapa. A fase continua ativa para você buscar pontos adicionais; entre no portal quando decidir avançar.
-3. **Loja de Upgrades:** A cada portal, você visita a loja onde gasta o Ouro ganho.
-4. **Coringas e Relíquias (Múltiplos efeitos):**
-   - **Slime Booster:** +15 Chips permanentes por pastilha comida.
-   - **Sugar Rush:** +3 Mult se sua vida estiver cheia.
-   - **Combo Master:** Cada 5 de combo adiciona +1 Mult.
-   - **Golden Tooth:** Pastilhas Douradas ganham +50 Chips extras.
-   - **Heavy Blaster:** Fantasmas ficam atordoados por mais tempo.
-   - **Vault Sandals:** Diminui em 25% o tempo de recarga do pulo.
-   - **Rage Slime:** x1.5 de Mult se houverem 2 ou mais fantasmas no mapa.
-   - **Tax Refund:** Adiciona +3 de Ouro ao passar de fase.
-   - **Overdrive:** +60 Chips ao custo de recarga de blaster maior.
-   - **Lucky Seven:** Chance de 14% de ganhar ouro extra ao comer orbes.
+O Pulo e o Disparo começam desabilitados. Você desbloqueia eles comprando as cartas **Mola Hidráulica** e **Canhão de Plasma** na loja entre as fases.
 
 ---
 
-## 🚀 Execução Local
+## Como funciona
 
-Como o projeto faz uso de **ES6 Modules** (`import` / `export`), a abertura direta do arquivo `index.html` via protocolo `file://` no navegador será bloqueada por políticas de CORS. É necessário servir os arquivos a partir de um servidor local.
+Cada fase tem uma **meta de pontuação**. Você percorre o labirinto comendo pastilhas e fugindo dos inimigos (que são cartas de baralho — Espadas e Ouros). Quando atinge a meta, um portal verde abre no centro do mapa. Você pode continuar catando pastilhas pra acumular mais fichas ou entrar no portal pra avançar.
 
-### Opção 1: VS Code Live Server
-Se você usa o VS Code, instale a extensão **Live Server**, clique com o botão direito em `index.html` e selecione *Open with Live Server*.
+Entre uma fase e outra, aparece uma **loja de cartas** onde você gasta o ouro que coletou. As cartas que você compra ficam ativas pelo resto da run e vão empilhando efeitos.
 
-### Opção 2: Servidor Node.js (npx)
-Execute o seguinte comando no terminal na raiz do projeto:
-```bash
+Se perder todas as vidas, a run acaba e você recomeça do zero. Roguelike clássico.
+
+### Pastilhas
+
+- **Normal** — as pastilhas padrão espalhadas pelo labirinto
+- **Dourada** — dá mais fichas e um boost de multiplicador. Aparece em posições aleatórias a cada fase
+- **Azul (Power Pellet)** — ativa o modo frenesi: os inimigos ficam vulneráveis por alguns segundos e você pode devorá-los pra ganhar pontos massivos. Também aparece aleatoriamente
+
+### Pontuação
+
+A pontuação funciona em duas camadas: cada pastilha rende fichas base, e esse valor é multiplicado pelo seu multiplicador atual. As cartas que você coleta ao longo da run vão inflando esses números, e o jogo escala exponencialmente conforme você avança.
+
+---
+
+## Cartas
+
+As cartas têm três raridades — **Comum**, **Incomum** e **Rara** — e se dividem em três categorias:
+
+### Ação & Sobrevivência
+| Carta | Raridade | Efeito |
+|---|---|---|
+| Mola Hidráulica | Comum | +1 carga de pulo |
+| Canhão de Plasma | Comum | +1 carga de disparo |
+| Bateria Reserva | Comum | +1 vida máxima e recupera todas |
+| Overclock de Sistema | Incomum | -30% no cooldown de todas as habilidades |
+
+### Multiplicadores & Pontuação
+| Carta | Raridade | Efeito |
+|---|---|---|
+| Revestimento de Aço | Comum | +20 fichas por pastilha normal |
+| Drift Perfeito | Incomum | +2 Mult ao fazer curva na quina exata |
+| Caçador de Naipes | Incomum | +5 Mult ao destruir inimigo com disparo |
+| Alquimia Dourada | Rara | Moedas especiais dão ×1.75 Mult |
+
+### Quebra de Regras
+| Carta | Raridade | Efeito |
+|---|---|---|
+| Lodo Viscoso | Incomum | Pular deixa poças que reduzem velocidade inimiga em 50% |
+| Tiro Perfurante | Rara | O disparo perfura todos os inimigos até bater na parede |
+| Vácuo Magnético | Rara | Atrai pastilhas num raio de 1.5 blocos |
+
+---
+
+## Rodando localmente
+
+O jogo usa ES Modules, então abrir o `index.html` direto pelo explorador de arquivos não vai funcionar (CORS). Precisa de um servidor local:
+
+**VS Code:** instala a extensão Live Server, clica com botão direito no `index.html` → Open with Live Server.
+
+**Node:**
+```
 npx serve
 ```
-Abra o endereço `http://localhost:3000` informado.
 
-### Opção 3: Servidor Python
-Se tiver Python instalado, execute na raiz do projeto:
-```bash
-# Python 3
+**Python:**
+```
 python -m http.server 8000
 ```
-Abra `http://localhost:8000` em seu navegador.
 
 ---
 
-## 🌐 Deploy no GitHub Pages
+## Deploy
 
-Para publicar seu jogo online:
-1. Crie um repositório no GitHub (ex: `munch-game`).
-2. Suba todos os arquivos para a branch principal (`main` ou `master`).
-3. Vá em **Settings** (Configurações) do repositório no GitHub.
-4. No menu lateral, acesse **Pages**.
-5. Em **Build and deployment**, selecione para implantar a partir de uma branch (`Deploy from a branch`).
-6. Escolha a branch `main` e a pasta `/` (root), depois clique em **Save**.
-7. Em poucos minutos, seu jogo estará online no endereço `https://<seu-usuario>.github.io/munch-game/`.
+Pra colocar online, sobe tudo pra um repositório no GitHub, vai em Settings → Pages, seleciona a branch `main` na raiz `/` e salva. Em alguns minutos o jogo fica acessível em `https://<seu-usuario>.github.io/<nome-do-repo>/`.
+
+---
+
+## Estrutura do projeto
+
+```
+MUNCH/
+├── index.html          # Tela de loading com animação do Slime
+├── menu.html           # Menu principal com vitrine de carta holográfica
+├── game.html           # Tela do jogo (canvas + HUD + modais)
+├── src/
+│   ├── game.js         # Engine completa — mapa, entidades, física, loja, cartas
+│   └── menu.js         # Lógica do menu e navegação
+└── styles/
+    ├── loading.css      # Animações da tela de loading
+    ├── menu.css         # Layout e estilo do menu
+    ├── game.css         # HUD, modais, cartas durante o jogo
+    └── ui.css           # Componentes de UI da loja
+```

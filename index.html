@@ -18,12 +18,12 @@
 </head>
 <body>
 
-  <!-- Tela de Carregamento Cinematográfica (tela cheia) -->
+  <!-- Tela de carregamento cheia -->
   <div id="loading-screen" class="loading-screen">
-    <!-- Onda de choque -->
+    <!-- Efeito de impacto do slime -->
     <div class="shockwave-ring" id="loading-shockwave"></div>
 
-    <!-- Partículas de poeira -->
+    <!-- Poeira levantada no impacto -->
     <div class="dust-container" id="loading-dust">
       <div class="dust-particle dp1"></div>
       <div class="dust-particle dp2"></div>
@@ -33,27 +33,23 @@
       <div class="dust-particle dp6"></div>
     </div>
 
-    <!-- Slime Gigante do Centro -->
+    <!-- Slime central grande -->
     <div class="central-slime-wrapper" id="central-slime-wrapper">
       <div class="slime-cube-big" id="big-slime">
         <svg viewBox="0 0 160 160" width="100%" height="100%">
-          <!-- Corpo do slime -->
           <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff" stroke-width="6" />
           <g class="slime-eyes">
-            <!-- Sobrancelhas (linhas grossas com inclinação de ~28° para o centro) -->
+            <!-- Olhos e sobrancelhas bravas -->
             <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
             <path d="M 138 46 L 92 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-            <!-- Olho esquerdo (cunha afiada inclinada para baixo/centro) -->
             <polygon points="26,66 66,78 26,84" fill="#ffffff" />
             <circle cx="52" cy="77" r="5.5" fill="#1a1a1a" />
-            <!-- Olho direito (cunha afiada inclinada para baixo/centro) -->
             <polygon points="134,66 94,78 134,84" fill="#ffffff" />
             <circle cx="108" cy="77" r="5.5" fill="#1a1a1a" />
           </g>
-          <!-- Narinas -->
+          <!-- Detalhes do rosto -->
           <circle cx="75" cy="92" r="2.5" fill="#ffffff" />
           <circle cx="85" cy="92" r="2.5" fill="#ffffff" />
-          <!-- Boca de rosnado com dentes -->
           <rect x="48" y="105" width="64" height="17" rx="3" fill="#1a1a1a" stroke="#ffffff" stroke-width="3" />
           <polygon points="56,105 63,114 70,105" fill="#ffffff" />
           <polygon points="73,105 80,114 87,105" fill="#ffffff" />
@@ -62,12 +58,12 @@
       </div>
     </div>
 
-    <!-- Prompt para iniciar -->
+    <!-- Instrução para começar -->
     <div class="start-prompt" id="start-prompt">
       PRESS ANY KEY OR CLICK TO START
     </div>
 
-    <!-- Indicador de carregamento no canto inferior direito -->
+    <!-- Indicador de carregamento no rodapé -->
     <div class="bottom-right-loader" id="bottom-right-loader">
       <span class="loading-text-label">LOADING...</span>
       <div class="mini-slimes-container">
@@ -75,19 +71,14 @@
         <div class="mini-slime ms1">
           <svg viewBox="0 0 48 48" width="100%" height="100%">
             <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
-            <!-- Sobrancelhas -->
             <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
             <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <!-- Olho esquerdo -->
             <polygon points="8,20 20,24 8,26" fill="#ffffff" />
             <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Olho direito -->
             <polygon points="40,20 28,24 40,26" fill="#ffffff" />
             <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Narinas -->
             <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
             <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
-            <!-- Boca de rosnado -->
             <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
             <polygon points="17,32 20,36 23,32" fill="#ffffff" />
             <polygon points="25,32 28,36 31,32" fill="#ffffff" />
@@ -99,19 +90,14 @@
         <div class="mini-slime ms2">
           <svg viewBox="0 0 48 48" width="100%" height="100%">
             <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
-            <!-- Sobrancelhas -->
             <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
             <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <!-- Olho esquerdo -->
             <polygon points="8,20 20,24 8,26" fill="#ffffff" />
             <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Olho direito -->
             <polygon points="40,20 28,24 40,26" fill="#ffffff" />
             <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Narinas -->
             <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
             <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
-            <!-- Boca de rosnado -->
             <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
             <polygon points="17,32 20,36 23,32" fill="#ffffff" />
             <polygon points="25,32 28,36 31,32" fill="#ffffff" />
@@ -123,19 +109,14 @@
         <div class="mini-slime ms3">
           <svg viewBox="0 0 48 48" width="100%" height="100%">
             <rect x="2" y="2" width="44" height="44" rx="6" ry="6" fill="#a3a3a3" stroke="#ffffff" stroke-width="3" />
-            <!-- Sobrancelhas -->
             <path d="M 7 14 L 21 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
             <path d="M 41 14 L 27 19" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <!-- Olho esquerdo -->
             <polygon points="8,20 20,24 8,26" fill="#ffffff" />
             <circle cx="16" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Olho direito -->
             <polygon points="40,20 28,24 40,26" fill="#ffffff" />
             <circle cx="32" cy="24" r="1.8" fill="#1a1a1a" />
-            <!-- Narinas -->
             <circle cx="22" cy="29" r="0.8" fill="#ffffff" />
             <circle cx="26" cy="29" r="0.8" fill="#ffffff" />
-            <!-- Boca de rosnado -->
             <rect x="14" y="32" width="20" height="6" rx="1" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5" />
             <polygon points="17,32 20,36 23,32" fill="#ffffff" />
             <polygon points="25,32 28,36 31,32" fill="#ffffff" />
@@ -147,10 +128,7 @@
     </div>
   </div>
 
-  <!--
-    Script sem tipo module para rodar direto no navegador (sem travar por CORS se abrir via file://)
-    Controla o fluxo: 3s de loading -> queda/impacto -> espera clique -> redireciona.
-  -->
+  <!-- Fluxo de carregamento: animação inicial, queda com impacto e redirecionamento -->
   <script>
     window.addEventListener('DOMContentLoaded', function () {
       var overlay       = document.getElementById('loading-screen');
@@ -162,7 +140,7 @@
 
       var readyToStart = false;
 
-      // Favicon dinâmico e título na aba
+      // Favicon animado no navegador
       var canvas = document.createElement('canvas');
       canvas.width = 32;
       canvas.height = 32;
@@ -181,7 +159,6 @@
       var titleInterval = null;
       var time = 0;
       
-      // Renderiza o slime no canvas do favicon
       function drawSlimeFrame(yOffset, squishX, squishY) {
         ctx.clearRect(0, 0, 32, 32);
         ctx.save();
@@ -248,7 +225,7 @@
         faviconLink.href = canvas.toDataURL('image/png');
       }
       
-      // Favicon estático de alta resolução pós-loading
+      // Favicon estático após o término do carregamento
       function setStaticFavicon() {
         if (animationInterval) clearInterval(animationInterval);
         if (titleInterval) clearInterval(titleInterval);
@@ -318,7 +295,7 @@
         faviconLink.href = canvas.toDataURL('image/png');
       }
       
-      // Roda a animação de pulo do slime no favicon
+      // Animação de pulo do slime no favicon
       animationInterval = setInterval(function () {
         time += 0.22;
         var yOffset = -Math.abs(Math.sin(time)) * 5;
@@ -356,7 +333,6 @@
         window.removeEventListener('keydown', goToGame);
         window.removeEventListener('click', goToGame);
 
-        // Faz o fade out da tela de loading
         overlay.classList.add('exit-fade');
 
         setTimeout(function () {
@@ -364,17 +340,14 @@
         }, 500);
       }
 
-      // Efeitos de impacto após 3 segundos de loading
+      // Conclui o carregamento após 3 segundos
       setTimeout(function () {
         setStaticFavicon();
 
-        // 1. Esconde os mini-slimes do canto
         bottomLoader.classList.add('fade-out');
-
-        // 2. Faz o slime gigante cair
         bigSlime.classList.add('fall-impact');
 
-        // 3. Efeitos de colisão sincronizados (360ms de queda)
+        // Efeito de colisão e tremor após o impacto
         setTimeout(function () {
           overlay.classList.add('shake-active');
           setTimeout(function () {
@@ -384,7 +357,7 @@
           dust.classList.add('dust-active');
         }, 360);
 
-        // 4. Mostra o aviso de clique após o impacto (800ms)
+        // Habilita a entrada para o menu principal
         setTimeout(function () {
           startPrompt.classList.add('visible');
           readyToStart = true;

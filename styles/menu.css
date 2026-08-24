@@ -34,7 +34,7 @@ body {
   position: relative;
 }
 
-/* ── Scanlines CRT ── */
+/* Efeito de scanlines de monitor antigo */
 body::before {
   content: "";
   position: absolute;
@@ -50,7 +50,7 @@ body::before {
   z-index: 10;
 }
 
-/* ── Vinheta radial de curvatura CRT ── */
+/* Sombreamento nas bordas da tela */
 body::after {
   content: "";
   position: absolute;
@@ -60,7 +60,7 @@ body::after {
   z-index: 11;
 }
 
-/* ── Navbar superior ── */
+/* Cabeçalho superior */
 .top-header {
   display: flex;
   justify-content: space-between;
@@ -74,7 +74,7 @@ body::after {
   gap: 2px;
 }
 
-/* ── Título com aberração cromática ── */
+/* Título com aberração cromática no hover/glitch */
 .brand-title {
   font-size: 76px;
   font-weight: 800;
@@ -94,7 +94,7 @@ body::after {
      0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-/* Micro-piscar de glitch no hover */
+/* Oscilação rápida durante o glitch */
 @keyframes title-glitch-flicker {
   0%, 100% { opacity: 1; transform: translateX(0); }
   20%      { opacity: 0.85; transform: translateX(-1px); }
@@ -115,7 +115,7 @@ body::after {
   margin-top: 6px;
 }
 
-/* ── Coluna direita (stats + card holográfico) ── */
+/* Coluna direita contendo placar e o card holográfico */
 .right-column {
   display: flex;
   flex-direction: column;
@@ -123,7 +123,7 @@ body::after {
   gap: 20px;
 }
 
-/* Placar */
+/* Caixa de recordes */
 .arcade-stats {
   display: flex;
   gap: 24px;
@@ -155,7 +155,7 @@ body::after {
   text-shadow: 0 0 10px var(--yellow-glow);
 }
 
-/* ── Card holográfico colecionável ── */
+/* Card 3D holográfico */
 .holo-card-wrapper {
   perspective: 700px;
   width: 230px;
@@ -185,7 +185,7 @@ body::after {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
 }
 
-/* Reflexo de luz foil que acompanha o mouse */
+/* Brilho reflexivo que segue o mouse */
 .holo-glare {
   position: absolute;
   inset: 0;
@@ -207,7 +207,7 @@ body::after {
   opacity: 1;
 }
 
-/* Borda chanfrada interna */
+/* Detalhe interno de acabamento */
 .holo-card::before {
   content: "";
   position: absolute;
@@ -218,7 +218,7 @@ body::after {
   z-index: 7;
 }
 
-/* Re-utilização dos elementos da carta */
+/* Estrutura interna do card */
 .holo-card .relic-card-header {
   width: 100%;
   display: flex;
@@ -269,14 +269,12 @@ body::after {
   justify-content: center;
 }
 
-/* SVG do slime no card */
 .holo-card-slime {
   width: 68px;
   height: 68px;
   filter: drop-shadow(0 0 8px rgba(158, 158, 158, 0.3));
 }
 
-/* Nome do slime */
 .holo-card .relic-card-name {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 900;
@@ -350,7 +348,7 @@ body::after {
   text-align: center;
 }
 
-/* ── Menu principal com navegação arcade ── */
+/* Grupo de botões de navegação */
 .button-group {
   display: flex;
   flex-direction: column;
@@ -379,7 +377,7 @@ body::after {
   outline: none;
 }
 
-/* Glifo retrô amarelo que aparece no hover/focus */
+/* Ícone de seta que aparece na opção selecionada */
 .btn::before {
   content: "▶";
   position: absolute;
@@ -392,7 +390,7 @@ body::after {
   text-shadow: 0 0 6px var(--yellow-glow);
 }
 
-/* ── Botão Jogar ── */
+/* Botão principal de jogar */
 .btn-play {
   background-color: var(--yellow-primary);
   color: #000000;
@@ -420,7 +418,7 @@ body::after {
   animation: glyph-pulse 0.8s infinite ease-in-out;
 }
 
-/* ── Botões secundários ── */
+/* Botões do menu secundário */
 .btn-secondary {
   background-color: var(--card-bg);
   color: var(--text-muted);
@@ -442,7 +440,7 @@ body::after {
   animation: glyph-pulse 0.8s infinite ease-in-out;
 }
 
-/* Flash visual ao confirmar seleção */
+/* Piscar ao confirmar ação do botão */
 .btn.confirm-flash {
   filter: brightness(1.6) !important;
   transition: filter 0.06s ease;
@@ -464,7 +462,7 @@ body::after {
   }
 }
 
-/* ── Pista de corrida inferior ── */
+/* Trilho decorativo inferior */
 .runner-track {
   position: relative;
   width: 100%;
@@ -474,7 +472,7 @@ body::after {
   margin-bottom: 8px;
 }
 
-/* Pontos estáticos do rastro — agora gerenciados por JS para o efeito de "devorar" */
+/* Rastro de bolinhas que o slime consome */
 .dots-trail {
   position: absolute;
   bottom: 8px;
@@ -484,7 +482,6 @@ body::after {
   pointer-events: none;
 }
 
-/* Cada ponto individual criado via JS */
 .trail-dot {
   position: absolute;
   width: 4px;
@@ -500,7 +497,7 @@ body::after {
   transform: scale(0);
 }
 
-/* Grupo de perseguição */
+/* Personagem e carta em movimento */
 .chase-group {
   position: absolute;
   bottom: 0px;
@@ -525,7 +522,7 @@ body::after {
   animation: slime-jump 0.5s infinite ease-in-out;
 }
 
-/* Partículas de poeira no impacto do pulo */
+/* Partículas de poeira do movimento */
 .dust-particle-track {
   position: absolute;
   width: 6px;
@@ -552,7 +549,7 @@ body::after {
   }
 }
 
-/* Carta dourada */
+/* Carta fugindo do slime */
 .card-target {
   position: relative;
   width: 40px;
@@ -585,8 +582,7 @@ body::after {
   letter-spacing: -1px;
 }
 
-/* ── Keyframes de animação ── */
-
+/* Animações do rodapé */
 @keyframes run-across {
   0% { transform: translateX(0); }
   100% { transform: translateX(calc(100vw + 450px)); }
@@ -620,7 +616,7 @@ body::after {
   100% { transform: translateY(-22px); }
 }
 
-/* ── Rodapé ── */
+/* Linha de rodapé com informações */
 .footer-info {
   display: flex;
   justify-content: space-between;

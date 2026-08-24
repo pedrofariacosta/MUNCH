@@ -1,4 +1,4 @@
-/* loading.css */
+/* Tela de carregamento */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .loading-screen {
@@ -7,7 +7,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #000000 !important; /* Absolute black */
+  background-color: #000000 !important;
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -22,13 +22,13 @@
   pointer-events: none;
 }
 
-/* Exit fade transition */
+/* Transição de fade ao sair da tela */
 .loading-screen.exit-fade {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Central Slime Styling */
+/* Container do slime central */
 .central-slime-wrapper {
   position: relative;
   width: 160px;
@@ -36,7 +36,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transform: translateY(-120vh); /* Initial position offscreen */
+  transform: translateY(-120vh); /* Começa fora da tela, acima */
   z-index: 100;
 }
 
@@ -46,7 +46,7 @@
   transform-origin: bottom center;
 }
 
-/* Eye blink animation inside SVG elements */
+/* Animação de piscar de olhos do SVG */
 .slime-eyes {
   transform-origin: center 78px;
   animation: eye-blink-anim 4.5s infinite;
@@ -57,7 +57,7 @@
   92% { transform: scaleY(0.05); }
 }
 
-/* Fall impact animation class */
+/* Animação de queda e impacto do slime */
 .fall-impact {
   animation: drop-down 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
 }
@@ -70,13 +70,13 @@
     transform: translateY(0) scaleY(1.4) scaleX(0.6);
   }
   50% {
-    transform: translateY(0) scaleY(0.4) scaleX(1.6); /* Squash extreme */
+    transform: translateY(0) scaleY(0.4) scaleX(1.6); /* Esmaga no chão */
   }
   65% {
-    transform: translateY(-30px) scaleY(1.2) scaleX(0.8); /* Rebound stretch */
+    transform: translateY(-30px) scaleY(1.2) scaleX(0.8); /* Rebota para cima */
   }
   80% {
-    transform: translateY(0) scaleY(0.85) scaleX(1.15); /* Secondary bounce */
+    transform: translateY(0) scaleY(0.85) scaleX(1.15); /* Quique secundário */
   }
   92% {
     transform: translateY(-5px) scaleY(1.05) scaleX(0.95);
@@ -86,7 +86,7 @@
   }
 }
 
-/* Screen Shake effect */
+/* Tremor na tela durante o impacto */
 .shake-active {
   animation: screen-shake-anim 0.15s ease-out;
 }
@@ -100,7 +100,7 @@
   50% { transform: translate(-5px, 5px); }
 }
 
-/* Shockwave expansion */
+/* Efeito de onda de choque no chão */
 .shockwave-ring {
   position: absolute;
   top: 50%;
@@ -130,7 +130,7 @@
   }
 }
 
-/* Dust particles container */
+/* Partículas de poeira levantadas no impacto */
 .dust-container {
   position: absolute;
   top: 50%;
@@ -150,7 +150,7 @@
   opacity: 0;
 }
 
-/* Positioning initial burst coordinates near base of landing (y ≈ 140px, x left is ≈ 10px, x right is ≈ 150px) */
+/* Posições iniciais das partículas na base do slime */
 .dp1 { left: 10px; top: 140px; }
 .dp2 { left: 20px; top: 140px; }
 .dp3 { left: 5px; top: 140px; }
@@ -190,7 +190,7 @@
   100% { transform: translate(100px, -15px) scale(0); opacity: 0; }
 }
 
-/* Start game prompt */
+/* Texto de "pressione qualquer tecla" */
 .start-prompt {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
@@ -221,7 +221,7 @@
   }
 }
 
-/* Bottom-right Loading Indicator Panel */
+/* Painel indicador de carregamento */
 .bottom-right-loader {
   position: absolute;
   bottom: 30px;
@@ -255,10 +255,10 @@
   display: flex;
   gap: 10px;
   align-items: flex-end;
-  height: 75px; /* Give room for jumping */
+  height: 75px;
 }
 
-/* Mini Slimes Layout & Wave Jumps */
+/* Mini slimes pulando em sequência */
 .mini-slime {
   width: 48px;
   height: 48px;
@@ -267,7 +267,6 @@
   transform-origin: bottom center;
 }
 
-/* Jump Timings */
 .ms1 { animation: jump-anim 1.2s infinite ease-in-out; }
 .ms2 { animation: jump-anim 1.2s infinite ease-in-out 0.2s; }
 .ms3 { animation: jump-anim 1.2s infinite ease-in-out 0.4s; }
@@ -277,26 +276,26 @@
     transform: translateY(0) scaleY(1) scaleX(1);
   }
   8% {
-    transform: translateY(0) scaleY(0.7) scaleX(1.3); /* Squash preparatory */
+    transform: translateY(0) scaleY(0.7) scaleX(1.3); /* Prepara o impulso */
   }
   32% {
-    transform: translateY(-24px) scaleY(1.3) scaleX(0.7); /* Jump stretch */
+    transform: translateY(-24px) scaleY(1.3) scaleX(0.7); /* Subindo esticado */
   }
   48% {
-    transform: translateY(-24px) scaleY(1) scaleX(1); /* Peak normal */
+    transform: translateY(-24px) scaleY(1) scaleX(1);
   }
   64% {
-    transform: translateY(0) scaleY(1.2) scaleX(0.8); /* Falling stretch */
+    transform: translateY(0) scaleY(1.2) scaleX(0.8); /* Caindo esticado */
   }
   74% {
-    transform: translateY(0) scaleY(0.6) scaleX(1.4); /* Impact squash */
+    transform: translateY(0) scaleY(0.6) scaleX(1.4); /* Esmagando no pouso */
   }
   88% {
-    transform: translateY(0) scaleY(1.1) scaleX(0.9); /* Elastic rebound */
+    transform: translateY(0) scaleY(1.1) scaleX(0.9); /* Estabiliza */
   }
 }
 
-/* Mini Dust lines */
+/* Poeira levantada pelos mini slimes */
 .mini-dust {
   position: absolute;
   bottom: -2px;

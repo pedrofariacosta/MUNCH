@@ -1,12 +1,8 @@
-// ── Menu principal do MUNCH ──
-// Controla navegação por teclado, glitch do título, card holográfico 3D,
-// partículas de poeira e efeito de "devorar" pontos na pista.
+// Lógica do menu principal: navegação, efeito de glitch, card 3D e animações decorativas.
 
 window.addEventListener('DOMContentLoaded', () => {
 
-  // ════════════════════════════════════
-  //  0. Favicon Estático (Slime)
-  // ════════════════════════════════════
+  // Favicon do slime gerado via canvas dinâmico
   const faviconCanvas = document.createElement('canvas');
   faviconCanvas.width = 32;
   faviconCanvas.height = 32;
@@ -26,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.save();
     faviconCtx.translate(16, 16);
     
-    // Corpo
+    // Desenho do corpo
     faviconCtx.beginPath();
     faviconCtx.roundRect(-9, -9, 18, 18, 3.5);
     faviconCtx.fillStyle = '#9e9e9e';
@@ -35,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.lineWidth = 2.5;
     faviconCtx.stroke();
     
-    // Sobrancelhas
+    // Sobrancelhas bravas
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 1.8;
     faviconCtx.lineCap = 'round';
@@ -48,7 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.lineTo(2, -2.5);
     faviconCtx.stroke();
     
-    // Olhos
+    // Olhos bravos
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.beginPath();
     faviconCtx.moveTo(-7, -1);
@@ -73,7 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.fillRect(-1.2, 3.5, 0.8, 0.8);
     faviconCtx.fillRect(0.8, 3.5, 0.8, 0.8);
     
-    // Boca
+    // Boca de rosnado
     faviconCtx.fillStyle = '#1a1a1a';
     faviconCtx.fillRect(-4, 5.5, 8, 2.5);
     faviconCtx.strokeStyle = '#ffffff';
@@ -94,10 +90,7 @@ window.addEventListener('DOMContentLoaded', () => {
   
   drawStaticFavicon();
 
-  // ════════════════════════════════════
-  //  1. Navegação por teclado + botões
-  // ════════════════════════════════════
-
+  // Navegação pelos botões do menu usando teclado
   const buttons = Array.from(document.querySelectorAll('.button-group .btn'));
   let focusIndex = 0;
 
@@ -107,17 +100,16 @@ window.addEventListener('DOMContentLoaded', () => {
     buttons[focusIndex].classList.add('kb-focus');
   }
 
-  // Inicia com foco no primeiro botão
+  // Foco inicial no primeiro botão
   setFocus(0);
 
   function confirmSelection() {
     const btn = buttons[focusIndex];
 
-    // Flash visual de confirmação
+    // Efeito rápido de clique
     btn.classList.add('confirm-flash');
     setTimeout(() => btn.classList.remove('confirm-flash'), 120);
 
-    // Dispara a ação correspondente
     btn.click();
   }
 
@@ -141,12 +133,12 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Sincroniza hover do mouse com o foco do teclado
+  // Alinha o foco do mouse com o do teclado
   buttons.forEach((btn, i) => {
     btn.addEventListener('mouseenter', () => setFocus(i));
   });
 
-  // Ação do botão Jogar
+  // Redireciona para a tela do jogo
   const playButton = document.querySelector('.btn-play');
   if (playButton) {
     playButton.addEventListener('click', () => {
@@ -154,10 +146,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ════════════════════════════════════
-  //  2. Aberração cromática no título
-  // ════════════════════════════════════
-
+  // Efeito de aberração cromática aleatório no título principal
   const title = document.querySelector('.brand-title');
   let glitchTimer = null;
 
@@ -166,7 +155,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => title.classList.remove('glitch-active'), 180);
   }
 
-  // Glitches aleatórios a cada 3–7s
+  // Agenda um efeito de glitch aleatório a cada 3 a 7 segundos
   function scheduleGlitch() {
     const delay = 3000 + Math.random() * 4000;
     glitchTimer = setTimeout(() => {
@@ -177,10 +166,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   scheduleGlitch();
 
-  // ════════════════════════════════════
-  //  3. Card holográfico 3D com parallax
-  // ════════════════════════════════════
-
+  // Efeito 3D holográfico com inclinação e reflexo no card ao passar o mouse
   const holoCard = document.querySelector('.holo-card');
   const holoGlare = document.querySelector('.holo-glare');
 
@@ -192,14 +178,14 @@ window.addEventListener('DOMContentLoaded', () => {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      // Rotação 3D proporcional à posição do mouse
+      // Calcula a rotação com base na posição do cursor
       const rotateY = ((x - centerX) / centerX) * 14;
       const rotateX = ((centerY - y) / centerY) * 14;
 
       holoCard.style.transform =
         `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
 
-      // Move o ponto de luz junto com o cursor
+      // Posiciona o brilho do card conforme o cursor se move
       if (holoGlare) {
         const percX = (x / rect.width) * 100;
         const percY = (y / rect.height) * 100;
@@ -220,10 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ════════════════════════════════════
-  //  4. Pontos "devorados" na pista
-  // ════════════════════════════════════
-
+  // Animação de rastro de bolinhas comidas pelo slime decorativo no rodapé
   const dotsContainer = document.querySelector('.dots-trail');
   const chaseGroup = document.querySelector('.chase-group');
   const runnerTrack = document.querySelector('.runner-track');
@@ -250,7 +233,7 @@ window.addEventListener('DOMContentLoaded', () => {
   createDots();
   window.addEventListener('resize', createDots);
 
-  // A cada frame, checa se o slime passou por cima de algum ponto
+  // Monitora se o slime passou por cima de cada bolinha pra sumir com ela
   function updateDots() {
     if (!chaseGroup || dots.length === 0) {
       requestAnimationFrame(updateDots);
@@ -260,7 +243,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const trackRect = runnerTrack.getBoundingClientRect();
     const groupRect = chaseGroup.getBoundingClientRect();
 
-    // Posição X do slime relativa à pista
+    // Posição horizontal do slime na pista
     const slimeX = groupRect.left - trackRect.left + 32;
 
     dots.forEach(d => {
@@ -270,7 +253,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Quando o grupo recicla (volta pro começo), reseta os pontos
+    // Reseta as bolinhas quando a animação do slime volta pro começo
     if (groupRect.left > trackRect.right) {
       dots.forEach(d => {
         d.eaten = false;
@@ -283,10 +266,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updateDots);
 
-  // ════════════════════════════════════
-  //  5. Partículas de poeira no impacto
-  // ════════════════════════════════════
-
+  // Partículas de poeira disparadas na aterrissagem do slime
   const slimeWrapper = document.querySelector('.slime-wrapper');
 
   function spawnDustBurst() {
@@ -295,7 +275,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const wrapperRect = slimeWrapper.getBoundingClientRect();
     const trackRect = runnerTrack.getBoundingClientRect();
 
-    // Pé do slime (base)
+    // Ponto de contato na base do slime
     const baseX = wrapperRect.left - trackRect.left + wrapperRect.width / 2;
     const baseY = wrapperRect.bottom - trackRect.top;
 
@@ -313,16 +293,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
       runnerTrack.appendChild(p);
 
-      // Inicia a animação no próximo frame pra garantir a transição
       requestAnimationFrame(() => p.classList.add('burst'));
 
-      // Remove do DOM quando acabar
+      // Remove a partícula ao fim da animação
       setTimeout(() => p.remove(), 400);
     }
   }
 
-  // O slime-jump leva 500ms, aterrissa em ~0% e ~100% do ciclo
-  // Dispara poeira sincronizada com a aterrissagem
+  // Sincroniza poeira com o ritmo de pulo do slime (500ms)
   setInterval(spawnDustBurst, 500);
 
 });

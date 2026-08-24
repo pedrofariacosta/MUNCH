@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUNCH — Jogando</title>
   
-  <!-- Fontes -->
+  <!-- Fontes do projeto -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -18,9 +18,9 @@
 
   <div class="game-container">
     
-    <!-- 1. Header Superior (HUD Balatro Style) -->
+    <!-- HUD superior -->
     <header class="hud-header">
-      <!-- Painel Esquerdo: Meta + Score -->
+      <!-- Placar e meta de pontuação -->
       <div class="hud-panel hud-score-panel">
         <div class="hud-blind-badge" id="hudBlindBadge">ANTE 1 // SMALL BLIND</div>
         <div class="hud-target-line">
@@ -33,13 +33,13 @@
         </div>
       </div>
       
-      <!-- Bandeja de Relíquias (Centro) -->
+      <!-- Bandeja de relíquias coletadas -->
       <div class="hud-relics-wrapper">
         <div class="hud-relics-label">JOKERS <span class="relics-count" id="relicsCount">(0/5)</span></div>
         <div class="relics-tray" id="relicsTray"></div>
       </div>
       
-      <!-- Painel Direito: Chips x Mult -->
+      <!-- Multiplicadores de pontuação -->
       <div class="balatro-scoring">
         <div class="score-box chips-box" id="chipsBox">
           <span class="score-box-label">Fichas</span>
@@ -55,12 +55,12 @@
       </div>
     </header>
 
-    <!-- 2. Área Central (Campo de Jogo /fliperama) -->
+    <!-- Área de renderização do jogo -->
     <main class="arcade-bezel" id="arcadeBezel">
       <canvas id="gameCanvas" width="800" height="600"></canvas>
     </main>
 
-    <!-- 3. Painel Inferior (Status e Habilidades) -->
+    <!-- Status e recarga das habilidades -->
     <footer class="hud-footer">
       <div class="footer-stats">
         <div class="stat-label-box">
@@ -107,11 +107,9 @@
     
   </div>
 
-  <!-- ════════════════════════════════════
-     4. Modais de Tela (Sobreposições)
-     ════════════════════════════════════ -->
+  <!-- Modais de sobreposição de tela -->
      
-  <!-- Modal de Vitória -->
+  <!-- Modal de vitória -->
   <div class="overlay-modal" id="modalWin">
     <div class="modal-content">
       <h2 class="modal-title win">Rodada Vencida!</h2>
@@ -136,20 +134,19 @@
     </div>
   </div>
 
-  <!-- Modal de Draft Shop (Escolha de Relíquia) -->
+  <!-- Modal da loja de relíquias -->
   <div class="overlay-modal" id="modalDraftShop">
     <div class="modal-content draft-modal-content">
       <h2 class="modal-title win">RODADA COMPLETA</h2>
       <p class="modal-subtitle">ESCOLHA UMA RELIQUIA PARA A SUA RUN</p>
       
-      <!-- Container das cartas lado a lado -->
       <div class="draft-cards-container" id="draftCardsContainer">
-        <!-- Cartas serão inseridas via Javascript -->
+        <!-- Inserido dinamicamente via JS -->
       </div>
     </div>
   </div>
 
-  <!-- Modal de Game Over -->
+  <!-- Modal de derrota -->
   <div class="overlay-modal" id="modalGameOver">
     <div class="modal-content">
       <h2 class="modal-title lose">Fim de Jogo</h2>
@@ -170,7 +167,7 @@
     </div>
   </div>
 
-  <!-- Inicializador do Jogo -->
+  <!-- Script principal do jogo -->
   <script src="./src/game.js"></script>
 </body>
 </html>

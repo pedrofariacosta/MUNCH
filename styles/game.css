@@ -37,7 +37,7 @@ body {
   background-size: 40px 40px;
 }
 
-/* ── Scanlines CRT ── */
+/* Efeito de scanlines de monitor antigo */
 body::before {
   content: "";
   position: absolute;
@@ -53,7 +53,7 @@ body::before {
   z-index: 10;
 }
 
-/* ── Vinheta radial de curvatura CRT ── */
+/* Sombreamento nas bordas da tela */
 body::after {
   content: "";
   position: absolute;
@@ -63,7 +63,7 @@ body::after {
   z-index: 11;
 }
 
-/* ── Container principal do jogo (Gabinete) ── */
+/* Container do jogo */
 .game-container {
   display: flex;
   flex-direction: column;
@@ -75,9 +75,7 @@ body::after {
   gap: 10px;
 }
 
-/* ════════════════════════════════════
-   1. Header Superior (HUD Balatro Style)
-   ════════════════════════════════════ */
+/* Painel superior */
 .hud-header {
   width: 100%;
   background: #0a0a10;
@@ -92,7 +90,7 @@ body::after {
   position: relative;
 }
 
-/* ── Painel Esquerdo: Meta + Score ── */
+/* Painel esquerdo com a pontuação atual */
 .hud-panel {
   background: #141419;
   border: 2px solid #2a2a38;
@@ -143,7 +141,6 @@ body::after {
   letter-spacing: 1px;
 }
 
-/* Texto antigo referenciado pelo JS - alias oculto */
 .hud-blind-target {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
@@ -166,7 +163,7 @@ body::after {
   transform: scale(1.08);
 }
 
-/* Barra de progresso da Blind */
+/* Barra de progresso para a meta da fase */
 .progress-container {
   width: 100%;
   height: 8px;
@@ -186,7 +183,7 @@ body::after {
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Centro: Bandeja de Reliquias ── */
+/* Slots de relíquias no centro */
 .hud-relics-wrapper {
   display: flex;
   flex-direction: column;
@@ -246,7 +243,7 @@ body::after {
   z-index: 10;
 }
 
-/* Tooltip Flutuante Retro */
+/* Tooltips explicativos de cada relíquia */
 .relic-tooltip {
   position: absolute;
   top: 66px;
@@ -310,7 +307,7 @@ body::after {
   padding-top: 6px;
 }
 
-/* ── Direito: Chips x Mult ── */
+/* Painel de cálculo de pontuação no canto superior direito */
 .balatro-scoring {
   display: flex;
   align-items: center;
@@ -373,9 +370,7 @@ body::after {
   text-shadow: 0 0 8px rgba(255, 107, 46, 0.4);
 }
 
-/* ════════════════════════════════════
-   2. Area Central (Campo de Jogo)
-   ════════════════════════════════════ */
+/* Moldura e tela do fliperama */
 .arcade-bezel {
   position: relative;
   background: #0b0b0e;
@@ -390,7 +385,7 @@ body::after {
   height: 600px;
 }
 
-/* Scanlines locais do canvas de maior opacidade */
+/* Efeito de scanlines no canvas */
 .arcade-bezel::after {
   content: "";
   position: absolute;
@@ -411,7 +406,7 @@ body::after {
   height: 100%;
 }
 
-/* Tremor na tela fliperama */
+/* Efeito de tremor de tela ao receber dano/pontuar alto */
 .arcade-bezel.shake {
   animation: bezel-shake 0.15s ease-out;
 }
@@ -425,7 +420,7 @@ body::after {
   50% { transform: translate(-3px, 3px); }
 }
 
-/* Flicker da tela CRT */
+/* Leve oscilação de brilho de monitor CRT */
 .crt-flicker {
   animation: monitor-flicker 0.15s infinite;
 }
@@ -436,9 +431,7 @@ body::after {
   100% { opacity: 0.99; }
 }
 
-/* ════════════════════════════════════
-   3. Painel Inferior (Status e Habilidades)
-   ════════════════════════════════════ */
+/* Painel de controle e status inferior */
 .hud-footer {
   width: 100%;
   background: #0a0a10;
@@ -452,7 +445,7 @@ body::after {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
-/* Nivel/Ante e estatisticas de jogo */
+/* Indicador de fase e ante */
 .footer-stats {
   display: flex;
   align-items: center;
@@ -483,7 +476,7 @@ body::after {
   white-space: nowrap;
 }
 
-/* Barra de Vidas e Moedas */
+/* Vidas e moedas acumuladas */
 .footer-resources {
   display: flex;
   align-items: center;
@@ -513,7 +506,7 @@ body::after {
   text-shadow: 0 0 5px var(--yellow-glow);
 }
 
-/* Painel de Habilidades */
+/* Indicadores de recarga de habilidades */
 .footer-skills {
   display: flex;
   gap: 10px;
@@ -556,7 +549,6 @@ body::after {
   white-space: nowrap;
 }
 
-/* Barra de cooldown */
 .skill-bar-wrapper {
   width: 100%;
   height: 4px;
@@ -583,9 +575,7 @@ body::after {
   text-shadow: 0 0 4px var(--cyan-glow);
 }
 
-/* ════════════════════════════════════
-   4. Modais de Tela (Sobreposicoes)
-   ════════════════════════════════════ */
+/* Modais de sobreposição de tela */
 .overlay-modal {
   position: absolute;
   inset: 0;
@@ -626,7 +616,6 @@ body::after {
   transform: translateY(0) translateZ(0);
 }
 
-/* Titulos retro dos modais */
 .modal-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 18px;
@@ -653,7 +642,6 @@ body::after {
   overflow: visible;
 }
 
-/* Caixa com dados do resultado */
 .modal-stats-box {
   width: 100%;
   background: rgba(255, 255, 255, 0.02);
@@ -688,7 +676,6 @@ body::after {
   text-shadow: 0 0 5px var(--yellow-glow);
 }
 
-/* Botao Arcade */
 .btn-arcade-modal {
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
@@ -724,9 +711,7 @@ body::after {
   box-shadow: 0 6px 0 var(--border-color), 0 0 15px var(--cyan-glow);
 }
 
-/* ════════════════════════════════════
-   5. Loja de Draft (Cartas Estilo Balatro)
-   ════════════════════════════════════ */
+/* Loja de cartas entre as fases */
 .draft-modal-content {
   width: 640px;
   max-width: 96%;
@@ -741,7 +726,7 @@ body::after {
   margin-top: 15px;
 }
 
-/* Carta Reliquia - Formato Refatorado (Design Fluido e Sem Grid) */
+/* Estilo do card de relíquia */
 .relic-card {
   flex: 0 0 auto;
   width: 230px;
@@ -774,7 +759,7 @@ body::after {
   100% { transform: translateY(0) scale(1) translateZ(0); opacity: 1; }
 }
 
-/* Efeito Holografico / Foil Sheen */
+/* Brilho reflexivo da carta sob o cursor */
 .relic-card::before {
   content: "";
   position: absolute;
@@ -796,7 +781,6 @@ body::after {
   opacity: 1;
 }
 
-/* Borda Interna Fina */
 .relic-card::after {
   content: "";
   position: absolute;
@@ -807,8 +791,7 @@ body::after {
   z-index: 7;
 }
 
-/* ── RARIDADES ── */
-/* Comum (Silver/Platinum Glow) */
+/* Diferenciação visual por raridade */
 .relic-card.comum {
   background: radial-gradient(circle at 50% 25%, #1c2230 0%, #0d101a 65%, #06070c 100%);
   border-color: #8a96a8;
@@ -819,7 +802,6 @@ body::after {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
 }
 
-/* Incomum (Cyan/Teal Glow) */
 .relic-card.incomum {
   background: radial-gradient(circle at 50% 25%, #0a202d 0%, #08141e 65%, #040910 100%);
   border-color: #00e5ff;
@@ -830,7 +812,6 @@ body::after {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 245, 212, 0.4), inset 0 0 25px rgba(0, 229, 255, 0.12);
 }
 
-/* Rara (Metallic Gold Glow) */
 .relic-card.rara {
   background: radial-gradient(circle at 50% 25%, #2a220b 0%, #161206 65%, #080602 100%);
   border-color: #ffd700;
@@ -841,7 +822,7 @@ body::after {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.55), inset 0 0 30px rgba(255, 230, 0, 0.18);
 }
 
-/* ── Top Header Pill `[ RARITY // TYPE ]` ── */
+/* Indicador de categoria e raridade no topo da carta */
 .relic-card-header {
   width: 100%;
   display: flex;
@@ -901,7 +882,7 @@ body::after {
   color: #ffaa00;
 }
 
-/* ── Circular Icon Ring / Artwork Container ── */
+/* Moldura para o ícone ilustrativo */
 .relic-card-icon-container {
   position: relative;
   margin: 2px 0 10px 0;
@@ -952,7 +933,7 @@ body::after {
   transform: scale(1.1);
 }
 
-/* ── Card Title Banner ── */
+/* Nome da carta */
 .relic-card-name {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 900;
@@ -971,7 +952,7 @@ body::after {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* ── Bottom Description Box & Stat Pills ── */
+/* Caixa inferior de atributos e descrição */
 .relic-card-desc-box {
   background: #0e111a;
   border: 1.5px solid #232838;
@@ -1033,7 +1014,7 @@ body::after {
   text-align: center;
 }
 
-/* Destaques de Termos na Descricao */
+/* Cores de destaque para termos nas descrições */
 .highlight-chips {
   color: #38bdf8;
   font-weight: bold;
@@ -1062,11 +1043,7 @@ body::after {
   font-weight: bold;
 }
 
-/* ════════════════════════════════════
-   6. Tela de Substituicao de Reliquias
-   ════════════════════════════════════ */
-
-/* Quando em modo substituicao, o container permite scroll horizontal */
+/* Substituição de relíquias quando o inventário está cheio */
 .draft-cards-container:has(.active-relic-option) {
   flex-wrap: nowrap;
   gap: 12px;
@@ -1164,7 +1141,7 @@ body::after {
   box-shadow: 0 0 10px var(--red-glow);
 }
 
-/* Separador visual 'OU' */
+/* Divisor visual entre as opções de substituição */
 .replacement-divider {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -1174,7 +1151,7 @@ body::after {
   letter-spacing: 2px;
 }
 
-/* Botao de descarte da nova reliquia */
+/* Botão de recusar/descartar nova relíquia */
 .btn-discard-new {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -1196,9 +1173,7 @@ body::after {
   background: #1a0a0a;
 }
 
-/* ════════════════════════════════════
-   7. Habilidades Bloqueadas
-   ════════════════════════════════════ */
+/* Habilidades bloqueadas inicialmente */
 .skill-indicator.blocked {
   opacity: 0.5;
   border-color: rgba(255, 46, 46, 0.2);
@@ -1215,9 +1190,7 @@ body::after {
   box-shadow: none;
 }
 
-/* ════════════════════════════════════
-   8. Brilho Dourado Pulsante (100%)
-   ════════════════════════════════════ */
+/* Destaque piscando quando o progresso chega a 100% */
 .progress-bar.gold-pulsing {
   background: var(--yellow-primary) !important;
   box-shadow: 0 0 15px var(--yellow-glow), 0 0 25px var(--yellow-primary) !important;

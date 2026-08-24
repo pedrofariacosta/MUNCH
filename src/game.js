@@ -1,9 +1,7 @@
-// ════════════════════════════════════
-//   MUNCH Gameplay Engine v1.2
-// ════════════════════════════════════
+// Munch - Motor de física e jogabilidade
 
 (function() {
-  // Favicon Estático
+  // Favicon fixo do slime
   const faviconCanvas = document.createElement('canvas');
   faviconCanvas.width = 32;
   faviconCanvas.height = 32;
@@ -97,8 +95,7 @@
     GAME_OVER: 'game_over'
   };
 
-  // Mapa base do labirinto (20 x 15)
-  // 0: Vazio/Caminho, 1: Parede, 2: Pastilha, 3: Pastilha Ouro, 4: Power Pellet
+  // Mapa do labirinto: 0 = vazio, 1 = parede, 2 = pastilha, 3 = ouro, 4 = azul
   const BASE_MAP = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,4,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,4,1],
@@ -117,7 +114,7 @@
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ];
 
-  // Pool de cartas/relíquias roguelike
+  // Lista de relíquias disponíveis
   const CARD_POOL = [
     {
       id: "relic_jump_module",
@@ -269,7 +266,7 @@
     }
   ];
 
-  // Classe para gerenciar poças pegajosas deixadas por pulos (Rastro Viscoso)
+  // Classe para as poças de lodo
   class StickyPool {
     constructor(gridX, gridY, duration = 5000) {
       this.gridX = gridX;
@@ -294,7 +291,7 @@
     }
   }
 
-  // Engine principal
+  // Classe controladora do jogo
   class Game {
     constructor() {
       this.canvas = document.getElementById('gameCanvas');
@@ -307,7 +304,7 @@
       this.btnNextBlind = document.getElementById('btnNextBlind');
       this.btnRestart = document.getElementById('btnRestart');
 
-      // HUD
+      // Elementos do HUD
       this.hudBlindTarget = document.getElementById('hudBlindTarget');
       this.hudBlindBadge = document.getElementById('hudBlindBadge');
       this.hudRelicsCount = document.getElementById('relicsCount');
@@ -322,7 +319,7 @@
       this.chipsBox = document.getElementById('chipsBox');
       this.multBox = document.getElementById('multBox');
 
-      // Cooldown Skills
+      // Habilidades e recarga
       this.vaultChargesEl = document.getElementById('vaultCharges');
       this.vaultCooldownFill = document.getElementById('vaultCooldownFill');
       this.blasterChargesEl = document.getElementById('blasterCharges');
@@ -331,12 +328,12 @@
       this.skillVault = document.getElementById('skillVault');
       this.skillBlaster = document.getElementById('skillBlaster');
 
-      // Estado do Jogo
+      // Estado inicial do jogo
       this.gameState = GAME_STATES.PLAYING;
       this.ante = 1;
       this.blind = 1;
-      this.maxLives = 2; // Vida máxima inicial da run
-      this.lives = 2; // Começa com 2 corações
+      this.maxLives = 2; // Vida máxima
+      this.lives = 2; // Vidas iniciais
       this.gold = 0;
       this.phase = 1;
 
@@ -347,18 +344,18 @@
       this.remainingPellets = 0;
       this.phaseClearTimer = 0;
 
-      // Habilidades bloqueadas inicialmente
+      // Habilidades bloqueadas de início
       this.vaultMaxCharges = 0;
       this.vaultCharges = 0;
       this.vaultCooldown = 0;
-      this.vaultMaxCooldown = 7000; // Recarga estendida de 7.0s
+      this.vaultMaxCooldown = 7000;
 
       this.blasterMaxCharges = 0;
       this.blasterCharges = 0;
       this.blasterCooldown = 0;
-      this.blasterMaxCooldown = 10000; // Recarga estendida de 10.0s
+      this.blasterMaxCooldown = 10000;
 
-      // Estado do inventário de relíquias e modificadores roguelike
+      // Relíquias e bônus ativos
       this.activeRelics = [];
       this.pelletChipBonus = 0;
       this.killMultBonus = 0;
@@ -377,55 +374,55 @@
       this.ghosts = [];
 
       this.frightenedTimer = 0;
-      this.debugMode = false; // Inativo por padrão, so abre caso aperte F3
+      this.debugMode = false; // Alterna com F3
       this.overchargeShockwave = null;
 
       this.init();
     }
 
     init() {
-      // Eventos teclado
+      // Escuta do teclado
       window.addEventListener('keydown', (e) => {
         if (!this.player) return;
 
-        // F3 alterna o Painel de Depuração Visual na tela
+        // Abre/fecha depurador com F3
         if (e.code === 'F3') {
           e.preventDefault();
           this.debugMode = !this.debugMode;
           return;
         }
 
-        // Armazena no buffer de entrada (Input Buffer) do jogador
+        // Buffer de entrada
         if (e.code === 'ArrowUp' || e.code === 'KeyW') this.player.setInput(DIRECTIONS.UP);
         if (e.code === 'ArrowDown' || e.code === 'KeyS') this.player.setInput(DIRECTIONS.DOWN);
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.player.setInput(DIRECTIONS.LEFT);
         if (e.code === 'ArrowRight' || e.code === 'KeyD') this.player.setInput(DIRECTIONS.RIGHT);
 
-        // Pulo
+        // Aciona pulo
         if (e.code === 'Space') {
           e.preventDefault();
           this.triggerVault();
         }
 
-        // Disparo
+        // Aciona disparo
         if (e.code === 'KeyF') {
           this.triggerBlaster();
         }
 
-        // Reiniciar rápido
+        // Atalho para reiniciar
         if (this.gameState === GAME_STATES.GAME_OVER && e.code === 'KeyR') {
           this.restartGame();
         }
       });
 
-      // Clique no canvas atira blaster
+      // Clique esquerdo para atirar
       this.canvas.addEventListener('mousedown', (e) => {
         if (e.button === 0 && this.gameState === GAME_STATES.PLAYING) {
           this.triggerBlaster();
         }
       });
 
-      // Modais
+      // Modais do jogo
       this.btnNextBlind.addEventListener('click', () => {
         this.modalWin.classList.remove('visible');
         this.showDraftShopModal();
@@ -438,10 +435,10 @@
     }
 
     loadLevel() {
-      // 1. Copia o mapa base
+      // Copia o mapa padrão
       this.map = BASE_MAP.map(row => [...row]);
 
-      // 2. Normaliza e aleatoriza as pastilhas especiais (Azuis e Douradas)
+      // Coleta as posições livres para as pastilhas especiais
       const candidateTiles = [];
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
@@ -449,7 +446,7 @@
             this.map[r][c] = 2; // Converte para pastilha normal primeiro
           }
           if (this.map[r][c] === 2) {
-            // Garante distância mínima de 2.5 blocos do ponto de spawn do Slime (9, 8)
+            // Ignora tiles muito próximos do spawn do jogador
             const dist = Math.hypot(c - 9, r - 8);
             if (dist > 2.5) {
               candidateTiles.push({ r, c });
@@ -458,37 +455,35 @@
         }
       }
 
-      // Embaralha as casas válidas (Fisher-Yates Shuffle)
+      // Embaralha as posições disponíveis
       for (let i = candidateTiles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [candidateTiles[i], candidateTiles[j]] = [candidateTiles[j], candidateTiles[i]];
       }
 
-      // Spawna 4 Pastilhas Azuis (Power Pellets - tipo 4) aleatórias no mapa
+      // Coloca 4 pastilhas azuis
       for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
         const t = candidateTiles.pop();
         this.map[t.r][t.c] = 4;
       }
 
-      // Spawna 4 Pastilhas Douradas (Moedas - tipo 3) aleatórias no mapa
+      // Coloca 4 pastilhas douradas
       for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
         const t = candidateTiles.pop();
         this.map[t.r][t.c] = 3;
       }
 
-      // Reconta total de pastilhas no mapa
+      // Conta as pastilhas no tabuleiro
       this.remainingPellets = 0;
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
           if (this.map[r][c] >= 2) this.remainingPellets++;
         }
       }
-      this.totalPellets = this.remainingPellets; // Guarda o total para a barra de progresso
+      this.totalPellets = this.remainingPellets;
 
-      // Cria jogador na posicao (9, 8) - corredor central livre
+      // Spawna o slime e os inimigos
       this.player = new Player(9, 8);
-
-      // Cria inimigos em posições seguras longe do jogador
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
 
       this.projectiles = [];
@@ -496,7 +491,7 @@
       this.floatingTexts = [];
       this.frightenedTimer = 0;
       this.phaseClearTimer = 0;
-      this.spawnProtectionTimer = 1200; // 1.2s de tempo de preparação ao iniciar a fase
+      this.spawnProtectionTimer = 1200; // Tempo de imunidade inicial
 
       this.targetScore = this.getTargetScore(this.ante, this.blind);
       this.score = 0;
@@ -534,18 +529,18 @@
     checkWinCondition() {
       if (this.gameState === GAME_STATES.PLAYING && this.score >= this.targetScore) {
         this.gameState = GAME_STATES.PHASE_CLEAR;
-        this.phaseClearTimer = 1500; // Congela 1.5s com efeitos especiais
+        this.phaseClearTimer = 1500; // Pausa rápida com efeitos visuais
         this.triggerScreenShake(12);
 
-        // Dá ouro pelo término da blind
+        // Ouro ganho ao terminar a fase
         this.gold += this.ante * 5;
 
-        // Explosão de confetes e partículas douradas
+        // Confetes e efeitos de vitória
         for (let i = 0; i < 40; i++) {
           this.particles.push(new Particle(
             this.canvas.width / 2,
             this.canvas.height / 2,
-            Math.random() > 0.5 ? '#FFE600' : `hsl(${Math.random() * 360}, 100%, 60%)`, // Dourado + cores vibrantes
+            Math.random() > 0.5 ? '#FFE600' : `hsl(${Math.random() * 360}, 100%, 60%)`,
             Math.random() * 4 + 3,
             (Math.random() - 0.5) * 8,
             (Math.random() - 0.5) * 8,
@@ -561,7 +556,7 @@
         y: this.canvas.height / 2,
         radius: 0,
         maxRadius: Math.hypot(this.canvas.width, this.canvas.height),
-        speed: 0.8, // pixels por ms
+        speed: 0.8,
         active: true
       };
 
@@ -571,13 +566,13 @@
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
           if (BASE_MAP[r][c] >= 2) {
-            this.map[r][c] = 5; // Reaparece como Pastilha Energizada
+            this.map[r][c] = 5; // Transforma em pastilha energizada
             this.remainingPellets++;
           }
         }
       }
 
-      // Spawna Moeda Especial Dourada (tipo 3) em (9, 8) Y=8, X=9
+      // Coloca uma moeda dourada no meio do mapa
       if (this.isWalkable(9, 8)) {
         this.map[8][9] = 3;
         this.remainingPellets++;
@@ -593,15 +588,9 @@
       );
     }
 
-    // Gera os inimigos conforme a fase atual — posições de spawn seguras nos cantos
+    // Cria os inimigos nos cantos do labirinto para não nascerem em cima do jogador
     spawnEnemiesForPhase(phase) {
       const speedMultiplier = this.getEnemySpeedMultiplier(phase);
-
-      // Posições de spawn seguras nos cantos do labirinto (distantes de (9, 8)):
-      // Canto 1: (2, 2)
-      // Canto 2: (17, 2)
-      // Canto 3: (2, 12)
-      // Canto 4: (17, 12)
       if (phase === 1) {
         const spade = new SpikeEnemy(2, 2, 'SPADE');
         spade.speed *= speedMultiplier;
@@ -619,7 +608,7 @@
         [e1, e2, e3].forEach(e => e.speed *= speedMultiplier);
         return [e1, e2, e3];
       } else {
-        // Fase 4+: 4 inimigos distribuídos nos 4 cantos do mapa
+        // 4 inimigos
         const e1 = new SpikeEnemy(2, 2, 'SPADE');
         const e2 = new SpikeEnemy(17, 2, 'DIAMOND');
         const e3 = new SpikeEnemy(2, 12, 'SPADE');
@@ -629,18 +618,18 @@
       }
     }
 
-    // Calcula o multiplicador de velocidade dos inimigos relativo ao jogador
+    // Define a velocidade dos inimigos a cada fase
     getEnemySpeedMultiplier(phase) {
       if (phase === 1) return 0.70;
       if (phase === 2) return 0.80;
-      // Fase 3+: 85% base + 5% por fase extra
+      // Aumenta gradativamente a partir da fase 3
       return Math.min(1.3, 0.85 + (phase - 3) * 0.05);
     }
 
     triggerScreenShake(intensity = 8) {
       if (!this.bezel) return;
       this.bezel.classList.remove('shake');
-      void this.bezel.offsetWidth; // Reflow
+      void this.bezel.offsetWidth;
       this.bezel.classList.add('shake');
       setTimeout(() => this.bezel.classList.remove('shake'), 150);
     }
@@ -653,7 +642,7 @@
       const targetGridY = this.player.gridY + this.player.dir.y * jumpDistance;
 
       if (this.isWalkable(targetGridX, targetGridY)) {
-        // Rastro Viscoso (Poças de Pulo)
+        // Poças de lodo deixadas pelo pulo
         if (this.hasStickyJump) {
           this.stickyPools.push(new StickyPool(this.player.gridX, this.player.gridY));
           this.stickyPools.push(new StickyPool(targetGridX, targetGridY));
@@ -741,7 +730,7 @@
       if (this.blind === 2) blindName = 'BIG BLIND';
       else if (this.blind === 3) blindName = 'BOSS BLIND';
 
-      // Painel esquerdo: badge + meta + score
+      // Informações da fase e meta
       if (this.hudBlindBadge) {
         this.hudBlindBadge.innerText = `ANTE ${this.ante} // ${blindName}`;
       }
@@ -765,12 +754,12 @@
       this.hudLives.innerText = '\u2764\uFE0F'.repeat(Math.max(0, this.lives));
       this.hudGold.innerText = this.gold;
 
-      // Relics count label
+      // Contador de relíquias
       if (this.hudRelicsCount) {
         this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
       }
 
-      // Vault (Pulo)
+      // Atualiza recarga do pulo
       if (this.vaultMaxCharges === 0) {
         document.querySelector('#skillVault .skill-key').innerText = '[ESPACO] BLOQUEADO';
         this.vaultChargesEl.innerText = 'BLOQUEADO';
@@ -793,7 +782,7 @@
         }
       }
 
-      // Blaster (Tiro)
+      // Atualiza recarga do disparo
       if (this.blasterMaxCharges === 0) {
         document.querySelector('#skillBlaster .skill-key').innerText = '[F] BLOQUEADO';
         this.blasterChargesEl.innerText = 'BLOQUEADO';
@@ -844,7 +833,7 @@
         tray.appendChild(slot);
       }
 
-      // Update relics count label
+      // Atualiza contador de relíquias no HUD
       if (this.hudRelicsCount) {
         this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
       }
@@ -963,7 +952,7 @@
       const candidates = CARD_POOL.filter(card => {
         if (excludeList.some(c => c.id === card.id)) return false;
         
-        // Exclude if it's already in activeRelics AND is of unique effect
+        // Exclui relíquias de efeito único já ativas
         const isUnique = ['relic_overclock', 'relic_slime_puddle', 'relic_railgun', 'relic_magnetic_pull', 'relic_gold_alchemist'].includes(card.id);
         if (isUnique && this.activeRelics.some(r => r.id === card.id)) return false;
         
@@ -1184,7 +1173,7 @@
         .replace(/(Disparo)/g, '<span class="highlight-shoot">$1</span>');
     }
 
-    // Mostra a Loja de Draft de Relíquias
+    // Exibe a tela de escolha de relíquias
     showDraftShopModal() {
       this.gameState = GAME_STATES.WIN_MODAL;
       const container = document.getElementById('draftCardsContainer');
@@ -1193,7 +1182,7 @@
       
       document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'ESCOLHA UMA RELIQUIA PARA A SUA RUN';
 
-      // Sorteia 2 cartas ponderadas e distintas
+      // Sorteia 2 opções de relíquias
       const card1 = this.getWeightedRandomCard([]);
       const card2 = this.getWeightedRandomCard(card1 ? [card1] : []);
 
@@ -1208,7 +1197,7 @@
 
         cardEl.innerHTML = this.createRelicCardHTML(card, false);
 
-        // 3D dynamic tilt and holographic sheen on mousemove (Throttled for 60fps)
+        // Efeito de inclinação 3D no mouse
         let isTicking = false;
         cardEl.addEventListener('mousemove', (e) => {
           if (isTicking) return;
@@ -1258,7 +1247,7 @@
       this.activeRelics.push(card);
       card.apply(this);
 
-      // Encontra o slot correspondente para a animação de voar
+      // Slot de destino para a animação
       const slotIndex = this.activeRelics.length - 1;
       const targetSlot = document.getElementById('relicsTray').children[slotIndex] || document.getElementById('relicsTray');
 
@@ -1316,7 +1305,7 @@
       } else {
         this.player.resetPosition(9, 8);
 
-        // Reposiciona inimigos nos cantos seguros
+        // Reseta inimigos nos cantos
         const spawnCoords = [
           { x: 2, y: 2 },
           { x: 17, y: 2 },
@@ -1330,7 +1319,7 @@
           }
         });
 
-        this.spawnProtectionTimer = 1200; // 1.2s de imunidade / pausa ao renascer
+        this.spawnProtectionTimer = 1200; // Imunidade ao renascer
       }
       this.updateHUD();
     }
@@ -1364,7 +1353,7 @@
     }
 
     update(dt) {
-      // Atualiza onda de choque se ativa
+      // Atualiza onda de choque
       if (this.overchargeShockwave && this.overchargeShockwave.active) {
         this.overchargeShockwave.radius += this.overchargeShockwave.speed * dt;
         if (this.overchargeShockwave.radius >= this.overchargeShockwave.maxRadius) {
@@ -1373,10 +1362,10 @@
         }
       }
 
-      // Congelamento breve após limpar o mapa
+      // Pequena pausa ao completar a fase
       if (this.gameState === GAME_STATES.PHASE_CLEAR) {
         this.phaseClearTimer -= dt;
-        // Partículas e textos continuam animando durante o freeze
+        // Mantém animações rodando na pausa
         this.particles.forEach(p => { if (p) p.update(dt); });
         this.particles = this.particles.filter(p => p && p.active && !p.toRemove);
         if (this.phaseClearTimer <= 0) {
@@ -1391,15 +1380,14 @@
 
       if (this.gameState !== GAME_STATES.PLAYING) return;
 
-      // Temporizador de Proteção / Pausa no Spawn
+      // Proteção temporária após spawnar
       if (this.spawnProtectionTimer > 0) {
         this.spawnProtectionTimer -= dt;
-        // Permite ao jogador bufferizar comandos de movimento, mas congela os inimigos
         if (this.player) this.player.update(dt, this);
         return;
       }
 
-      // 1. Cooldown de pulo
+      // Cooldown do pulo
       if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
         this.vaultCooldown += dt;
         const currentMaxCld = this.vaultMaxCooldown * (this.cooldownMultiplier || 1.0);
@@ -1409,7 +1397,7 @@
         }
       }
 
-      // 2. Cooldown de disparo
+      // Cooldown do disparo
       if (this.blasterMaxCharges > 0 && this.blasterCharges < this.blasterMaxCharges) {
         this.blasterCooldown += dt;
         const currentMaxCld = this.blasterMaxCooldown * (this.cooldownMultiplier || 1.0);
@@ -1419,13 +1407,13 @@
         }
       }
 
-      // Atualização das poças viscosas (Rastro Viscoso)
+      // Atualiza poças de lodo no chão
       if (this.stickyPools) {
         this.stickyPools.forEach(p => p.update(dt));
         this.stickyPools = this.stickyPools.filter(p => p.timeLeft > 0);
       }
 
-      // 3. Temporizador de pânico (frightened)
+      // Temporizador de pânico dos inimigos
       if (this.frightenedTimer > 0) {
         this.frightenedTimer -= dt;
         if (this.frightenedTimer <= 0) {
@@ -1435,24 +1423,24 @@
         }
       }
 
-      // 4. Jogador
+      // Atualiza jogador
       if (this.player) {
         this.player.update(dt, this);
       }
 
-      // 5. Projéteis (Limpeza Estável / Sem Crash)
+      // Atualiza projéteis
       this.projectiles.forEach(proj => {
         if (proj) proj.update(dt, this);
       });
       this.projectiles = this.projectiles.filter(proj => proj && proj.active && !proj.toRemove);
 
-      // 6. Inimigos (Limpeza Estável / Sem Crash)
+      // Atualiza inimigos
       this.ghosts.forEach(ghost => {
         if (ghost) ghost.update(dt, this);
       });
       this.ghosts = this.ghosts.filter(ghost => ghost && !ghost.toRemove);
 
-      // 7. Colisões do Jogador com Inimigos (Hitbox Tolerante)
+      // Colisões do slime com inimigos
       if (this.player && !this.player.isJumping) {
         this.ghosts.forEach(ghost => {
           if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning') return;
@@ -1462,7 +1450,7 @@
             (this.player.y + TILE_SIZE/2) - (ghost.y + TILE_SIZE/2)
           );
 
-          // Hitbox de colisão reduzida (0.55 * TILE_SIZE ≈ 22px)
+          // Área de colisão efetiva
           if (dist < TILE_SIZE * 0.55) {
             if (ghost.state === 'frightened' || ghost.state === 'stunned') {
               this.eatGhost(ghost);
@@ -1473,7 +1461,7 @@
         });
       }
 
-      // 8. Partículas e textos flutuantes (Limpeza Estável)
+      // Partículas e textos na tela
       this.particles.forEach(p => {
         if (p) p.update(dt);
       });
@@ -1495,7 +1483,7 @@
     draw() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // ── Chão do Corredor (Preto Absoluto + Micro-Grid Pontilhado) ──
+      // Renderiza o fundo do labirinto
       this.ctx.fillStyle = '#08080a';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -1506,22 +1494,21 @@
         }
       }
 
-      // ── Desenha o Labirinto (Temática Balatro) ──
+      // Renderiza as paredes e pastilhas
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
           const tile = this.map[r][c];
           
           if (tile === 1) {
-            // Muro: Corpo Cinza-Ardósia Metálico Escuro (#1b1b22)
+            // Paredes
             this.ctx.fillStyle = '#1b1b22';
             this.ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             
-            // Contorno: Linha sólida sutil Cinza Platina (#4a4b57)
             this.ctx.strokeStyle = '#4a4b57';
             this.ctx.lineWidth = 1.8;
             this.ctx.strokeRect(c * TILE_SIZE + 1.5, r * TILE_SIZE + 1.5, TILE_SIZE - 3, TILE_SIZE - 3);
 
-            // Nós de conexão Amarelo Arcade (#FFE600) nos vértices (cantos dos tiles de parede)
+            // Detalhes dos cantos das paredes
             this.ctx.fillStyle = '#FFE600';
             this.ctx.beginPath();
             this.ctx.arc(c * TILE_SIZE, r * TILE_SIZE, 2, 0, Math.PI * 2);
@@ -1536,13 +1523,13 @@
             this.ctx.arc(c * TILE_SIZE + TILE_SIZE, r * TILE_SIZE + TILE_SIZE, 2, 0, Math.PI * 2);
             this.ctx.fill();
 
-          } else {
-            // Caminho - Pastilhas e Moedas
+            } else {
+              // Desenha itens
             const cx = c * TILE_SIZE + TILE_SIZE / 2;
             const cy = r * TILE_SIZE + TILE_SIZE / 2;
 
             if (tile === 2) {
-              // Pastilha Normal: Losango Branco Brilhante (#ffffff)
+              // Pastilha normal
               this.ctx.fillStyle = '#ffffff';
               this.ctx.beginPath();
               this.ctx.moveTo(cx, cy - 4.5);
@@ -1552,7 +1539,7 @@
               this.ctx.closePath();
               this.ctx.fill();
             } else if (tile === 3) {
-              // Pastilha Dourada: Moeda Octogonal Dourada Pulsante (#FFE600)
+              // Pastilha dourada
               const pulse = 1 + Math.sin(performance.now() * 0.008) * 0.12;
               const rVal = 5.5 * pulse;
               
@@ -1572,7 +1559,7 @@
               this.ctx.fill();
               this.ctx.shadowBlur = 0;
             } else if (tile === 4) {
-              // Power Pellet: Pulso suave ciano com senoide (~1.3s de ciclo)
+              // Pastilha especial azul
               const sineCycle = (Math.sin(performance.now() * 0.00483) + 1) / 2; // 0.0 a 1.0 suave
               const pelletOpacity = 0.5 + sineCycle * 0.5; // Oscila entre 0.5 e 1.0
               const glowIntensity = 4 + sineCycle * 8;
@@ -1588,7 +1575,7 @@
               this.ctx.shadowBlur = 0;
               this.ctx.restore();
             } else if (tile === 5) {
-              // Pastilha Energizada: Losango Neon Roxo/Rosa Pulsante (#FF00FF)
+              // Pastilha energizada magenta
               const pulse = 1 + Math.sin(performance.now() * 0.012) * 0.2;
               const radius = 6 * pulse;
               
@@ -1611,12 +1598,12 @@
         }
       }
 
-      // Rastro Viscoso (Poças de Pulo)
+      // Desenha as poças de lodo
       if (this.stickyPools) {
         this.stickyPools.forEach(p => p.draw(this.ctx));
       }
 
-      // Onda de Choque do Overcharge
+      // Onda de choque ao limpar tabuleiro
       if (this.overchargeShockwave && this.overchargeShockwave.active) {
         this.ctx.save();
         this.ctx.strokeStyle = 'rgba(255, 255, 200, 0.5)';
@@ -1629,7 +1616,7 @@
         this.ctx.restore();
       }
 
-      // Sombra do jogador pulando
+      // Sombra do slime
       if (this.player && this.player.isJumping) {
         this.ctx.save();
         const centerX = this.player.x + TILE_SIZE / 2;
@@ -1642,12 +1629,12 @@
         this.ctx.restore();
       }
 
-      // Desenha jogador
+      // Slime
       if (this.player) {
         this.player.draw(this.ctx);
       }
 
-      // Projéteis
+      // Laser
       this.projectiles.forEach(proj => {
         if (proj) proj.draw(this.ctx);
       });
@@ -1657,12 +1644,12 @@
         if (ghost) ghost.draw(this.ctx);
       });
 
-      // Partículas
+      // Partículas de poeira
       this.particles.forEach(p => {
         if (p) p.draw(this.ctx);
       });
 
-      // Textos Flutuantes
+      // Textos flutuantes de pontuação
       this.ctx.save();
       this.floatingTexts.forEach(t => {
         if (!t) return;
@@ -1682,7 +1669,7 @@
       });
       this.ctx.restore();
 
-      // Overlay de Proteção no Spawn
+      // Mensagem de "Prepare-se"
       if (this.spawnProtectionTimer > 0) {
         this.ctx.save();
         this.ctx.textAlign = 'center';
@@ -1707,7 +1694,7 @@
         this.ctx.restore();
       }
 
-      // Painel de Depuração Visual
+      // Painel de debug
       if (this.debugMode && this.player) {
         this.drawDebugOverlay();
       }
@@ -1764,26 +1751,26 @@
     }
   }
 
-  // ── Player (Slime 2.5D Dinâmico - Engine Contínua Arcade) ──
+  // Classe do jogador
   class Player {
     constructor(gridX, gridY) {
       this.gridX = gridX;
       this.gridY = gridY;
       
-      // Coordenadas em pixel (alinhadas ao canto superior esquerdo do tile)
+      // Coordenadas em pixel
       this.x = gridX * TILE_SIZE;
       this.y = gridY * TILE_SIZE;
 
-      this.speed = 0.14; // Pixels por milissegundo (velocidade confortável e precisa)
+      this.speed = 0.14; // Pixels por ms
       this.dir = DIRECTIONS.RIGHT;
       
-      // Squash & Stretch
+      // Efeitos de distorção elástica
       this.squishX = 1;
       this.squishY = 1;
       this.angle = 0;
       this.walkTimer = 0;
 
-      // Pulo (Vault)
+      // Dados do pulo
       this.isJumping = false;
       this.jumpDuration = 250;
       this.jumpTimeLeft = 0;
@@ -1791,7 +1778,7 @@
       this.jumpTarget = { x: 0, y: 0 };
       this.jumpProgress = 0;
 
-      // Input Buffer
+      // Buffer de movimentos
       this.inputBufferDir = DIRECTIONS.NONE;
       this.inputBufferTime = 0;
       this.lastStopReason = '';
@@ -1841,13 +1828,13 @@
       }
     }
 
-    // Verifica se duas direções são exatamente opostas (giro de 180°)
+    // Verifica movimentos opostos
     isOpposite(dirA, dirB) {
       return (dirA.x === -dirB.x && dirA.x !== 0) || (dirA.y === -dirB.y && dirA.y !== 0);
     }
 
     setInput(dir) {
-      // Inversão Imediata (180°): altera a direção instantaneamente no mesmo frame
+      // Permite virar no sentido oposto na hora
       if (this.dir !== DIRECTIONS.NONE && this.isOpposite(this.dir, dir)) {
         this.dir = dir;
         this.angle = dir.angle;
@@ -1857,7 +1844,7 @@
       }
 
       this.inputBufferDir = dir;
-      this.inputBufferTime = 300; // Janela de buffer de 300ms
+      this.inputBufferTime = 300;
     }
 
     resetPosition(gridX, gridY) {
@@ -1889,7 +1876,7 @@
     }
 
     update(dt, game) {
-      // 1. Contagem do tempo limite do Input Buffer
+      // Tempo limite do buffer
       if (this.inputBufferTime > 0) {
         this.inputBufferTime -= dt;
         if (this.inputBufferTime <= 0) {
@@ -1897,7 +1884,7 @@
         }
       }
 
-      // 2. Lógica do Salto (Pulo / Vault)
+      // Animação de pulo
       if (this.isJumping) {
         this.jumpTimeLeft -= dt;
         this.jumpProgress = 1 - Math.max(0, this.jumpTimeLeft) / this.jumpDuration;
@@ -1932,7 +1919,7 @@
       this.squishX += (1 - this.squishX) * 0.15;
       this.squishY += (1 - this.squishY) * 0.15;
 
-      // Se o Slime estiver parado, tenta iniciar movimento a partir do buffer
+      // Move o slime se tiver comando no buffer
       if (this.dir === DIRECTIONS.NONE) {
         if (this.inputBufferDir !== DIRECTIONS.NONE) {
           const nextGridX = this.gridX + this.inputBufferDir.x;
@@ -1947,29 +1934,29 @@
             this.inputBufferTime = 0;
           }
         }
-        if (this.dir === DIRECTIONS.NONE) return; // Permanece parado no centro do tile
+        if (this.dir === DIRECTIONS.NONE) return;
       }
 
-      // 3. Movimentação Contínua baseada em Velocidade (Auto-Walk Arcade Engine)
+      // Movimentação contínua
       let step = this.speed * dt;
 
-      // Animação de deformação (gelatina) enquanto anda
+      // Animação do slime balançando
       this.walkTimer += dt * 0.015;
       this.squishX = 1 + Math.sin(this.walkTimer) * 0.05;
       this.squishY = 1 - Math.sin(this.walkTimer) * 0.05;
 
       while (step > 0 && this.dir !== DIRECTIONS.NONE) {
-        // Centro do próximo tile para onde estamos nos movendo
+        // Coordenadas centrais do tile alvo
         const targetCenter = {
           x: (this.gridX + this.dir.x) * TILE_SIZE,
           y: (this.gridY + this.dir.y) * TILE_SIZE
         };
 
-        // Distância até o próximo centro de tile
+        // Distância para o centro do tile
         const distToTargetCenter = Math.hypot(targetCenter.x - this.x, targetCenter.y - this.y);
 
         if (step < distToTargetCenter) {
-          // Snap de curva instantânea "na hora": se acabou de passar do centro do tile (dist <= 14px) e apertou a curva
+          // Faz curvas rápidas antes de chegar no centro do tile
           if (this.inputBufferDir !== DIRECTIONS.NONE && this.inputBufferDir !== this.dir) {
             const isPerpendicular = (this.dir.x !== 0 && this.inputBufferDir.y !== 0) || (this.dir.y !== 0 && this.inputBufferDir.x !== 0);
             if (isPerpendicular) {
@@ -2000,12 +1987,12 @@
             }
           }
 
-          // Deslocamento normal dentro do segmento atual
+          // Movimento normal dentro da reta
           this.x += this.dir.x * step;
           this.y += this.dir.y * step;
           step = 0;
         } else {
-          // Atingiu ou ultrapassou o centro do próximo tile!
+          // Chegou no centro do tile
           step -= distToTargetCenter;
           this.x = targetCenter.x;
           this.y = targetCenter.y;
@@ -2013,7 +2000,7 @@
           this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
           this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
 
-          // Wrap portals (linha 7)
+          // Teleporte das bordas horizontais
           if (this.gridY === 7) {
             if (this.gridX < 0) {
               this.gridX = GRID_WIDTH - 1;
@@ -2024,12 +2011,12 @@
             }
           }
 
-          // Devora a pastilha no centro do novo tile
+          // Verifica pastilhas no novo tile
           this.checkEatPellet(game);
 
-          // ── MÁQUINA DE DECISÃO NO CENTRO DO TILE (INTERSECTION ENGINE) ──
+          // Tomada de decisão nas interseções
           
-          // Prioridade 1: Mudar para a nova direção buffered se a casa adjacente estiver LIVRE
+          // Tenta mudar de direção se houver comando no buffer
           let directionChanged = false;
           if (this.inputBufferDir !== DIRECTIONS.NONE) {
             const bufGridX = this.gridX + this.inputBufferDir.x;
@@ -2049,19 +2036,19 @@
                 game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
               }
             } else {
-              // Se o buffer aponta para uma parede no cruzamento, descarta o comando sem parar o slime
+              // Ignora comando se for parede
               this.inputBufferDir = DIRECTIONS.NONE;
               this.inputBufferTime = 0;
             }
           }
 
-          // Prioridade 2 e 3: Manter rota ou parar se houver parede na frente
+          // Segue em frente ou para se bater na parede
           if (!directionChanged) {
             const nextGridX = this.gridX + this.dir.x;
             const nextGridY = this.gridY + this.dir.y;
 
             if (!game.isWalkable(nextGridX, nextGridY)) {
-              // Prioridade 3: Parede na frente -> Trava no centro exato do tile e zera a velocidade
+              // Para o slime no centro do tile
               this.x = this.gridX * TILE_SIZE;
               this.y = this.gridY * TILE_SIZE;
               
@@ -2078,7 +2065,7 @@
     }
 
     draw(ctx) {
-      // Sombra preta semitransparente elíptica logo abaixo
+      // Sombra do slime
       ctx.save();
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.beginPath();
@@ -2092,10 +2079,10 @@
       ctx.translate(centerX, centerY);
       ctx.scale(this.squishX, this.squishY);
 
-      // Corpo 3D com Projeção Ortográfica / 2.5D
+      // Renderiza corpo 2.5D do jogador
       const size = TILE_SIZE - 4;
       
-      // 1. Topo do Cubo (Cinza mais claro #b0b0b0)
+      // Topo do slime
       ctx.fillStyle = '#b0b0b0';
       ctx.beginPath();
       ctx.moveTo(-size/2, -size/2 + 6);
@@ -2105,13 +2092,13 @@
       ctx.closePath();
       ctx.fill();
 
-      // 2. Face frontal (Cinza médio #949494)
+      // Face frontal
       ctx.fillStyle = '#949494';
       ctx.beginPath();
       ctx.roundRect(-size/2, -size/2 + 6, size, size - 6, [0, 0, 6, 6]);
       ctx.fill();
 
-      // 3. Contorno Branco Sólido de 3px
+      // Contorno branco
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -2124,7 +2111,7 @@
       ctx.closePath();
       ctx.stroke();
 
-      // Divisor entre topo e face frontal
+      // Linha divisória
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -2132,7 +2119,7 @@
       ctx.lineTo(size/2, -size/2 + 6);
       ctx.stroke();
 
-      // 4. Deslocamento dinâmico dos elementos da face (Olhar na direção)
+      // Move os olhos dependendo da direção
       let faceX = 0;
       let faceY = 0;
 
@@ -2143,7 +2130,7 @@
 
       ctx.translate(faceX, faceY + 4); // Desloca para o centro da face frontal
 
-      // Sobrancelhas bravas diagonais em "V"
+      // Sobrancelhas
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2.2;
       ctx.lineCap = 'round';
@@ -2156,7 +2143,7 @@
       ctx.lineTo(2, -2);
       ctx.stroke();
 
-      // Olhos brancos em formato cunha (\ /)
+      // Olhos
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.moveTo(-7, -1);
@@ -2185,7 +2172,7 @@
       ctx.fillRect(-0.8, 2.5, 0.6, 0.6);
       ctx.fillRect(0.8, 2.5, 0.6, 0.6);
 
-      // Boca rosnando
+      // Boca
       ctx.fillStyle = '#1a1a1a';
       ctx.fillRect(-3.5, 4.5, 7, 2);
       ctx.strokeStyle = '#ffffff';
@@ -2196,7 +2183,7 @@
     }
   }
 
-  // ── Projétil Laser ──
+  // Classe do projétil laser
   class Laser {
     constructor(x, y, dir, isRailgun = false) {
       this.x = x;
@@ -2223,7 +2210,7 @@
         return;
       }
 
-      // Colisão com inimigos
+      // Colisão com fantasmas
       for (let i = 0; i < game.ghosts.length; i++) {
         const ghost = game.ghosts[i];
         if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning') continue;
@@ -2246,7 +2233,7 @@
       ctx.rotate(this.dir.angle);
       
       if (this.isRailgun) {
-        ctx.shadowColor = '#FF00FF'; // Brilho neon rosa para railgun
+        ctx.shadowColor = '#FF00FF';
         ctx.shadowBlur = 12;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(-15, -4, 30, 8); // Laser mais espesso
@@ -2261,7 +2248,7 @@
     }
   }
 
-  // ── SpikeEnemy: Inimigos Temáticos de Naipes Espinhados ──
+  // Classe dos inimigos geométricos
   class SpikeEnemy {
     constructor(gridX, gridY, type) {
       this.gridX = gridX;
@@ -2276,7 +2263,7 @@
       this.speed = type === 'DIAMOND' ? 0.11 : 0.075;
       this.dir = DIRECTIONS.UP;
       
-      this.state = 'normal'; // 'normal', 'dash', 'stunned', 'frightened', 'eaten', 'respawning'
+      this.state = 'normal';
       this.stunTimer = 0;
       this.respawnTimer = 0;
       this.dashCooldown = 0;
@@ -2308,18 +2295,18 @@
 
     die(game) {
       this.state = 'respawning';
-      this.respawnTimer = 2500; // Respawna em 2.5 segundos
+      this.respawnTimer = 2500; // Tempo para renascer
       
       const deathX = this.x + TILE_SIZE/2;
       const deathY = this.y + TILE_SIZE/2;
 
-      // Quebra em 4 estilhaços geométricos giratórios
+      // Cria partículas de estilhaços
       const color = this.type === 'SPADE' ? '#32323e' : '#FB8500';
       for (let i = 0; i < 4; i++) {
         game.particles.push(new ShardParticle(deathX, deathY, color));
       }
 
-      // Recompensas imediatas
+      // Adiciona pontuação da eliminação
       game.chips += 200;
       const extraMult = 2 + (game.killMultBonus || 0);
       game.mult += extraMult;
@@ -2336,7 +2323,7 @@
         `+200 Fichas +${extraMult} Mult`
       );
 
-      // Manda invisível pro centro
+      // Manda de volta para a base
       this.x = 8 * TILE_SIZE;
       this.y = 7 * TILE_SIZE;
       this.targetX = this.x;
@@ -2350,7 +2337,7 @@
     }
 
     update(dt, game) {
-      // 1. Controle de Respawn
+      // Controle de respawn
       if (this.state === 'respawning') {
         this.respawnTimer -= dt;
         if (this.respawnTimer <= 0) {
@@ -2360,12 +2347,12 @@
         return;
       }
 
-      // Cooldown de investidas
+      // Recarga da investida
       if (this.dashCooldown > 0) {
         this.dashCooldown -= dt;
       }
 
-      // 2. Lógica de Atordoamento
+      // Controle do atordoamento
       if (this.state === 'stunned') {
         this.stunTimer -= dt;
         if (this.stunTimer <= 0) {
@@ -2374,15 +2361,15 @@
         return;
       }
 
-      // Calcula velocidade atual
+      // Define a velocidade atual
       let currentSpeed = this.speed + (game.ante * 0.008);
 
-      // Boss Blind de Ante Ímpar: Inimigos +15% mais velozes
+      // Bônus de velocidade para o Boss
       if (game.blind === 3 && game.ante % 2 === 1) {
         currentSpeed *= 1.15;
       }
 
-      // Checa se está sobre uma poça viscosa (Rastro Viscoso)
+      // Verifica poça de lodo
       let isSteppingOnSticky = false;
       if (game.stickyPools) {
         for (const pool of game.stickyPools) {
@@ -2393,15 +2380,15 @@
         }
       }
       if (isSteppingOnSticky) {
-        currentSpeed *= 0.5; // Frenagem de 50%
+        currentSpeed *= 0.5; // Lentidão
       }
 
       if (this.state === 'dash') {
-        currentSpeed = this.speed * 2.8; // Investida super veloz
+        currentSpeed = this.speed * 2.8; // Investida
       } else if (this.state === 'frightened') {
-        currentSpeed = this.speed * 0.6; // Lento em pânico
+        currentSpeed = this.speed * 0.6; // Pânico
       } else if (this.state === 'eaten') {
-        currentSpeed = this.speed * 2.5; // Correndo pro meio
+        currentSpeed = this.speed * 2.5; // Retornando à base
       }
 
       if (this.isMoving()) {
@@ -2416,7 +2403,7 @@
           this.gridX = Math.round(this.x / TILE_SIZE);
           this.gridY = Math.round(this.y / TILE_SIZE);
 
-          // Wrap portals (linha 7)
+          // Teleporte
           if (this.gridY === 7) {
             if (this.gridX < 0) {
               this.gridX = GRID_WIDTH - 1;
@@ -2434,12 +2421,12 @@
           }
           
           if (this.state === 'dash') {
-            // Se bater na quina de parede após a investida, cessa a investida e fica brevemente atordoado
+            // Para ao bater na parede
             const checkX = this.gridX + this.dir.x;
             const checkY = this.gridY + this.dir.y;
             if (!game.isWalkable(checkX, checkY)) {
               this.state = 'normal';
-              // Boss Blind de Ante Par: investe com o dobro de frequência (metade do cooldown)
+              // Cooldown menor no boss
               const baseCooldown = (game.blind === 3 && game.ante % 2 === 0) ? 750 : 1500;
               this.dashCooldown = baseCooldown; // Impede outra investida imediatamente
             }
@@ -2451,7 +2438,7 @@
       }
 
       if (!this.isMoving()) {
-        // Se comido, volta pro corredor central (8, 7)
+        // Retorna para a base se foi comido
         if (this.state === 'eaten') {
           const path = this.findPath(this.gridX, this.gridY, 8, 7, game);
           if (path.length > 0) {
@@ -2464,7 +2451,7 @@
           return;
         }
 
-        // ♠ Espada: Ativa investida em linha reta se avistar jogador
+        // Investida do Espada
         if (this.type === 'SPADE' && this.state === 'normal' && this.dashCooldown <= 0) {
           const seenDir = this.checkLineOfSight(game.player, game);
           if (seenDir && game.isWalkable(this.gridX + seenDir.x, this.gridY + seenDir.y)) {
@@ -2477,7 +2464,7 @@
           }
         }
 
-        // Escolhe caminhos no cruzamento
+        // Escolha de caminho nas interseções
         const validDirs = [];
         for (const [key, d] of Object.entries(DIRECTIONS)) {
           if (d === DIRECTIONS.NONE) continue;
@@ -2496,7 +2483,7 @@
         } else {
           let chosenDir = null;
 
-          // ♦ Ouro: Persegue e tenta flanquear usando cálculo de distância no grid
+          // Perseguição do Ouro
           if (this.type === 'DIAMOND' && this.state === 'normal' && game.player) {
             let minDistance = Infinity;
             validDirs.forEach(d => {
@@ -2510,7 +2497,7 @@
             });
           }
 
-          // Caso normal / aleatório
+          // Escolha aleatória
           if (!chosenDir) {
             chosenDir = validDirs[Math.floor(Math.random() * validDirs.length)];
           }
@@ -2578,16 +2565,16 @@
     }
 
     draw(ctx) {
-      if (this.state === 'respawning') return; // Oculta durante respawn
+      if (this.state === 'respawning') return;
 
       ctx.save();
       const cx = this.x + TILE_SIZE / 2;
       const cy = this.y + TILE_SIZE / 2;
       ctx.translate(cx, cy);
 
-      // Alvos atordoados/pânico
+      // Renderiza estados especiais
       if (this.state === 'eaten') {
-        // Apenas Olhos
+        // Apenas os olhos
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(-5, -3, 5, 0, Math.PI * 2);
@@ -2599,7 +2586,7 @@
         ctx.arc(5 + this.dir.x * 2, -3 + this.dir.y * 2, 2, 0, Math.PI * 2);
         ctx.fill();
       } else if (this.state === 'frightened') {
-        // Losango de pânico (Branco piscando)
+        // Naipe assustado
         const isFlash = Math.floor(performance.now() / 180) % 2 === 0;
         ctx.fillStyle = isFlash ? '#1d1d8f' : '#ffffff';
         ctx.beginPath();
@@ -2613,7 +2600,7 @@
         ctx.lineWidth = 2;
         ctx.stroke();
       } else if (this.state === 'stunned') {
-        // Losango congelado (Ciano)
+        // Naipe congelado
         ctx.fillStyle = '#00838f';
         ctx.beginPath();
         ctx.moveTo(0, -14);
@@ -2626,20 +2613,20 @@
         ctx.lineWidth = 2;
         ctx.stroke();
       } else {
-        // Desenhos normais de naipes
+        // Naipe padrão
         if (this.type === 'SPADE') {
-          // ♠ INVESTIDA GLOW
+          // Brilho de investida
           if (this.state === 'dash') {
             ctx.shadowColor = '#FF2E2E';
             ctx.shadowBlur = 12;
-            // Brilho vermelho de investida
+            // Sombra vermelha
             ctx.fillStyle = 'rgba(255, 46, 46, 0.15)';
             ctx.beginPath();
             ctx.arc(0, 0, 19, 0, Math.PI * 2);
             ctx.fill();
           }
 
-          // ♠ Desenho de Espada
+          // Desenho da Espada
           ctx.beginPath();
           ctx.moveTo(0, -14);
           ctx.bezierCurveTo(8, -14, 14, -5, 14, 1);
@@ -2654,7 +2641,7 @@
           ctx.lineWidth = 2.5;
           ctx.stroke();
 
-          // Pedestal da espada
+          // Base da Espada
           ctx.beginPath();
           ctx.moveTo(0, 3);
           ctx.quadraticCurveTo(5, 11, 7, 13);
@@ -2665,7 +2652,7 @@
           ctx.fill();
           ctx.stroke();
 
-          // Ponta metálica amarela/brilhante
+          // Ponta amarela
           ctx.fillStyle = '#FFE600';
           ctx.beginPath();
           ctx.moveTo(0, -14);
@@ -2676,9 +2663,9 @@
 
           ctx.shadowBlur = 0;
         } else if (this.type === 'DIAMOND') {
-          // ♦ Lâmina de Ouros — Losango geométrico chanfrado, sem esfera pulsante
+          // Desenho de Ouros
 
-          // Corpo externo: cinza-metálico escuro
+          // Losango externo
           ctx.beginPath();
           ctx.moveTo(0, -15);
           ctx.lineTo(13, 0);
@@ -2691,7 +2678,7 @@
           ctx.lineWidth = 2.5;
           ctx.stroke();
 
-          // Facetas internas anguladas em tom metálico sutil
+          // Losango interno
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -2708,7 +2695,7 @@
     }
   }
 
-  // ── Fragmento de Destruição ShardParticle ──
+  // Estilhaços geométricos
   class ShardParticle {
     constructor(x, y, color) {
       this.x = x;
@@ -2741,7 +2728,7 @@
       ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
       ctx.fillStyle = this.color;
       
-      // Desenha estilhaço triangular
+      // Desenha estilhaço
       ctx.beginPath();
       ctx.moveTo(0, -this.size);
       ctx.lineTo(this.size, this.size);
@@ -2756,7 +2743,7 @@
     }
   }
 
-  // ── Representação das Partículas ──
+  // Partícula básica
   class Particle {
     constructor(x, y, color, size, vx, vy, life) {
       this.x = x;
@@ -2793,7 +2780,7 @@
     }
   }
 
-  // Instancia a classe principal
+  // Inicialização do jogo
   window.addEventListener('DOMContentLoaded', () => {
     window.munchGame = new Game();
   });
