@@ -158,55 +158,49 @@ body::after {
 /* ── Card holográfico colecionável ── */
 .holo-card-wrapper {
   perspective: 700px;
-  width: 240px;
-  height: 320px;
+  width: 230px;
+  height: 345px;
 }
 
 .holo-card {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
-  background:
-    linear-gradient(145deg, #0d0d12 0%, #161620 50%, #0d0d12 100%);
-  border: 2px solid #333348;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04),
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  background: radial-gradient(circle at 50% 25%, #1c2230 0%, #0d101a 65%, #06070c 100%);
+  border: 4px solid #8a96a8;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(180, 200, 220, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.03);
   overflow: hidden;
-  transition: transform 0.12s ease-out, box-shadow 0.2s ease;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease;
   transform-style: preserve-3d;
   cursor: default;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 14px 12px;
+  padding: 12px 14px 14px;
 }
 
 .holo-card:hover {
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.08),
-    0 16px 48px rgba(0, 0, 0, 0.7),
-    0 0 30px rgba(150, 150, 255, 0.08);
+  border-color: #ffffff;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
 }
 
 /* Reflexo de luz foil que acompanha o mouse */
 .holo-glare {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
+  border-radius: 16px;
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0.05) 30%,
-    transparent 60%
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    transparent 65%
   );
   opacity: 0;
   pointer-events: none;
-  z-index: 3;
+  z-index: 8;
   transition: opacity 0.2s ease;
-  mix-blend-mode: overlay;
+  mix-blend-mode: color-dodge;
 }
 
 .holo-card:hover .holo-glare {
@@ -217,84 +211,143 @@ body::after {
 .holo-card::before {
   content: "";
   position: absolute;
-  inset: 3px;
-  border-radius: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  inset: 4px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   pointer-events: none;
-  z-index: 2;
+  z-index: 7;
 }
 
-/* Selo superior */
-.holo-card-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
-  letter-spacing: 2px;
-  color: #555570;
+/* Re-utilização dos elementos da carta */
+.holo-card .relic-card-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 6;
+  margin-bottom: 8px;
+}
+
+.holo-card .relic-card-pill {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: #06070a;
+  border: 1.5px solid #7a8698;
+  color: #e2e8f0;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  text-align: center;
-  line-height: 1.6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.holo-card .pill-rarity { color: #cbd5e1; }
+.holo-card .pill-category { color: #ffaa00; }
+
+.holo-card .relic-card-icon-container {
+  position: relative;
+  margin: 2px 0 10px 0;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.holo-card .relic-card-icon-ring {
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at center, rgba(16, 18, 26, 0.9) 0%, rgba(5, 6, 9, 0.95) 100%),
+    repeating-radial-gradient(circle at center, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 4px);
+  border: 3px solid #7a8698;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* SVG do slime no card */
 .holo-card-slime {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 12px rgba(158, 158, 158, 0.3));
+  width: 68px;
+  height: 68px;
+  filter: drop-shadow(0 0 8px rgba(158, 158, 158, 0.3));
 }
 
 /* Nome do slime */
-.holo-card-name {
+.holo-card .relic-card-name {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: 800;
+  font-weight: 900;
+  font-size: 15px;
   color: #ffffff;
-  letter-spacing: 2px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.holo-card-rarity {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  color: #777790;
-  margin-bottom: 14px;
-  letter-spacing: 1px;
-}
-
-/* Modificadores base */
-.holo-card-mods {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  z-index: 6;
+  line-height: 1.2;
+  margin-bottom: 8px;
   width: 100%;
-}
-
-.holo-mod {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 11px;
-  color: #b0b0c8;
-}
-
-.holo-mod-icon {
-  font-size: 13px;
-  min-width: 18px;
+  padding: 4px 6px;
+  background: rgba(15, 18, 26, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   text-align: center;
 }
 
-.holo-mod-value {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  color: var(--yellow-primary);
-  margin-left: auto;
-  text-shadow: 0 0 6px rgba(255, 230, 0, 0.3);
+.holo-card .relic-card-desc-box {
+  background: #0e111a;
+  border: 1.5px solid #232838;
+  border-radius: 10px;
+  padding: 10px 10px;
+  width: 100%;
+  margin-top: auto;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.holo-card .card-stat-badge-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.holo-card .card-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #141926;
+  border: 1.5px solid #2b3346;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #e2e8f0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.holo-card .card-stat-pill .pill-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #ffffff;
+  background: #0077ff;
+}
+
+.holo-card .relic-card-desc-text {
+  font-size: 10px;
+  color: #b0b8cc;
+  line-height: 1.45;
+  text-align: center;
 }
 
 /* ── Menu principal com navegação arcade ── */

@@ -589,15 +589,15 @@ body::after {
 .overlay-modal {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(5, 7, 12, 0.92);
   z-index: 100;
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease-out;
+  will-change: opacity;
 }
 
 .overlay-modal.visible {
@@ -617,12 +617,13 @@ body::after {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  transform: translateY(-20px);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-20px) translateZ(0);
+  will-change: transform;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overlay-modal.visible .modal-content {
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
 }
 
 /* Titulos retro dos modais */
@@ -740,38 +741,37 @@ body::after {
   margin-top: 15px;
 }
 
-/* Carta Reliquia - Formato Balatro */
+/* Carta Reliquia - Formato Refatorado (Design Fluido e Sem Grid) */
 .relic-card {
   flex: 0 0 auto;
-  width: 220px;
-  height: 320px;
-  background: #0d0d15;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 16px 16px;
-  border: 3px solid #2a2a3a;
-  border-radius: 12px;
-  padding: 18px 16px 14px;
+  width: 230px;
+  height: 345px;
+  background: radial-gradient(circle at 50% 25%, #181c2b 0%, #0c0e17 65%, #05060b 100%);
+  border: 4px solid #333948;
+  border-radius: 16px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, box-shadow 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
-  animation: card-slide-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  animation: card-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .relic-card:nth-child(2) {
-  animation-delay: 0.1s;
+  animation-delay: 0.08s;
 }
 
 @keyframes card-slide-in {
-  0% { transform: translateY(40px) scale(0.9) rotateX(8deg); opacity: 0; }
-  100% { transform: translateY(0) scale(1) rotateX(0); opacity: 1; }
+  0% { transform: translateY(30px) scale(0.94) translateZ(0); opacity: 0; }
+  100% { transform: translateY(0) scale(1) translateZ(0); opacity: 1; }
 }
 
 /* Efeito Holografico / Foil Sheen */
@@ -781,12 +781,12 @@ body::after {
   inset: 0;
   background: radial-gradient(
     circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0.06) 30%,
-    transparent 60%
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    transparent 65%
   );
   pointer-events: none;
-  z-index: 5;
+  z-index: 8;
   mix-blend-mode: color-dodge;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -796,112 +796,241 @@ body::after {
   opacity: 1;
 }
 
-/* Raridades */
-.relic-card.comum {
-  border-color: #6e6e7a;
-  box-shadow: 0 6px 16px rgba(142, 142, 142, 0.1);
-}
-.relic-card.incomum {
-  border-color: #00c4b8;
-  box-shadow: 0 6px 16px rgba(0, 229, 255, 0.12);
-}
-.relic-card.rara {
-  border-color: #d4a800;
-  box-shadow: 0 6px 16px rgba(255, 230, 0, 0.15);
+/* Borda Interna Fina */
+.relic-card::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  pointer-events: none;
+  z-index: 7;
 }
 
+/* ── RARIDADES ── */
+/* Comum (Silver/Platinum Glow) */
+.relic-card.comum {
+  background: radial-gradient(circle at 50% 25%, #1c2230 0%, #0d101a 65%, #06070c 100%);
+  border-color: #8a96a8;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(180, 200, 220, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.03);
+}
 .relic-card.comum:hover {
   border-color: #ffffff;
-  box-shadow: 0 12px 30px rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
 }
 
+/* Incomum (Cyan/Teal Glow) */
+.relic-card.incomum {
+  background: radial-gradient(circle at 50% 25%, #0a202d 0%, #08141e 65%, #040910 100%);
+  border-color: #00e5ff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 22px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.05);
+}
 .relic-card.incomum:hover {
   border-color: #00f5d4;
-  box-shadow: 0 12px 30px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.12);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 245, 212, 0.4), inset 0 0 25px rgba(0, 229, 255, 0.12);
 }
 
+/* Rara (Metallic Gold Glow) */
+.relic-card.rara {
+  background: radial-gradient(circle at 50% 25%, #2a220b 0%, #161206 65%, #080602 100%);
+  border-color: #ffd700;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 28px rgba(255, 215, 0, 0.35), inset 0 0 20px rgba(255, 215, 0, 0.08);
+}
 .relic-card.rara:hover {
-  border-color: #FFE600;
-  box-shadow: 0 12px 30px rgba(255, 230, 0, 0.25), 0 0 20px rgba(255, 230, 0, 0.15);
+  border-color: #fff066;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.55), inset 0 0 30px rgba(255, 230, 0, 0.18);
 }
 
-/* Badge de Raridade (Topo Central) */
-.relic-card-rarity {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  text-transform: uppercase;
+/* ── Top Header Pill `[ RARITY // TYPE ]` ── */
+.relic-card-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   z-index: 6;
-  letter-spacing: 0.5px;
-  line-height: 1.4;
+  margin-bottom: 8px;
 }
 
-.relic-card.comum .relic-card-rarity {
-  background: #ffffff;
-  color: #111;
-  border: 1px solid #c0c0c0;
-}
-.relic-card.incomum .relic-card-rarity {
-  background: #00f5d4;
-  color: #0a1a18;
-  border: 1px solid #00c4b8;
-  box-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
-}
-.relic-card.rara .relic-card-rarity {
-  background: var(--yellow-primary);
-  color: #1a1500;
-  border: 1px solid #d4a800;
-  box-shadow: 0 0 8px var(--yellow-glow);
-  animation: rarity-pulse 1.5s infinite alternate;
+.relic-card-pill {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: #06070a;
+  border: 1.5px solid #333948;
+  color: #a0aab8;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-@keyframes rarity-pulse {
-  0% { box-shadow: 0 0 6px rgba(255, 230, 0, 0.3); }
-  100% { box-shadow: 0 0 14px rgba(255, 230, 0, 0.6); }
+.relic-card.comum .relic-card-pill {
+  border-color: #7a8698;
+  color: #e2e8f0;
+}
+.relic-card.comum .pill-rarity {
+  color: #cbd5e1;
+}
+.relic-card.comum .pill-category {
+  color: #ffaa00;
 }
 
-/* Area de Ilustracao (Icone) */
-.relic-card-icon {
-  width: 80px;
-  height: 80px;
+.relic-card.incomum .relic-card-pill {
+  border-color: #00e5ff;
+  color: #00e5ff;
+}
+.relic-card.incomum .pill-rarity {
+  color: #00e5ff;
+}
+.relic-card.incomum .pill-category {
+  color: #ffaa00;
+}
+
+.relic-card.rara .relic-card-pill {
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+}
+.relic-card.rara .pill-rarity {
+  color: #ffd700;
+}
+.relic-card.rara .pill-category {
+  color: #ffaa00;
+}
+
+/* ── Circular Icon Ring / Artwork Container ── */
+.relic-card-icon-container {
+  position: relative;
+  margin: 2px 0 10px 0;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.relic-card-icon-ring {
+  width: 95px;
+  height: 95px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: 
+    radial-gradient(circle at center, rgba(16, 18, 26, 0.9) 0%, rgba(5, 6, 9, 0.95) 100%),
+    repeating-radial-gradient(circle at center, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 4px);
+  border: 3px solid #2a3040;
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.6),
+    inset 0 0 15px rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
-  margin: 12px 0 8px;
-  z-index: 6;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.06));
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Titulo da Reliquia */
+.relic-card.comum .relic-card-icon-ring {
+  border-color: #7a8698;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.04);
+}
+.relic-card.incomum .relic-card-icon-ring {
+  border-color: #00e5ff;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.1);
+}
+.relic-card.rara .relic-card-icon-ring {
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+.relic-card-icon {
+  font-size: 42px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.relic-card:hover .relic-card-icon {
+  transform: scale(1.1);
+}
+
+/* ── Card Title Banner ── */
 .relic-card-name {
   font-family: 'Space Grotesk', sans-serif;
-  font-weight: 800;
-  font-size: 14px;
+  font-weight: 900;
+  font-size: 15px;
   color: #ffffff;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   z-index: 6;
-  line-height: 1.3;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  width: 100%;
+  padding: 4px 6px;
+  background: rgba(15, 18, 26, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Caixa de Descricao (Base da Carta) */
-.relic-card-desc {
-  background: #09090c;
-  border: 1px solid #232330;
-  border-radius: 6px;
-  padding: 10px;
+/* ── Bottom Description Box & Stat Pills ── */
+.relic-card-desc-box {
+  background: #0e111a;
+  border: 1.5px solid #232838;
+  border-radius: 10px;
+  padding: 10px 10px;
   width: 100%;
-  font-size: 10px;
-  color: #b0b0b8;
-  line-height: 1.5;
   margin-top: auto;
   z-index: 6;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.card-stat-badge-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.card-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #141926;
+  border: 1.5px solid #2b3346;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #e2e8f0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.card-stat-pill .pill-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #ffffff;
+  background: #0077ff;
+}
+
+.card-stat-pill.blue .pill-value { background: #0077ff; }
+.card-stat-pill.orange .pill-value { background: #ff7700; }
+.card-stat-pill.red .pill-value { background: #dc2626; }
+.card-stat-pill.cyan .pill-value { background: #00b4d8; }
+.card-stat-pill.teal .pill-value { background: #00b493; }
+.card-stat-pill.gold .pill-value { background: #d97706; }
+
+.relic-card-desc-text {
+  font-size: 10px;
+  color: #b0b8cc;
+  line-height: 1.45;
+  text-align: center;
 }
 
 /* Destaques de Termos na Descricao */
@@ -957,28 +1086,52 @@ body::after {
 }
 
 .relic-card.active-relic-option {
-  width: 130px;
-  min-width: 130px;
-  height: 200px;
-  padding: 10px 8px;
+  width: 140px;
+  min-width: 140px;
+  height: 225px;
+  padding: 8px 6px;
   flex: 0 0 auto;
 }
 
+.relic-card.active-relic-option .relic-card-pill {
+  font-size: 6px;
+  padding: 2px 6px;
+}
+
+.relic-card.active-relic-option .relic-card-icon-ring {
+  width: 55px;
+  height: 55px;
+  border-width: 2px;
+}
+
 .relic-card.active-relic-option .relic-card-icon {
-  width: 50px;
-  height: 50px;
   font-size: 24px;
-  margin: 6px 0 4px;
 }
 
 .relic-card.active-relic-option .relic-card-name {
   font-size: 10px;
   line-height: 1.2;
+  margin-bottom: 4px;
+  padding: 2px;
 }
 
-.relic-card.active-relic-option .relic-card-rarity {
-  font-size: 6px;
-  padding: 2px 6px;
+.relic-card.active-relic-option .relic-card-desc-box {
+  padding: 4px;
+  gap: 2px;
+}
+
+.relic-card.active-relic-option .relic-card-desc-text {
+  display: none;
+}
+
+.relic-card.active-relic-option .card-stat-pill {
+  font-size: 8px;
+  padding: 2px 4px;
+}
+
+.relic-card.active-relic-option .card-stat-pill .pill-value {
+  font-size: 9px;
+  padding: 1px 3px;
 }
 
 .relic-card.active-relic-option .relic-card-desc {

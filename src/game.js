@@ -438,9 +438,45 @@
     }
 
     loadLevel() {
+      // 1. Copia o mapa base
       this.map = BASE_MAP.map(row => [...row]);
 
-      // Conta total de pastilhas no mapa
+      // 2. Normaliza e aleatoriza as pastilhas especiais (Azuis e Douradas)
+      const candidateTiles = [];
+      for (let r = 0; r < GRID_HEIGHT; r++) {
+        for (let c = 0; c < GRID_WIDTH; c++) {
+          if (this.map[r][c] === 3 || this.map[r][c] === 4) {
+            this.map[r][c] = 2; // Converte para pastilha normal primeiro
+          }
+          if (this.map[r][c] === 2) {
+            // Garante distância mínima de 2.5 blocos do ponto de spawn do Slime (9, 8)
+            const dist = Math.hypot(c - 9, r - 8);
+            if (dist > 2.5) {
+              candidateTiles.push({ r, c });
+            }
+          }
+        }
+      }
+
+      // Embaralha as casas válidas (Fisher-Yates Shuffle)
+      for (let i = candidateTiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidateTiles[i], candidateTiles[j]] = [candidateTiles[j], candidateTiles[i]];
+      }
+
+      // Spawna 4 Pastilhas Azuis (Power Pellets - tipo 4) aleatórias no mapa
+      for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
+        const t = candidateTiles.pop();
+        this.map[t.r][t.c] = 4;
+      }
+
+      // Spawna 4 Pastilhas Douradas (Moedas - tipo 3) aleatórias no mapa
+      for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
+        const t = candidateTiles.pop();
+        this.map[t.r][t.c] = 3;
+      }
+
+      // Reconta total de pastilhas no mapa
       this.remainingPellets = 0;
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
@@ -452,7 +488,7 @@
       // Cria jogador na posicao (9, 8) - corredor central livre
       this.player = new Player(9, 8);
 
-      // Cria inimigos conforme a fase (dificuldade progressiva)
+      // Cria inimigos em posições seguras longe do jogador
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
 
       this.projectiles = [];
@@ -460,13 +496,14 @@
       this.floatingTexts = [];
       this.frightenedTimer = 0;
       this.phaseClearTimer = 0;
+      this.spawnProtectionTimer = 1200; // 1.2s de tempo de preparação ao iniciar a fase
 
       this.targetScore = this.getTargetScore(this.ante, this.blind);
       this.score = 0;
       this.chips = 0;
       this.mult = 1;
 
-       this.vaultCharges = this.vaultMaxCharges;
+      this.vaultCharges = this.vaultMaxCharges;
       this.vaultCooldown = 0;
       this.blasterCharges = this.blasterMaxCharges;
       this.blasterCooldown = 0;
@@ -556,31 +593,39 @@
       );
     }
 
-    // Gera os inimigos conforme a fase atual — escalabilidade de dificuldade
+    // Gera os inimigos conforme a fase atual — posições de spawn seguras nos cantos
     spawnEnemiesForPhase(phase) {
       const speedMultiplier = this.getEnemySpeedMultiplier(phase);
 
+      // Posições de spawn seguras nos cantos do labirinto (distantes de (9, 8)):
+      // Canto 1: (2, 2)
+      // Canto 2: (17, 2)
+      // Canto 3: (2, 12)
+      // Canto 4: (17, 12)
       if (phase === 1) {
-        // Tutorial calmo: apenas 1 Espada lenta
-        const spade = new SpikeEnemy(8, 7, 'SPADE');
+        const spade = new SpikeEnemy(2, 2, 'SPADE');
         spade.speed *= speedMultiplier;
         return [spade];
       } else if (phase === 2) {
-        // Fase 2: 1 Espada + 1 Ouro, velocidade maior
-        const spade = new SpikeEnemy(8, 7, 'SPADE');
-        const diamond = new SpikeEnemy(11, 7, 'DIAMOND');
+        const spade = new SpikeEnemy(2, 2, 'SPADE');
+        const diamond = new SpikeEnemy(17, 2, 'DIAMOND');
         spade.speed *= speedMultiplier;
         diamond.speed *= speedMultiplier;
         return [spade, diamond];
+      } else if (phase === 3) {
+        const e1 = new SpikeEnemy(2, 2, 'SPADE');
+        const e2 = new SpikeEnemy(17, 2, 'DIAMOND');
+        const e3 = new SpikeEnemy(2, 12, 'SPADE');
+        [e1, e2, e3].forEach(e => e.speed *= speedMultiplier);
+        return [e1, e2, e3];
       } else {
-        // Fase 3+: 2 Espadas + 1 Ouro, velocidade crescente
-        const enemies = [
-          new SpikeEnemy(8, 7, 'SPADE'),
-          new SpikeEnemy(9, 7, 'DIAMOND'),
-          new SpikeEnemy(11, 7, 'SPADE')
-        ];
-        enemies.forEach(e => e.speed *= speedMultiplier);
-        return enemies;
+        // Fase 4+: 4 inimigos distribuídos nos 4 cantos do mapa
+        const e1 = new SpikeEnemy(2, 2, 'SPADE');
+        const e2 = new SpikeEnemy(17, 2, 'DIAMOND');
+        const e3 = new SpikeEnemy(2, 12, 'SPADE');
+        const e4 = new SpikeEnemy(17, 12, 'DIAMOND');
+        [e1, e2, e3, e4].forEach(e => e.speed *= speedMultiplier);
+        return [e1, e2, e3, e4];
       }
     }
 
@@ -1023,6 +1068,62 @@
       }, 600);
     }
 
+    createRelicCardHTML(card, isReplacementOption = false) {
+      let rarityText = 'COMMON';
+      if (card.rarity === 'Incomum') rarityText = 'UNCOMMON';
+      else if (card.rarity === 'Rara') rarityText = 'RARE';
+      
+      let categoryText = 'ARSENAL';
+      if (card.category === 'MULTIPLICADORES & PONTUAÇÃO') categoryText = 'MULTIPLIER';
+      else if (card.category === 'QUEBRA DE REGRAS') categoryText = 'GAME BREAKER';
+      else if (card.category === 'AÇÃO & SOBREVIVÊNCIA') categoryText = 'ARSENAL';
+      else if (card.category) categoryText = card.category;
+
+      let statBadgeHtml = '';
+      if (card.id === 'relic_jump_module') {
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+1</span> Carga de Pulo</div>`;
+      } else if (card.id === 'relic_blaster_core') {
+        statBadgeHtml = `<div class="card-stat-pill orange"><span class="pill-value">+1</span> Disparo</div>`;
+      } else if (card.id === 'relic_overclock') {
+        statBadgeHtml = `<div class="card-stat-pill cyan"><span class="pill-value">-30%</span> Cooldown</div>`;
+      } else if (card.id === 'relic_backup_battery') {
+        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+1</span> Vida Max</div>`;
+      } else if (card.id === 'relic_steel_coating') {
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+20</span> Fichas Base</div>`;
+      } else if (card.id === 'relic_sharp_drift') {
+        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+2</span> Mult Drift</div>`;
+      } else if (card.id === 'relic_bounty_hunter') {
+        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+5</span> Mult Mult</div>`;
+      } else if (card.id === 'relic_gold_alchemist') {
+        statBadgeHtml = `<div class="card-stat-pill gold"><span class="pill-value">x1.75</span> Mult Ouro</div>`;
+      } else if (card.id === 'relic_slime_puddle') {
+        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">-50%</span> Vel. Inimigo</div>`;
+      } else if (card.id === 'relic_railgun') {
+        statBadgeHtml = `<div class="card-stat-pill gold"><span class="pill-value">PERF</span> Laser Total</div>`;
+      } else if (card.id === 'relic_magnetic_pull') {
+        statBadgeHtml = `<div class="card-stat-pill gold"><span class="pill-value">x1.5</span> Mult Vácuo</div>`;
+      }
+
+      const formattedDesc = this.formatCardDesc(card.desc);
+
+      return `
+        <div class="relic-card-header">
+          <div class="relic-card-pill">[ <span class="pill-rarity">${rarityText}</span> // <span class="pill-category">${categoryText}</span> ]</div>
+        </div>
+        <div class="relic-card-icon-container">
+          <div class="relic-card-icon-ring">
+            <div class="relic-card-icon">${card.icon}</div>
+          </div>
+        </div>
+        <div class="relic-card-name">${card.name}</div>
+        <div class="relic-card-desc-box">
+          ${statBadgeHtml ? `<div class="card-stat-badge-wrapper">${statBadgeHtml}</div>` : ''}
+          <div class="relic-card-desc-text">${formattedDesc}</div>
+        </div>
+        ${isReplacementOption ? `<div class="btn-replace-action">SUBSTITUIR</div>` : ''}
+      `;
+    }
+
     showReplacementUI(newCard, selectedEl) {
       const container = document.getElementById('draftCardsContainer');
       container.innerHTML = '';
@@ -1034,13 +1135,7 @@
         const cardEl = document.createElement('div');
         const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
         cardEl.className = `relic-card active-relic-option ${rarityClass}`;
-        cardEl.innerHTML = `
-          <div class="relic-card-rarity">${relic.rarity}</div>
-          <div class="relic-card-icon">${relic.icon}</div>
-          <div class="relic-card-name">${relic.name}</div>
-          <div class="relic-card-desc">${relic.desc}</div>
-          <div class="btn-replace-action">SUBSTITUIR</div>
-        `;
+        cardEl.innerHTML = this.createRelicCardHTML(relic, true);
         
         cardEl.addEventListener('click', () => {
           this.spawnCardParticles(selectedEl || cardEl);
@@ -1111,34 +1206,33 @@
         const rarityClass = card.rarity === 'Rara' ? 'rara' : card.rarity.toLowerCase();
         cardEl.className = `relic-card ${rarityClass}`;
 
-        const formattedDesc = this.formatCardDesc(card.desc);
+        cardEl.innerHTML = this.createRelicCardHTML(card, false);
 
-        cardEl.innerHTML = `
-          <div class="relic-card-rarity">${card.rarity}</div>
-          <div class="relic-card-icon">${card.icon}</div>
-          <div class="relic-card-name">${card.name}</div>
-          <div class="relic-card-desc">${formattedDesc}</div>
-        `;
-
-        // 3D dynamic tilt and holographic sheen on mousemove
+        // 3D dynamic tilt and holographic sheen on mousemove (Throttled for 60fps)
+        let isTicking = false;
         cardEl.addEventListener('mousemove', (e) => {
+          if (isTicking) return;
+          isTicking = true;
           const rect = cardEl.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const rotateY = ((x - centerX) / centerX) * 15;
-          const rotateX = ((centerY - y) / centerY) * 15;
-          cardEl.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-          
-          const pctX = (x / rect.width) * 100;
-          const pctY = (y / rect.height) * 100;
-          cardEl.style.setProperty('--sheen-x', `${pctX}%`);
-          cardEl.style.setProperty('--sheen-y', `${pctY}%`);
+          requestAnimationFrame(() => {
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateY = ((x - centerX) / centerX) * 12;
+            const rotateX = ((centerY - y) / centerY) * 12;
+            cardEl.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.04) translateZ(0)`;
+            
+            const pctX = (x / rect.width) * 100;
+            const pctY = (y / rect.height) * 100;
+            cardEl.style.setProperty('--sheen-x', `${pctX}%`);
+            cardEl.style.setProperty('--sheen-y', `${pctY}%`);
+            isTicking = false;
+          });
         });
 
         cardEl.addEventListener('mouseleave', () => {
-          cardEl.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1)';
+          cardEl.style.transform = 'perspective(600px) rotateX(0) rotateY(0) scale(1) translateZ(0)';
           cardEl.style.setProperty('--sheen-x', '50%');
           cardEl.style.setProperty('--sheen-y', '50%');
         });
@@ -1221,9 +1315,22 @@
         this.triggerGameOver();
       } else {
         this.player.resetPosition(9, 8);
+
+        // Reposiciona inimigos nos cantos seguros
+        const spawnCoords = [
+          { x: 2, y: 2 },
+          { x: 17, y: 2 },
+          { x: 2, y: 12 },
+          { x: 17, y: 12 }
+        ];
         this.ghosts.forEach((g, i) => {
-          if (g) g.resetPosition(8 + i, 7);
+          if (g) {
+            const coord = spawnCoords[i % spawnCoords.length];
+            g.resetPosition(coord.x, coord.y);
+          }
         });
+
+        this.spawnProtectionTimer = 1200; // 1.2s de imunidade / pausa ao renascer
       }
       this.updateHUD();
     }
@@ -1283,6 +1390,14 @@
       }
 
       if (this.gameState !== GAME_STATES.PLAYING) return;
+
+      // Temporizador de Proteção / Pausa no Spawn
+      if (this.spawnProtectionTimer > 0) {
+        this.spawnProtectionTimer -= dt;
+        // Permite ao jogador bufferizar comandos de movimento, mas congela os inimigos
+        if (this.player) this.player.update(dt, this);
+        return;
+      }
 
       // 1. Cooldown de pulo
       if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
@@ -1566,6 +1681,31 @@
         }
       });
       this.ctx.restore();
+
+      // Overlay de Proteção no Spawn
+      if (this.spawnProtectionTimer > 0) {
+        this.ctx.save();
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        const cx = this.canvas.width / 2;
+        const cy = this.canvas.height / 2 - 35;
+        const alpha = Math.min(1, this.spawnProtectionTimer / 300);
+        
+        this.ctx.globalAlpha = alpha;
+        this.ctx.font = '900 24px "Space Grotesk", sans-serif';
+        this.ctx.fillStyle = '#FFE600';
+        this.ctx.shadowColor = 'rgba(255, 230, 0, 0.8)';
+        this.ctx.shadowBlur = 14;
+        this.ctx.fillText("PREPARE-SE!", cx, cy);
+        
+        this.ctx.font = '8px "Press Start 2P", monospace';
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.shadowBlur = 4;
+        this.ctx.fillText("ENTRADA SEGURA // INIMIGOS REAGINDO...", cx, cy + 24);
+        
+        this.ctx.restore();
+      }
 
       // Painel de Depuração Visual
       if (this.debugMode && this.player) {
