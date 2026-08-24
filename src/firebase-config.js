@@ -1,15 +1,15 @@
 // MUNCH - Serviço de Ranking Global (Top 5 por Categoria/Stake) via Firebase & Local Fallback
 
 (function() {
-  // Configuração padrão do projeto Firebase munch-15e44
+  // Configuração padrão do projeto Firebase munch-cbbd5 (chaves privadas vêm do window.MUNCH_FIREBASE_CONFIG via env.js)
   const defaultConfig = {
-    apiKey: "AIzaSyDarfTU4CccAtSBTCcfIwoOHDwfs_2I1mg",
-    authDomain: "munch-15e44.firebaseapp.com",
-    projectId: "munch-15e44",
-    storageBucket: "munch-15e44.firebasestorage.app",
-    messagingSenderId: "952418912914",
-    appId: "1:952418912914:web:dcc49aedf8a0c5a535744b",
-    databaseURL: "https://munch-15e44-default-rtdb.firebaseio.com"
+    apiKey: "",
+    authDomain: "munch-cbbd5.firebaseapp.com",
+    projectId: "munch-cbbd5",
+    storageBucket: "munch-cbbd5.firebasestorage.app",
+    messagingSenderId: "218078253246",
+    appId: "1:218078253246:web:0e3e36cab291b933b70eef",
+    databaseURL: "https://munch-cbbd5-default-rtdb.firebaseio.com"
   };
 
   const config = window.MUNCH_FIREBASE_CONFIG || defaultConfig;
