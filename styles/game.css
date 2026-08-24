@@ -14,6 +14,41 @@
   --green-primary: #10B981;
 }
 
+/* Temas Visuais CRT */
+body.theme-gameboy {
+  --bg-color: #0f380f;
+  --panel-bg: #1f4a1f;
+  --border-color: #306230;
+  --text-muted: #8bac0f;
+  --text-pure: #9bbc0f;
+  --yellow-primary: #9bbc0f;
+  --cyan-primary: #8bac0f;
+  --red-primary: #306230;
+}
+
+body.theme-amber {
+  --bg-color: #120a00;
+  --panel-bg: #1a0f00;
+  --border-color: #3a2200;
+  --text-muted: #995c00;
+  --text-pure: #ffb700;
+  --yellow-primary: #ffb700;
+  --cyan-primary: #ffaa00;
+  --red-primary: #ff4400;
+}
+
+body.theme-cyberpunk {
+  --bg-color: #070012;
+  --panel-bg: #120024;
+  --border-color: #2c004d;
+  --text-muted: #8800cc;
+  --text-pure: #00ffff;
+  --yellow-primary: #ff007f;
+  --cyan-primary: #00ffff;
+  --red-primary: #ff0044;
+}
+
+
 * {
   margin: 0;
   padding: 0;

@@ -163,11 +163,26 @@
         </div>
       </div>
       
-      <button class="btn-arcade-modal" id="btnRestart">Jogar Novamente</button>
+      <!-- Formulário de Envio para o Ranking Global -->
+      <div class="leaderboard-submit-box" style="margin-top:12px; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid #333;">
+        <label style="font-size:9px; color:#FFE600; font-weight:bold; font-family:'Press Start 2P', monospace;">🏆 REGISTRAR NO RANKING GLOBAL</label>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="text" id="txtPlayerName" placeholder="SEU APELIDO" maxlength="12" style="font-family:'Press Start 2P', monospace; font-size:9px; padding:8px; background:#08080d; color:#fff; border:1.5px solid #FFE600; border-radius:4px; flex-grow:1; text-transform:uppercase; outline:none;">
+          <button id="btnSubmitScore" style="font-family:'Press Start 2P', monospace; font-size:8px; padding:8px 12px; background:#FFE600; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">ENVIAR</button>
+        </div>
+        <span id="lblSubmitStatus" style="font-size:9px; color:#10B981; margin-top:6px; display:block;"></span>
+      </div>
+
+      <div style="display:flex; gap:10px; width:100%; margin-top:12px;">
+        <button class="btn-arcade-modal" id="btnRestart" style="flex:1;">Jogar Novamente</button>
+        <button class="btn-arcade-modal" id="btnReturnMenu" style="flex:1; background:#2a2a3a;">Menu Principal</button>
+      </div>
     </div>
   </div>
 
-  <!-- Script principal do jogo -->
+  <!-- Scripts do jogo -->
+  <script src="./src/env.js"></script>
+  <script src="./src/firebase-config.js"></script>
   <script src="./src/game.js"></script>
 </body>
 </html>

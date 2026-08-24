@@ -381,8 +381,17 @@
     }
 
     init() {
+      // Aplica tema visual CRT salvo
+      const theme = localStorage.getItem('munch_crt_theme');
+      if (theme && theme !== 'default') {
+        document.body.classList.add(`theme-${theme}`);
+      }
+
       // Escuta do teclado
       window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+          return;
+        }
         if (!this.player) return;
 
         // Abre/fecha depurador com F3
@@ -429,12 +438,61 @@
       });
       this.btnRestart.addEventListener('click', () => this.restartGame());
 
-      this.loadLevel();
+      const btnReturnMenu = document.getElementById('btnReturnMenu');
+      if (btnReturnMenu) {
+        btnReturnMenu.addEventListener('click', () => {
+          window.location.href = 'menu.html';
+        });
+      }
+
+      const btnSubmitScore = document.getElementById('btnSubmitScore');
+      const txtPlayerName = document.getElementById('txtPlayerName');
+      const lblSubmitStatus = document.getElementById('lblSubmitStatus');
+
+      if (btnSubmitScore && txtPlayerName) {
+        txtPlayerName.value = localStorage.getItem('munch_last_player_name') || '';
+        btnSubmitScore.addEventListener('click', async () => {
+          const name = txtPlayerName.value.trim();
+          if (!name) {
+            lblSubmitStatus.innerText = "Por favor, digite seu apelido!";
+            lblSubmitStatus.style.color = "#FF2E2E";
+            return;
+          }
+          localStorage.setItem('munch_last_player_name', name);
+          lblSubmitStatus.innerText = "Enviando ao Firebase...";
+          lblSubmitStatus.style.color = "#FFE600";
+          btnSubmitScore.disabled = true;
+
+          await MunchLeaderboard.submitScore(name, this.score, this.ante, this.stake);
+          lblSubmitStatus.innerText = "✓ RECORD ENVIADO COM SUCESSO!";
+          lblSubmitStatus.style.color = "#10B981";
+        });
+      }
+
+      // Verifica se deve resumir run ativa
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('resume') === 'true' && localStorage.getItem('munch_active_run')) {
+        this.resumeActiveRun();
+      } else {
+        this.resetRunState();
+        this.loadLevel();
+      }
+
       this.lastTime = performance.now();
       requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     loadLevel() {
+      // Carrega setup da partida e variante do slime
+      const setupRaw = localStorage.getItem('munch_run_setup');
+      let setup = { stake: 'white', endless: false };
+      if (setupRaw) { try { setup = JSON.parse(setupRaw); } catch(e) {} }
+      this.stake = setup.stake || 'white';
+      this.isEndless = setup.endless || false;
+
+      this.selectedSlime = localStorage.getItem('munch_selected_slime') || 'classic';
+      this.isGamblerSlime = (this.selectedSlime === 'gambler');
+
       // Copia o mapa padrão
       this.map = BASE_MAP.map(row => [...row]);
 
@@ -467,10 +525,12 @@
         this.map[t.r][t.c] = 4;
       }
 
-      // Coloca 4 pastilhas douradas
-      for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
-        const t = candidateTiles.pop();
-        this.map[t.r][t.c] = 3;
+      // Coloca 4 pastilhas douradas (Ficha Dourada não gera pastilhas douradas de cura)
+      if (this.stake !== 'gold') {
+        for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
+          const t = candidateTiles.pop();
+          this.map[t.r][t.c] = 3;
+        }
       }
 
       // Conta as pastilhas no tabuleiro
@@ -491,39 +551,43 @@
       this.floatingTexts = [];
       this.frightenedTimer = 0;
       this.phaseClearTimer = 0;
-      this.spawnProtectionTimer = 1200; // Tempo de imunidade inicial
-
       this.targetScore = this.getTargetScore(this.ante, this.blind);
       this.score = 0;
       this.chips = 0;
       this.mult = 1;
 
+      // Recarrega as cargas das habilidades para o máximo
       this.vaultCharges = this.vaultMaxCharges;
-      this.vaultCooldown = 0;
       this.blasterCharges = this.blasterMaxCharges;
+      this.vaultCooldown = 0;
       this.blasterCooldown = 0;
-      
       this.stickyPools = [];
       this.pelletsEatenForVault = 0;
 
       this.updateHUD();
       this.updateRelicsTray();
+      this.saveActiveRunState();
     }
 
     getTargetScore(ante, blind) {
+      let baseTarget = 2000;
       if (ante === 1) {
-        if (blind === 1) return 2000;
-        if (blind === 2) return 4000;
-        if (blind === 3) return 8000;
+        if (blind === 1) baseTarget = 2000;
+        if (blind === 2) baseTarget = 4000;
+        if (blind === 3) baseTarget = 8000;
+      } else if (ante === 2) {
+        if (blind === 1) baseTarget = 15000;
+        if (blind === 2) baseTarget = 25000;
+        if (blind === 3) baseTarget = 45000;
+      } else {
+        const base = blind === 1 ? 15000 : (blind === 2 ? 25000 : 45000);
+        baseTarget = Math.round(base * Math.pow(2.2, ante - 2));
       }
-      if (ante === 2) {
-        if (blind === 1) return 15000;
-        if (blind === 2) return 25000;
-        if (blind === 3) return 45000;
-      }
-      // Antes superiores (ante >= 3)
-      const base = blind === 1 ? 15000 : (blind === 2 ? 25000 : 45000);
-      return Math.round(base * Math.pow(2.2, ante - 2));
+
+      if (this.stake === 'red') baseTarget = Math.round(baseTarget * 1.20);
+      if (this.stake === 'gold') baseTarget = Math.round(baseTarget * 1.40);
+
+      return baseTarget;
     }
 
     checkWinCondition() {
@@ -534,6 +598,12 @@
 
         // Ouro ganho ao terminar a fase
         this.gold += this.ante * 5;
+
+        // Registra incremento de Antes completados nas estatísticas
+        let completed = parseInt(localStorage.getItem('munch_completed_antes')) || 0;
+        let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
+        localStorage.setItem('munch_completed_antes', completed + 1);
+        localStorage.setItem('munch_total_antes', totalAntes + 1);
 
         // Confetes e efeitos de vitória
         for (let i = 0; i < 40; i++) {
@@ -547,6 +617,8 @@
             1200
           ));
         }
+
+        this.saveActiveRunState();
       }
     }
 
@@ -620,18 +692,27 @@
 
     // Define a velocidade dos inimigos a cada fase
     getEnemySpeedMultiplier(phase) {
-      if (phase === 1) return 0.70;
-      if (phase === 2) return 0.80;
-      // Aumenta gradativamente a partir da fase 3
-      return Math.min(1.3, 0.85 + (phase - 3) * 0.05);
+      let mult = 0.70;
+      if (phase === 1) mult = 0.70;
+      else if (phase === 2) mult = 0.80;
+      else mult = Math.min(1.3, 0.85 + (phase - 3) * 0.05);
+
+      if (this.stake === 'red') mult *= 1.10;
+      if (this.stake === 'gold') mult *= 1.20;
+
+      return mult;
     }
 
     triggerScreenShake(intensity = 8) {
       if (!this.bezel) return;
+      const shakeSetting = localStorage.getItem('munch_option_shake') || '100';
+      const factor = parseInt(shakeSetting) / 100;
+      if (factor <= 0) return;
+
       this.bezel.classList.remove('shake');
       void this.bezel.offsetWidth;
       this.bezel.classList.add('shake');
-      setTimeout(() => this.bezel.classList.remove('shake'), 150);
+      setTimeout(() => this.bezel.classList.remove('shake'), Math.round(150 * factor));
     }
 
     triggerVault() {
@@ -847,17 +928,120 @@
       this.hasStickyJump = false;
       this.cooldownMultiplier = 1.0;
       
+      this.selectedSlime = localStorage.getItem('munch_selected_slime') || 'classic';
+      this.isGamblerSlime = (this.selectedSlime === 'gambler');
+      this.initialRunRecord = parseInt(localStorage.getItem('munch_best_round_score')) || 0;
+
+      // Aplica estatísticas e habilidades base de cada Slime
       this.vaultMaxCharges = 0;
       this.blasterMaxCharges = 0;
-      this.vaultCharges = 0;
-      this.blasterCharges = 0;
-      
+
+      if (this.selectedSlime === 'metallic') {
+        this.pelletChipBonus = 30;
+        this.cooldownMultiplier = 1.20;
+      } else if (this.selectedSlime === 'ballistic') {
+        this.blasterMaxCharges = 2;
+      }
+
+      this.vaultCharges = this.vaultMaxCharges;
+      this.blasterCharges = this.blasterMaxCharges;
+      this.vaultCooldown = 0;
+      this.blasterCooldown = 0;
+
       this.maxLives = 2;
       this.lives = 2;
       this.gold = 0;
       this.phase = 1;
       this.ante = 1;
       this.blind = 1;
+      this.score = 0;
+      this.chips = 0;
+      this.mult = 1;
+    }
+
+    saveActiveRunState() {
+      if (this.gameState === GAME_STATES.GAME_OVER) return;
+      const data = {
+        ante: this.ante,
+        blind: this.blind,
+        phase: this.phase,
+        score: this.score,
+        chips: this.chips,
+        mult: this.mult,
+        gold: this.gold,
+        lives: this.lives,
+        maxLives: this.maxLives,
+        selectedSlime: this.selectedSlime,
+        stake: this.stake,
+        isEndless: this.isEndless,
+        activeRelics: this.activeRelics.map(r => ({ id: r.id, name: r.name, icon: r.icon, rarity: r.rarity, category: r.category, desc: r.desc }))
+      };
+      localStorage.setItem('munch_active_run', JSON.stringify(data));
+    }
+
+    resumeActiveRun() {
+      const activeRaw = localStorage.getItem('munch_active_run');
+      if (!activeRaw) {
+        this.resetRunState();
+        this.loadLevel();
+        return;
+      }
+      try {
+        const data = JSON.parse(activeRaw);
+        this.resetRunState();
+
+        this.ante = data.ante || 1;
+        this.blind = data.blind || 1;
+        this.phase = data.phase || 1;
+        this.score = data.score || 0;
+        this.chips = data.chips || 0;
+        this.mult = data.mult || 1;
+        this.gold = data.gold || 0;
+        this.selectedSlime = data.selectedSlime || 'classic';
+        this.stake = data.stake || 'white';
+        this.isEndless = data.isEndless || false;
+        this.isGamblerSlime = (this.selectedSlime === 'gambler');
+
+        this.activeRelics = [];
+        if (data.activeRelics && Array.isArray(data.activeRelics)) {
+          data.activeRelics.forEach(savedRelic => {
+            const template = CARD_POOL.find(c => c.id === savedRelic.id);
+            if (template) {
+              this.activeRelics.push(template);
+              if (typeof template.apply === 'function') {
+                template.apply(this);
+              }
+            }
+          });
+        }
+        if (data.lives) this.lives = data.lives;
+        if (data.maxLives) this.maxLives = data.maxLives;
+
+        this.loadLevel();
+      } catch (e) {
+        this.resetRunState();
+        this.loadLevel();
+      }
+    }
+
+    recordRunHistory() {
+      const historyRaw = localStorage.getItem('munch_run_history') || '[]';
+      let history = [];
+      try { history = JSON.parse(historyRaw); } catch(e) {}
+      
+      const now = new Date();
+      const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+      
+      history.unshift({
+        date: dateStr,
+        stake: this.stake || 'white',
+        ante: this.ante || 1,
+        score: Math.round(this.score || 0),
+        relics: this.activeRelics.map(r => ({ icon: r.icon, id: r.id }))
+      });
+      
+      if (history.length > 10) history.pop();
+      localStorage.setItem('munch_run_history', JSON.stringify(history));
     }
 
     scorePop(box) {
@@ -871,6 +1055,9 @@
       let earnedMult = 0;
       let scoreColor = '#ffffff';
       let tag = '';
+
+      let totalPellets = (parseInt(localStorage.getItem('munch_total_pellets')) || 0) + 1;
+      localStorage.setItem('munch_total_pellets', totalPellets);
 
       if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
         this.pelletsEatenForVault = (this.pelletsEatenForVault || 0) + 1;
@@ -923,8 +1110,19 @@
         this.scorePop(this.chipsBox);
       }
 
+      if (this.isGamblerSlime) {
+        const randFactor = parseFloat((0.5 + Math.random() * 2.5).toFixed(1));
+        this.mult = Math.max(1, Math.round(this.mult * randFactor));
+      }
+
       const oldScore = this.score;
       this.score = this.chips * this.mult;
+
+      // Registra recorde de multiplicador máximo na rodada
+      const currentMaxMult = parseInt(localStorage.getItem('munch_max_mult')) || 1;
+      if (this.mult > currentMaxMult) {
+        localStorage.setItem('munch_max_mult', Math.round(this.mult));
+      }
 
       const diff = this.score - oldScore;
       if (diff > 0 && this.player) {
@@ -1244,6 +1442,15 @@
 
       this.spawnCardParticles(cardEl);
 
+      // Adiciona relíquia descoberta no compêndio
+      const discoveredRaw = localStorage.getItem('munch_discovered_relics') || '[]';
+      let discovered = [];
+      try { discovered = JSON.parse(discoveredRaw); } catch(e) {}
+      if (!discovered.includes(card.id)) {
+        discovered.push(card.id);
+        localStorage.setItem('munch_discovered_relics', JSON.stringify(discovered));
+      }
+
       this.activeRelics.push(card);
       card.apply(this);
 
@@ -1255,6 +1462,7 @@
         document.getElementById('modalDraftShop').classList.remove('visible');
         this.triggerScreenShake(8);
         this.updateRelicsTray();
+        this.saveActiveRunState();
         this.nextRound();
       });
     }
@@ -1267,22 +1475,61 @@
         this.ante++;
       }
 
+      if (this.ante > 8 && !this.isEndless) {
+        // Run concluída com vitória total no Ante 8
+        this.recordRunHistory();
+        localStorage.removeItem('munch_active_run');
+        alert("PARABÉNS! VOCÊ CONCLUIU A RUN NO ANTE 8!");
+        window.location.href = 'menu.html';
+        return;
+      }
+
       this.gameState = GAME_STATES.PLAYING;
       this.loadLevel();
     }
 
-    triggerGameOver() {
+    async triggerGameOver() {
       this.gameState = GAME_STATES.GAME_OVER;
       this.triggerScreenShake(16);
 
-      const record = parseInt(localStorage.getItem('munch_highscore')) || 0;
-      if (this.score > record) {
-        localStorage.setItem('munch_highscore', this.score);
+      let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
+      localStorage.setItem('munch_total_antes', totalAntes + 1);
+
+      this.recordRunHistory();
+      localStorage.removeItem('munch_active_run');
+
+      const previousRecord = (this.initialRunRecord !== undefined) ? this.initialRunRecord : (parseInt(localStorage.getItem('munch_best_round_score')) || 0);
+      if (this.score > previousRecord) {
+        localStorage.setItem('munch_best_round_score', Math.round(this.score));
       }
 
       document.getElementById('loseModalScore').innerText = Math.round(this.score).toLocaleString();
-      document.getElementById('loseModalHighScore').innerText = Math.max(record, Math.round(this.score)).toLocaleString();
-      
+      document.getElementById('loseModalHighScore').innerText = Math.max(previousRecord, Math.round(this.score)).toLocaleString();
+
+      const submitBox = document.querySelector('.leaderboard-submit-box');
+      const btnSubmitScore = document.getElementById('btnSubmitScore');
+      const lblSubmitStatus = document.getElementById('lblSubmitStatus');
+
+      // Verifica se a pontuação entra no Top 5 de Todos os Tempos na categoria atual
+      const isTop5 = await MunchLeaderboard.isTop5(this.stake || 'white', this.score);
+
+      if (submitBox) {
+        if (isTop5) {
+          let stakeLabel = 'FICHA BRANCA';
+          if (this.stake === 'red') stakeLabel = 'FICHA VERMELHA';
+          if (this.stake === 'gold') stakeLabel = 'FICHA DOURADA';
+
+          submitBox.style.display = 'block';
+          if (btnSubmitScore) btnSubmitScore.disabled = false;
+          if (lblSubmitStatus) {
+            lblSubmitStatus.innerText = `🎉 NOVO TOP 5 GLOBAL NA ${stakeLabel}!`;
+            lblSubmitStatus.style.color = '#FFE600';
+          }
+        } else {
+          submitBox.style.display = 'none';
+        }
+      }
+
       this.modalGameOver.classList.add('visible');
     }
 
@@ -1326,6 +1573,9 @@
 
     eatGhost(ghost) {
       ghost.state = 'eaten';
+
+      let totalKills = (parseInt(localStorage.getItem('munch_total_kills')) || 0) + 1;
+      localStorage.setItem('munch_total_kills', totalKills);
       
       const ghostBaseScore = 200;
       const ghostBaseMult = 2;
@@ -2294,6 +2544,9 @@
     }
 
     die(game) {
+      let totalKills = (parseInt(localStorage.getItem('munch_total_kills')) || 0) + 1;
+      localStorage.setItem('munch_total_kills', totalKills);
+
       this.state = 'respawning';
       this.respawnTimer = 2500; // Tempo para renascer
       

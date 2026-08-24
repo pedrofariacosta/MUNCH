@@ -12,6 +12,8 @@
 
   <!-- CSS e Javascript -->
   <link rel="stylesheet" href="./styles/menu.css">
+  <script src="./src/env.js"></script>
+  <script src="./src/firebase-config.js"></script>
   <script src="./src/menu.js"></script>
 </head>
 <body>
@@ -24,10 +26,10 @@
 
       <!-- Menu principal -->
       <nav class="button-group" aria-label="Menu Principal">
-        <button class="btn btn-play">Jogar</button>
-        <button class="btn btn-secondary">Baralho / Slimes</button>
-        <button class="btn btn-secondary">Estatísticas</button>
-        <button class="btn btn-secondary">Opções</button>
+        <button class="btn btn-play" id="menuBtnPlay">Jogar</button>
+        <button class="btn btn-secondary" id="menuBtnDeck">Baralho / Slimes</button>
+        <button class="btn btn-secondary" id="menuBtnStats">Estatísticas</button>
+        <button class="btn btn-secondary" id="menuBtnOptions">Opções</button>
       </nav>
     </div>
 
@@ -37,27 +39,27 @@
       <aside class="arcade-stats">
         <div class="stat-box">
           <span class="stat-label">Best Run</span>
-          <span class="stat-value">1,420,500</span>
+          <span class="stat-value" id="topBestRunScore">0</span>
         </div>
         <div class="stat-box">
           <span class="stat-label">Max Multi</span>
-          <span class="stat-value">x32</span>
+          <span class="stat-value" id="topMaxMultValue">x1</span>
         </div>
       </aside>
 
-      <!-- Card holográfico do slime -->
+      <!-- Card holográfico do slime selecionado -->
       <div class="holo-card-wrapper">
-        <div class="holo-card comum">
+        <div class="holo-card comum" id="mainSlimeCard">
           <div class="holo-glare"></div>
 
           <div class="relic-card-header">
-            <div class="relic-card-pill">[ <span class="pill-rarity">COMMON</span> // <span class="pill-category">STARTER</span> ]</div>
+            <div class="relic-card-pill">[ <span class="pill-rarity" id="mainSlimeRarity">COMMON</span> // <span class="pill-category">STARTER</span> ]</div>
           </div>
 
           <div class="relic-card-icon-container">
             <div class="relic-card-icon-ring">
               <!-- Desenho do slime -->
-              <svg class="holo-card-slime" viewBox="0 0 160 160" fill="none">
+              <svg class="holo-card-slime" id="mainSlimeSvg" viewBox="0 0 160 160" fill="none">
                 <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff" stroke-width="6"/>
                 <g>
                   <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
@@ -77,14 +79,14 @@
             </div>
           </div>
 
-          <div class="relic-card-name">SLIME RABUGENTO</div>
+          <div class="relic-card-name" id="mainSlimeName">SLIME CLÁSSICO</div>
 
           <!-- Descrição da carta -->
           <div class="relic-card-desc-box">
             <div class="card-stat-badge-wrapper">
-              <div class="card-stat-pill blue"><span class="pill-value">+1</span> Pulo &amp; Disparo</div>
+              <div class="card-stat-pill blue" id="mainSlimeBadge"><span class="pill-value">+1</span> Pulo Base</div>
             </div>
-            <div class="relic-card-desc-text">Slime rabugento inicial com 100 Fichas Base e pulo ativado.</div>
+            <div class="relic-card-desc-text" id="mainSlimeDesc">Slime inicial balanceado com 1 pulo ativado.</div>
           </div>
         </div>
       </div>
@@ -127,6 +129,408 @@
     <span>BUILD 2026.1 // DESKTOP EDITION</span>
     <span>[↑↓] NAVEGAR &nbsp;&nbsp; [ENTER] CONFIRMAR</span>
   </footer>
+
+  <!-- ========================================== -->
+  <!-- ESTRUTURA UNIVERSAL DE MODAIS ARCADE       -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Seleção de Partida (▶ JOGAR) -->
+  <div class="arcade-modal-overlay" id="modalPlay">
+    <div class="arcade-modal-container">
+      <header class="arcade-modal-header">
+        <h2 class="arcade-modal-title">SELEÇÃO DE PARTIDA</h2>
+        <button class="arcade-modal-close" data-close="modalPlay">[ ✕ / ESC ]</button>
+      </header>
+
+      <div class="arcade-modal-body">
+        <!-- Card de Continuar Run (Exibido dinamicamente se existir save) -->
+        <div class="active-run-card hidden" id="activeRunCard">
+          <div class="active-run-header">
+            <span class="active-run-badge">PARTIDA EM ANDAMENTO</span>
+            <span class="active-run-ante" id="activeRunAnte">ANTE 1 // BLIND 1</span>
+          </div>
+          <div class="active-run-details">
+            <div class="active-run-info">
+              <span class="info-label">PONTUAÇÃO ATUAL</span>
+              <span class="info-val" id="activeRunScore">0</span>
+            </div>
+            <div class="active-run-info">
+              <span class="info-label">RELÍQUIAS EQUIPADAS</span>
+              <div class="active-run-relics" id="activeRunRelics"></div>
+            </div>
+          </div>
+          <button class="btn-continue-run" id="btnContinueRun">▶ CONTINUAR RUN</button>
+        </div>
+
+        <div class="section-divider-title">NOVA PARTIDA — SELEÇÃO DE STAKE</div>
+
+        <!-- Seletor de Fichas de Aposta (Stakes) -->
+        <div class="stakes-grid">
+          <div class="stake-card selected" data-stake="white">
+            <div class="stake-chip white-chip">⚪</div>
+            <div class="stake-name">FICHA BRANCA</div>
+            <div class="stake-tag">PADRÃO</div>
+            <div class="stake-desc">Dificuldade balanceada. Ideal para explorar relíquias e estratégias.</div>
+          </div>
+
+          <div class="stake-card" data-stake="red">
+            <div class="stake-chip red-chip">🔴</div>
+            <div class="stake-name">FICHA VERMELHA</div>
+            <div class="stake-tag">AVANÇADA</div>
+            <div class="stake-desc">Metas de Blind <strong>+20%</strong> // Inimigos <strong>+10%</strong> mais velozes.</div>
+          </div>
+
+          <div class="stake-card" data-stake="gold">
+            <div class="stake-chip gold-chip">🟡</div>
+            <div class="stake-name">FICHA DOURADA</div>
+            <div class="stake-tag">INFERNAL</div>
+            <div class="stake-desc">Sem moedas de cura no mapa // Tempo de investida dos inimigos <strong>-50%</strong>.</div>
+          </div>
+        </div>
+
+        <!-- Modo Sem Fim (Endless) -->
+        <div class="endless-toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="chkEndlessMode">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="endless-info">
+            <span class="endless-title">MODO SEM FIM (ENDLESS MODE)</span>
+            <span class="endless-desc">Continue jogando após o Ante 8 com multiplicadores de meta exponenciais.</span>
+          </div>
+        </div>
+
+        <!-- Botão de Iniciar -->
+        <div class="modal-actions">
+          <button class="btn-start-run" id="btnStartNewRun">INICIAR NOVA RUN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Customização & Baralho (BARALHO / SLIMES) -->
+  <div class="arcade-modal-overlay" id="modalDeck">
+    <div class="arcade-modal-container deck-modal-large">
+      <header class="arcade-modal-header">
+        <h2 class="arcade-modal-title">BARALHO & CUSTOMIZAÇÃO</h2>
+        <button class="arcade-modal-close" data-close="modalDeck">[ ✕ / ESC ]</button>
+      </header>
+
+      <!-- Abas de Navegação -->
+      <nav class="arcade-modal-tabs">
+        <button class="tab-btn active" data-tab="tabSlimes">SLIMES JOGÁVEIS</button>
+        <button class="tab-btn" data-tab="tabCompendium">COMPÊNDIO DE RELÍQUIAS</button>
+        <button class="tab-btn" data-tab="tabThemes">TEMAS VISUAIS CRT</button>
+      </nav>
+
+      <div class="arcade-modal-body">
+        <!-- Aba 1: Seleção de Slimes -->
+        <div class="tab-content active" id="tabSlimes">
+          <div class="slimes-selector-grid" id="slimesGrid">
+            <!-- Slime Clássico -->
+            <div class="slime-select-card selected" data-slime="classic">
+              <div class="slime-card-icon-wrapper classic-bg">
+                <span class="slime-card-emoji">🟩</span>
+              </div>
+              <div class="slime-card-title">SLIME CLÁSSICO</div>
+              <div class="slime-card-badge blue">+1 Pulo Base</div>
+              <div class="slime-card-desc">Slime inicial balanceado. Excelente para partidas padrão.</div>
+              <button class="btn-select-slime">SELECIONADO</button>
+            </div>
+
+            <!-- Slime Metálico -->
+            <div class="slime-select-card" data-slime="metallic">
+              <div class="slime-card-icon-wrapper metallic-bg">
+                <span class="slime-card-emoji">⚙️</span>
+              </div>
+              <div class="slime-card-title">SLIME METÁLICO</div>
+              <div class="slime-card-badge cyan">+30 Fichas / Pastilha</div>
+              <div class="slime-card-desc">Ganhe mais fichas por pastilha. Recarga de habilidades 20% mais lenta.</div>
+              <button class="btn-select-slime">SELECIONAR</button>
+            </div>
+
+            <!-- Slime Balístico -->
+            <div class="slime-select-card" data-slime="ballistic">
+              <div class="slime-card-icon-wrapper ballistic-bg">
+                <span class="slime-card-emoji">🎯</span>
+              </div>
+              <div class="slime-card-title">SLIME BALÍSTICO</div>
+              <div class="slime-card-badge orange">2 Tiros // 0 Pulos</div>
+              <div class="slime-card-desc">Comece com 2 cargas de disparo desbloqueadas, mas sem a habilidade de pulo inicial.</div>
+              <button class="btn-select-slime">SELECIONAR</button>
+            </div>
+
+            <!-- Slime Gambler -->
+            <div class="slime-select-card" data-slime="gambler">
+              <div class="slime-card-icon-wrapper gambler-bg">
+                <span class="slime-card-emoji">🎲</span>
+              </div>
+              <div class="slime-card-title">SLIME GAMBLER</div>
+              <div class="slime-card-badge gold">Mult Caótico (x0.5 - x3.0)</div>
+              <div class="slime-card-desc">Seu multiplicador oscila aleatoriamente entre x0.5 e x3.0 a cada pastilha consumida.</div>
+              <button class="btn-select-slime">SELECIONAR</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aba 2: Compêndio de Relíquias (Codex) -->
+        <div class="tab-content" id="tabCompendium">
+          <div class="compendium-header-info">
+            <span>RELÍQUIAS DESCOBERTAS: <strong id="discoveredRelicsCount">0 / 11</strong></span>
+            <span class="compendium-hint">Jogue partidas para desbloquear novas cartas no seu álbum.</span>
+          </div>
+          <div class="compendium-grid" id="compendiumGrid">
+            <!-- Preenchido dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Aba 3: Temas Visuais CRT -->
+        <div class="tab-content" id="tabThemes">
+          <div class="themes-grid" id="themesGrid">
+            <div class="theme-card selected" data-theme="default">
+              <div class="theme-preview default-preview">
+                <div class="tp-bar"></div>
+                <div class="tp-box"></div>
+              </div>
+              <div class="theme-title">ORIGINAL ARCADE</div>
+              <div class="theme-desc">Preto puro com acentos em ciano, amarelo neon e rosa.</div>
+            </div>
+
+            <div class="theme-card" data-theme="gameboy">
+              <div class="theme-preview gameboy-preview">
+                <div class="tp-bar"></div>
+                <div class="tp-box"></div>
+              </div>
+              <div class="theme-title">GAME BOY GREEN</div>
+              <div class="theme-desc">Paleta de 4 tons de verde monocromático retrô portáti.</div>
+            </div>
+
+            <div class="theme-card" data-theme="amber">
+              <div class="theme-preview amber-preview">
+                <div class="tp-bar"></div>
+                <div class="tp-box"></div>
+              </div>
+              <div class="theme-title">FÓSFORO ÂMBAR</div>
+              <div class="theme-desc">Monitor industrial clássico com brilho quente de fósforo.</div>
+            </div>
+
+            <div class="theme-card" data-theme="cyberpunk">
+              <div class="theme-preview cyberpunk-preview">
+                <div class="tp-bar"></div>
+                <div class="tp-box"></div>
+              </div>
+              <div class="theme-title">CYBERPUNK NEON</div>
+              <div class="theme-desc">Contraste intenso em magenta radiante e ciano elétrico.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Estatísticas Globais (ESTATÍSTICAS) -->
+  <div class="arcade-modal-overlay" id="modalStats">
+    <div class="arcade-modal-container stats-modal-wide">
+      <header class="arcade-modal-header">
+        <h2 class="arcade-modal-title">ESTATÍSTICAS GLOBAIS</h2>
+        <button class="arcade-modal-close" data-close="modalStats">[ ✕ / ESC ]</button>
+      </header>
+
+      <div class="arcade-modal-body">
+        <!-- Cards de Métricas em Destaque -->
+        <div class="stats-summary-grid">
+          <div class="summary-card">
+            <span class="sc-icon">🏆</span>
+            <span class="sc-label">MAIOR PONTUAÇÃO</span>
+            <span class="sc-value gold" id="statBestRound">0</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="sc-icon">🔥</span>
+            <span class="sc-label">MAX MULTIPLICADOR</span>
+            <span class="sc-value red" id="statMaxMult">x1</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="sc-icon">⚔️</span>
+            <span class="sc-label">INIMIGOS DESTRUÍDOS</span>
+            <span class="sc-value cyan" id="statTotalKills">0</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="sc-icon">🟨</span>
+            <span class="sc-label">PASTILHAS DEVORADAS</span>
+            <span class="sc-value white" id="statTotalPellets">0</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="sc-icon">📊</span>
+            <span class="sc-label">TAXA DE VITÓRIA</span>
+            <span class="sc-value green" id="statWinRate">0%</span>
+          </div>
+        </div>
+
+        <div class="section-divider-title-with-btn">
+          <span>🏆 RANKING GLOBAL (TOP 5 DE TODOS OS TEMPOS)</span>
+          <button class="btn-mini-refresh" id="btnRefreshRanking">[ 🔄 ATUALIZAR ]</button>
+        </div>
+
+        <!-- Abas de Categoria do Ranking por Ficha/Stake -->
+        <div class="ranking-tabs">
+          <button class="ranking-tab-btn active" data-ranking-stake="white">⚪ FICHA BRANCA</button>
+          <button class="ranking-tab-btn" data-ranking-stake="red">🔴 FICHA VERMELHA</button>
+          <button class="ranking-tab-btn" data-ranking-stake="gold">🟡 FICHA DOURADA</button>
+        </div>
+
+        <!-- Tabela do Ranking Global (Top 5 por Categoria) -->
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th># POSIÇÃO</th>
+                <th>JOGADOR</th>
+                <th>ANTE ALCANÇADO</th>
+                <th>PONTUAÇÃO FINAL</th>
+                <th>DATA</th>
+              </tr>
+            </thead>
+            <tbody id="globalRankingTableBody">
+              <!-- Preenchido via Firebase / JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-divider-title">HISTÓRICO RECENTE DE RUNS (ÚLTIMAS 5 PARTIDAS)</div>
+
+        <!-- Tabela de Histórico -->
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>DATA / HORA</th>
+                <th>STAKE</th>
+                <th>ANTE ALCANÇADO</th>
+                <th>PONTUAÇÃO FINAL</th>
+                <th>RELÍQUIAS EQUIPADAS</th>
+              </tr>
+            </thead>
+            <tbody id="recentRunsTableBody">
+              <!-- Linhas preenchidas via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Configurações & Acessibilidade (OPÇÕES) -->
+  <div class="arcade-modal-overlay" id="modalOptions">
+    <div class="arcade-modal-container">
+      <header class="arcade-modal-header">
+        <h2 class="arcade-modal-title">CONFIGURAÇÕES & ACESSIBILIDADE</h2>
+        <button class="arcade-modal-close" data-close="modalOptions">[ ✕ / ESC ]</button>
+      </header>
+
+      <div class="arcade-modal-body">
+        <!-- Seção 1: Áudio -->
+        <div class="options-group">
+          <div class="options-group-title">🔊 CONFIGURAÇÕES DE ÁUDIO</div>
+          
+          <div class="option-row">
+            <div class="option-label-box">
+              <span class="opt-name">Volume da Música</span>
+              <span class="opt-val-badge" id="lblMusicVol">80%</span>
+            </div>
+            <input type="range" class="range-slider" id="sliderMusicVol" min="0" max="100" value="80">
+          </div>
+
+          <div class="option-row">
+            <div class="option-label-box">
+              <span class="opt-name">Efeitos Sonoros (SFX)</span>
+              <span class="opt-val-badge" id="lblSfxVol">100%</span>
+            </div>
+            <input type="range" class="range-slider" id="sliderSfxVol" min="0" max="100" value="100">
+          </div>
+        </div>
+
+        <!-- Seção 2: Gráficos & Acessibilidade -->
+        <div class="options-group">
+          <div class="options-group-title">📺 GRÁFICOS & ACESSIBILIDADE</div>
+
+          <div class="option-row inline-space">
+            <span class="opt-name">Efeito CRT / Scanlines</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chkScanlines" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-row inline-space">
+            <span class="opt-name">Intensidade de Tremor de Tela (Shake)</span>
+            <select class="arcade-select" id="selScreenShake">
+              <option value="100">100% (Padrão Arcade)</option>
+              <option value="50">50% (Suave)</option>
+              <option value="0">0% (Desativado)</option>
+            </select>
+          </div>
+
+          <div class="option-row inline-space">
+            <span class="opt-name">Reduzir Flashes & Aberração</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chkReduceFlashes">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Seção 3: Controles -->
+        <div class="options-group">
+          <div class="options-group-title">🎮 CONTROLES</div>
+
+          <div class="option-row inline-space">
+            <span class="opt-name">Perfil de Teclas de Movimento</span>
+            <div class="segmented-control">
+              <button class="seg-btn active" data-control="wasd">WASD / SETAS</button>
+              <button class="seg-btn" data-control="arrows">APENAS SETAS</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 4: Firebase Leaderboard -->
+        <div class="options-group">
+          <div class="options-group-title">🔥 RANKING GLOBAL (FIREBASE DB)</div>
+          <div class="option-row">
+            <span class="opt-name">URL do Firebase Realtime Database</span>
+            <input type="text" class="arcade-input-text" id="txtFirebaseDbUrl" placeholder="https://seu-projeto-rtdb.firebaseio.com">
+          </div>
+        </div>
+
+        <!-- Seção 4: Gerenciamento de Save -->
+        <div class="options-group danger-zone">
+          <div class="options-group-title danger">⚠️ ZONA DE PERIGO</div>
+          <button class="btn-reset-save" id="btnOpenResetConfirm">RESETAR TODOS OS DADOS SALVOS</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub-modal de Confirmação de Reset de Save -->
+  <div class="arcade-modal-overlay sub-modal" id="modalConfirmReset">
+    <div class="arcade-modal-container alert-modal">
+      <header class="arcade-modal-header danger-bg">
+        <h2 class="arcade-modal-title">⚠️ APAGAR TODO O PROGRESSO?</h2>
+      </header>
+      <div class="arcade-modal-body text-center">
+        <p class="alert-desc">Esta ação irá apagar permanentemente todas as suas estatísticas globais, relíquias descobertas, histórico de partidas e configurações salvas.</p>
+        <p class="alert-desc highlight-red">Esta ação NÃO pode ser desfeita!</p>
+        
+        <div class="modal-actions inline-buttons">
+          <button class="btn-confirm-danger" id="btnExecuteResetSave">SIM, APAGAR TUDO</button>
+          <button class="btn-cancel-modal" id="btnCancelResetSave">CANCELAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
