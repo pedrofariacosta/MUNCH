@@ -512,7 +512,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Carrega Ranking Global (Firebase Top 5 por Categoria)
+    // Carrega Ranking (Top 5 por Categoria)
     loadGlobalRanking();
   }
 
@@ -578,7 +578,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const shake = localStorage.getItem('munch_option_shake') || '100';
     const reduceFlashes = localStorage.getItem('munch_option_reduce_flashes') === 'true';
     const controls = localStorage.getItem('munch_controls') || 'wasd';
-    const fbUrl = localStorage.getItem('munch_firebase_db_url') || '';
 
     document.getElementById('sliderMusicVol').value = musicVol;
     document.getElementById('lblMusicVol').innerText = `${musicVol}%`;
@@ -590,24 +589,12 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('selScreenShake').value = shake;
     document.getElementById('chkReduceFlashes').checked = reduceFlashes;
 
-    const txtFbUrl = document.getElementById('txtFirebaseDbUrl');
-    if (txtFbUrl) {
-      txtFbUrl.value = fbUrl;
-    }
-
     document.querySelectorAll('.segmented-control .seg-btn').forEach(btn => {
       if (btn.getAttribute('data-control') === controls) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
       }
-    });
-  }
-
-  const txtFbUrl = document.getElementById('txtFirebaseDbUrl');
-  if (txtFbUrl) {
-    txtFbUrl.addEventListener('change', (e) => {
-      localStorage.setItem('munch_firebase_db_url', e.target.value.trim());
     });
   }
 

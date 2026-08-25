@@ -459,7 +459,7 @@
             return;
           }
           localStorage.setItem('munch_last_player_name', name);
-          lblSubmitStatus.innerText = "Enviando ao Firebase...";
+          lblSubmitStatus.innerText = "Registrando recorde...";
           lblSubmitStatus.style.color = "#FFE600";
           btnSubmitScore.disabled = true;
 

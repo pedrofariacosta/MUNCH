@@ -12,8 +12,7 @@
 
   <!-- CSS e Javascript -->
   <link rel="stylesheet" href="./styles/menu.css">
-  <script src="./src/env.js"></script>
-  <script src="./src/firebase-config.js"></script>
+  <script src="./src/leaderboard.js"></script>
   <script src="./src/menu.js"></script>
 </head>
 <body>
@@ -395,7 +394,7 @@
               </tr>
             </thead>
             <tbody id="globalRankingTableBody">
-              <!-- Preenchido via Firebase / JS -->
+              <!-- Preenchido via JS -->
             </tbody>
           </table>
         </div>
@@ -496,14 +495,6 @@
           </div>
         </div>
 
-        <!-- Seção 4: Firebase Leaderboard -->
-        <div class="options-group">
-          <div class="options-group-title">🔥 RANKING GLOBAL (FIREBASE DB)</div>
-          <div class="option-row">
-            <span class="opt-name">URL do Firebase Realtime Database</span>
-            <input type="text" class="arcade-input-text" id="txtFirebaseDbUrl" placeholder="https://seu-projeto-rtdb.firebaseio.com">
-          </div>
-        </div>
 
         <!-- Seção 4: Gerenciamento de Save -->
         <div class="options-group danger-zone">

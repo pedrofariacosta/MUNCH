@@ -1,8 +1,9 @@
-# Configurações com Chaves e Segredos
-src/env.js
+# Variáveis de Ambiente e Segredos (Vercel / Local)
 .env
 .env.local
 .env.*.local
+.vercel
+
 
 # Dependências
 node_modules/
