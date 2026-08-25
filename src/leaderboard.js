@@ -1,13 +1,32 @@
-// MUNCH — Serviço de Ranking Local (Top 5 por Categoria / Stake via LocalStorage)
+// MUNCH — Serviço de Ranking Híbrido (Online Upstash Redis + Fallback LocalStorage)
 
 (function() {
   const MunchLeaderboard = {
-    // Retorna os 5 maiores recordes para a categoria/stake informada ('white', 'red', 'gold')
+    // Retorna os 5 maiores recordes da Stake (Online primeiro, fallback LocalStorage)
     async getTopScoresByStake(stake = 'white') {
+      try {
+        const response = await fetch(`/api/leaderboard?stake=${stake}`, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          const onlineScores = await response.json();
+          if (Array.isArray(onlineScores)) {
+            // Atualiza o cache local de segurança com os dados mais recentes da nuvem
+            localStorage.setItem(`munch_leaderboard_${stake}`, JSON.stringify(onlineScores));
+            return onlineScores;
+          }
+        }
+      } catch (err) {
+        console.warn(`[MUNCH] Falha ao consultar ranking online (${stake}), usando cache local.`);
+      }
+
+      // Se falhar a conexão ou estiver vazio, retorna os dados locais
       return this.getLocalFallbackScores(stake);
     },
 
-    // Envia o recorde para a categoria correspondente e armazena localmente
+    // Envia o recorde para a API online e persiste também localmente
     async submitScore(playerName, score, ante, stake = 'white') {
       const entry = {
         name: (playerName || "SLIME_ANONIMO").toUpperCase().trim().slice(0, 12),
@@ -18,11 +37,24 @@
         timestamp: Date.now()
       };
 
+      // 1. Grava no LocalStorage imediatamente
       this.saveLocalScore(stake, entry);
+
+      // 2. Envia para a nuvem em segundo plano
+      try {
+        await fetch('/api/leaderboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        });
+      } catch (err) {
+        console.warn('[MUNCH] Erro ao sincronizar pontuação na nuvem:', err);
+      }
+
       return entry;
     },
 
-    // Verifica se uma pontuação entra no Top 5 da categoria
+    // Verifica se a pontuação entra no Top 5 da categoria
     async isTop5(stake, score) {
       if (score <= 0) return false;
       const topScores = await this.getTopScoresByStake(stake);
@@ -30,7 +62,7 @@
       return score > topScores[topScores.length - 1].score;
     },
 
-    // Leitura dos recordes salvos no localStorage por categoria
+    // Leitura dos recordes salvos no localStorage
     getLocalFallbackScores(stake = 'white') {
       const localRaw = localStorage.getItem(`munch_leaderboard_${stake}`) || '[]';
       try {
