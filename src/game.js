@@ -422,6 +422,53 @@
         if (this.gameState === GAME_STATES.GAME_OVER && e.code === 'KeyR') {
           this.restartGame();
         }
+
+        // Atalho de Enter para avançar na tela de vitória
+        if (e.code === 'Enter' && this.gameState === GAME_STATES.WIN_MODAL && this.modalWin.classList.contains('visible')) {
+          e.preventDefault();
+          this.btnNextBlind.click();
+          return;
+        }
+
+        // Atalhos para Loja de Relíquias (Draft Shop e Modo Substituição)
+        const modalDraft = document.getElementById('modalDraftShop');
+        if (modalDraft && modalDraft.classList.contains('visible')) {
+          const cards = document.querySelectorAll('#draftCardsContainer .relic-card');
+          const interactables = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card, #draftCardsContainer .btn-discard-new'));
+          
+          if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
+            e.preventDefault();
+            this.draftSelectedIndex = (this.draftSelectedIndex - 1 + interactables.length) % interactables.length;
+            this.updateDraftFocus();
+            return;
+          }
+          
+          if (e.code === 'ArrowRight' || e.code === 'ArrowDown') {
+            e.preventDefault();
+            this.draftSelectedIndex = (this.draftSelectedIndex + 1) % interactables.length;
+            this.updateDraftFocus();
+            return;
+          }
+          
+          if (e.code === 'Enter') {
+            e.preventDefault();
+            if (interactables[this.draftSelectedIndex]) {
+              interactables[this.draftSelectedIndex].click();
+            }
+            return;
+          }
+          
+          if (e.code === 'Digit1' || e.code === 'Numpad1') { if (cards.length > 0) { e.preventDefault(); cards[0].click(); return; } }
+          if (e.code === 'Digit2' || e.code === 'Numpad2') { if (cards.length > 1) { e.preventDefault(); cards[1].click(); return; } }
+          if (e.code === 'Digit3' || e.code === 'Numpad3') { if (cards.length > 2) { e.preventDefault(); cards[2].click(); return; } }
+          if (e.code === 'Digit4' || e.code === 'Numpad4') { if (cards.length > 3) { e.preventDefault(); cards[3].click(); return; } }
+          if (e.code === 'Digit5' || e.code === 'Numpad5') { if (cards.length > 4) { e.preventDefault(); cards[4].click(); return; } }
+          
+          if (e.code === 'Escape' || e.code === 'Backspace' || e.code === 'Delete') {
+            const skipBtn = document.querySelector('.btn-discard-new');
+            if (skipBtn) { e.preventDefault(); skipBtn.click(); return; }
+          }
+        }
       });
 
       // Clique esquerdo para atirar
@@ -543,7 +590,7 @@
       this.totalPellets = this.remainingPellets;
 
       // Spawna o slime e os inimigos
-      this.player = new Player(9, 8);
+      this.player = new Player(9, 8, this.selectedSlime);
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
 
       this.projectiles = [];
@@ -807,13 +854,13 @@
     updateHUD() {
       if (!this.hudBlindTarget) return;
 
-      let blindName = 'SMALL BLIND';
-      if (this.blind === 2) blindName = 'BIG BLIND';
-      else if (this.blind === 3) blindName = 'BOSS BLIND';
+      let blindName = 'ESTÁGIO 1';
+      if (this.blind === 2) blindName = 'ESTÁGIO 2';
+      else if (this.blind === 3) blindName = 'CHEFÃO';
 
       // Informações da fase e meta
       if (this.hudBlindBadge) {
-        this.hudBlindBadge.innerText = `ANTE ${this.ante} // ${blindName}`;
+        this.hudBlindBadge.innerText = `NÍVEL ${this.ante} // ${blindName}`;
       }
       this.hudBlindTarget.innerText = this.targetScore.toLocaleString();
       
@@ -831,7 +878,7 @@
       this.hudChipsValue.innerText = Math.round(this.chips).toLocaleString();
       this.hudMultValueEl.innerText = Math.round(this.mult);
 
-      this.hudRoundIndicator.innerText = `ANTE ${this.ante} // ${blindName}`;
+      this.hudRoundIndicator.innerText = `NÍVEL ${this.ante} // ${blindName}`;
       this.hudLives.innerText = '\u2764\uFE0F'.repeat(Math.max(0, this.lives));
       this.hudGold.innerText = this.gold;
 
@@ -1360,6 +1407,9 @@
       });
       
       container.appendChild(skipBtn);
+
+      this.draftSelectedIndex = 0;
+      this.updateDraftFocus();
     }
 
     formatCardDesc(desc) {
@@ -1432,6 +1482,20 @@
       });
 
       document.getElementById('modalDraftShop').classList.add('visible');
+      
+      this.draftSelectedIndex = 0;
+      this.updateDraftFocus();
+    }
+
+    updateDraftFocus() {
+      const interactables = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card, #draftCardsContainer .btn-discard-new'));
+      interactables.forEach((el, index) => {
+        if (index === this.draftSelectedIndex) {
+          el.classList.add('keyboard-focus');
+        } else {
+          el.classList.remove('keyboard-focus');
+        }
+      });
     }
 
     selectDraftCard(card, cardEl) {
@@ -1479,7 +1543,7 @@
         // Run concluída com vitória total no Ante 8
         this.recordRunHistory();
         localStorage.removeItem('munch_active_run');
-        alert("PARABÉNS! VOCÊ CONCLUIU A RUN NO ANTE 8!");
+        alert("PARABÉNS! VOCÊ CONCLUIU A RUN NO NÍVEL 8!");
         window.location.href = 'menu.html';
         return;
       }
@@ -2003,7 +2067,8 @@
 
   // Classe do jogador
   class Player {
-    constructor(gridX, gridY) {
+    constructor(gridX, gridY, slimeType = 'classic') {
+      this.slimeType = slimeType;
       this.gridX = gridX;
       this.gridY = gridY;
       
@@ -2332,8 +2397,25 @@
       // Renderiza corpo 2.5D do jogador
       const size = TILE_SIZE - 4;
       
+      let topColor = '#b0b0b0';
+      let faceColor = '#949494';
+
+      if (this.slimeType === 'metallic') { // Mercenário
+        topColor = '#4ade80';
+        faceColor = '#22c55e';
+      } else if (this.slimeType === 'ballistic') {
+        topColor = '#f87171';
+        faceColor = '#ef4444';
+      } else if (this.slimeType === 'gambler') {
+        topColor = '#fde047';
+        faceColor = '#eab308';
+      } else {
+        topColor = '#a3a3c2';
+        faceColor = '#7a7a9e';
+      }
+
       // Topo do slime
-      ctx.fillStyle = '#b0b0b0';
+      ctx.fillStyle = topColor;
       ctx.beginPath();
       ctx.moveTo(-size/2, -size/2 + 6);
       ctx.lineTo(-size/2 + 3, -size/2);
@@ -2343,7 +2425,7 @@
       ctx.fill();
 
       // Face frontal
-      ctx.fillStyle = '#949494';
+      ctx.fillStyle = faceColor;
       ctx.beginPath();
       ctx.roundRect(-size/2, -size/2 + 6, size, size - 6, [0, 0, 6, 6]);
       ctx.fill();

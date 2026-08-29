@@ -812,7 +812,7 @@ body::after {
   transition: opacity 0.2s ease;
 }
 
-.relic-card:hover::before {
+.relic-card:hover::before, .relic-card.keyboard-focus::before {
   opacity: 1;
 }
 
@@ -832,7 +832,7 @@ body::after {
   border-color: #8a96a8;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(180, 200, 220, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.03);
 }
-.relic-card.comum:hover {
+.relic-card.comum:hover, .relic-card.comum.keyboard-focus {
   border-color: #ffffff;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
 }
@@ -842,7 +842,7 @@ body::after {
   border-color: #00e5ff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 22px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.05);
 }
-.relic-card.incomum:hover {
+.relic-card.incomum:hover, .relic-card.incomum.keyboard-focus {
   border-color: #00f5d4;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 245, 212, 0.4), inset 0 0 25px rgba(0, 229, 255, 0.12);
 }
@@ -852,7 +852,7 @@ body::after {
   border-color: #ffd700;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 28px rgba(255, 215, 0, 0.35), inset 0 0 20px rgba(255, 215, 0, 0.08);
 }
-.relic-card.rara:hover {
+.relic-card.rara:hover, .relic-card.rara.keyboard-focus {
   border-color: #fff066;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.55), inset 0 0 30px rgba(255, 230, 0, 0.18);
 }
@@ -964,7 +964,7 @@ body::after {
   transition: transform 0.2s ease;
 }
 
-.relic-card:hover .relic-card-icon {
+.relic-card:hover .relic-card-icon, .relic-card.keyboard-focus .relic-card-icon {
   transform: scale(1.1);
 }
 
@@ -1150,7 +1150,7 @@ body::after {
   display: none;
 }
 
-.relic-card.active-relic-option:hover {
+.relic-card.active-relic-option:hover, .relic-card.active-relic-option.keyboard-focus {
   border-color: var(--red-primary) !important;
   box-shadow: 0 0 20px rgba(255, 46, 46, 0.3) !important;
 }
@@ -1169,7 +1169,7 @@ body::after {
   line-height: 1.4;
 }
 
-.relic-card.active-relic-option:hover .btn-replace-action {
+.relic-card.active-relic-option:hover .btn-replace-action, .relic-card.active-relic-option.keyboard-focus .btn-replace-action {
   background: var(--red-primary);
   color: #fff;
   border-color: var(--red-primary);
@@ -1201,7 +1201,7 @@ body::after {
   line-height: 1.4;
 }
 
-.btn-discard-new:hover {
+.btn-discard-new:hover, .btn-discard-new.keyboard-focus {
   color: var(--red-primary);
   border-color: var(--red-primary);
   box-shadow: 0 0 12px rgba(255, 46, 46, 0.15);

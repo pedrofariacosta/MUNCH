@@ -2,7 +2,7 @@ import { TILE_SIZE, DIRECTIONS, SKILLS_CONFIG, ENTITY_SPEEDS, COLOR_PALETTE } fr
 import { Projectile } from './Projectile.js';
 
 export class Player {
-  constructor(gridX, gridY) {
+  constructor(gridX, gridY, slimeType = 'classic') {
     this.gridX = gridX;
     this.gridY = gridY;
     
@@ -12,6 +12,9 @@ export class Player {
     
     this.targetX = this.x;
     this.targetY = this.y;
+    
+    this.slimeType = slimeType;
+    this.color = COLOR_PALETTE.SLIME_COLORS[slimeType] || COLOR_PALETTE.PLAYER_SLIME;
     
     this.dir = DIRECTIONS.RIGHT;
     this.nextDir = DIRECTIONS.NONE;
@@ -322,7 +325,7 @@ export class Player {
     ctx.stroke();
 
     // Preenchimento cinza do corpo
-    ctx.fillStyle = COLOR_PALETTE.PLAYER_SLIME;
+    ctx.fillStyle = this.color;
     ctx.fill();
 
     // Draw angry squinting eyes looking forwards (to the right inside local rotated coords)

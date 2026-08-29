@@ -233,7 +233,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (activeRunRaw) {
       try {
         const runData = JSON.parse(activeRunRaw);
-        document.getElementById('activeRunAnte').innerText = `ANTE ${runData.ante} // BLIND ${runData.blind}`;
+        document.getElementById('activeRunAnte').innerText = `NÍVEL ${runData.ante} // ESTÁGIO ${runData.blind}`;
         document.getElementById('activeRunScore').innerText = Math.round(runData.score || 0).toLocaleString();
         
         const relicsContainer = document.getElementById('activeRunRelics');
@@ -417,7 +417,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!cardName) return;
 
     if (selectedSlime === 'metallic') {
-      cardName.innerText = 'SLIME METÁLICO';
+      cardName.innerText = 'SLIME MERCENÁRIO';
       cardBadge.className = 'card-stat-pill cyan';
       cardBadge.innerHTML = '<span class="pill-value">+30</span> Fichas / Pastilha';
       cardDesc.innerText = '+30 fichas por pastilha, mas recarga de habilidades 20% mais lenta.';
@@ -434,9 +434,23 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
       cardName.innerText = 'SLIME CLÁSSICO';
       cardBadge.className = 'card-stat-pill blue';
-      cardBadge.innerHTML = '<span class="pill-value">+1</span> Pulo Base';
-      cardDesc.innerText = 'Slime inicial balanceado com 1 pulo ativado.';
+      cardBadge.innerHTML = '<span class="pill-value">Padrão</span>';
+      cardDesc.innerText = 'Slime inicial balanceado sem habilidades extras.';
     }
+    
+    // Atualiza cor visual do slime nos SVGs
+    const slimeColors = {
+      classic: '#a3a3c2',
+      metallic: '#22c55e', // Verde Mercenário
+      ballistic: '#ef4444',
+      gambler: '#eab308'
+    };
+    
+    const currentColor = slimeColors[selectedSlime] || slimeColors.classic;
+    const svgMain = document.querySelector('#mainSlimeSvg rect');
+    const svgFooter = document.querySelector('.slime-character rect');
+    if (svgMain) svgMain.setAttribute('fill', currentColor);
+    if (svgFooter) svgFooter.setAttribute('fill', currentColor);
   }
 
   updateMainSlimeCard();
@@ -504,7 +518,7 @@ window.addEventListener('DOMContentLoaded', () => {
         tr.innerHTML = `
           <td>${run.date || 'Desconhecida'}</td>
           <td>${stakeBadge}</td>
-          <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--cyan-primary);">ANTE ${run.ante || 1}</td>
+          <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--cyan-primary);">NÍVEL ${run.ante || 1}</td>
           <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--yellow-primary);">${Math.round(run.score || 0).toLocaleString()}</td>
           <td>${relicsHtml}</td>
         `;
@@ -542,7 +556,7 @@ window.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td style="font-family:'Press Start 2P', monospace; font-size:8px; color:var(--yellow-primary);">${medal}</td>
         <td style="font-weight:bold; color:#fff;">${item.name || 'ANÔNIMO'}</td>
-        <td style="font-family:'Press Start 2P', monospace; font-size:8px; color:var(--cyan-primary);">ANTE ${item.ante || 1}</td>
+        <td style="font-family:'Press Start 2P', monospace; font-size:8px; color:var(--cyan-primary);">NÍVEL ${item.ante || 1}</td>
         <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--yellow-primary);">${Math.round(item.score || 0).toLocaleString()}</td>
         <td style="color:#888; font-size:10px;">${item.date || '-'}</td>
       `;

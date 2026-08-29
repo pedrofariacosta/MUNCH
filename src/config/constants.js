@@ -57,7 +57,13 @@ export const COLOR_PALETTE = {
   BACKGROUND: '#030305',
   WALL_NEON: '#3b82f6',
   WALL_INNER: '#1e3a8a',
-  PLAYER_SLIME: '#a3a3c2',
+  PLAYER_SLIME: '#a3a3c2', // Fallback
+  SLIME_COLORS: {
+    classic: '#a3a3c2', // Cor original mantida conforme solicitado
+    metallic: '#94a3b8',
+    ballistic: '#ef4444',
+    gambler: '#eab308'
+  },
   PLAYER_OUTLINE: '#ffffff',
   PROJECTILE: '#3b82f6',
   PELLET: '#ffffff',
