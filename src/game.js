@@ -77,8 +77,8 @@
 
   // Configurações do Jogo
   const TILE_SIZE = 40;
-  const GRID_WIDTH = 20;
-  const GRID_HEIGHT = 15;
+  let GRID_WIDTH = 20;
+  let GRID_HEIGHT = 15;
 
   const DIRECTIONS = {
     UP:    { x: 0,  y: -1, angle: -Math.PI / 2 },
@@ -263,6 +263,86 @@
       icon: "🧲",
       apply: (game) => {},
       revert: (game) => {}
+    },
+    {
+      id: "relic_mercury_skates",
+      name: "PATINS DE MERCÚRIO",
+      category: "AÇÃO & SOBREVIVÊNCIA",
+      rarity: "Incomum",
+      desc: "Aumenta a velocidade base de movimento do Slime em +10%.",
+      icon: "🛼",
+      apply: (game) => { game.baseSpeedMult = (game.baseSpeedMult || 1) + 0.10; },
+      revert: (game) => { game.baseSpeedMult = Math.max(1, (game.baseSpeedMult || 1.10) - 0.10); }
+    },
+    {
+      id: "relic_adrenaline",
+      name: "INJEÇÃO DE ADRENALINA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
+      rarity: "Rara",
+      desc: "Concede +20% de velocidade por 3s após abater um inimigo ou saltar.",
+      icon: "💉",
+      apply: (game) => { game.hasAdrenaline = true; },
+      revert: (game) => { game.hasAdrenaline = false; }
+    },
+    {
+      id: "relic_quantum_leap",
+      name: "SALTO QUÂNTICO",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Incomum",
+      desc: "O Pulo passa a atravessar 3 blocos de distância e recarrega 2s mais rápido.",
+      icon: "🌌",
+      apply: (game) => { game.hasQuantumLeap = true; game.vaultMaxCooldown -= 2000; },
+      revert: (game) => { game.hasQuantumLeap = false; game.vaultMaxCooldown += 2000; }
+    },
+    {
+      id: "relic_midas_touch",
+      name: "TOQUE DE MIDAS",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Incomum",
+      desc: "Ao saltar, converte a pastilha mais próxima em uma Moeda Dourada.",
+      icon: "✨",
+      apply: (game) => { game.hasMidasTouch = true; },
+      revert: (game) => { game.hasMidasTouch = false; }
+    },
+    {
+      id: "relic_black_card",
+      name: "CARTÃO BLACK",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Rara",
+      desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas.",
+      icon: "💳",
+      apply: (game) => { game.blackCardActive = true; },
+      revert: (game) => { game.blackCardActive = false; }
+    },
+    {
+      id: "relic_laser_ricochet",
+      name: "RICOCHETE LASER",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Rara",
+      desc: "O disparo do Blaster rebate em até 2 paredes.",
+      icon: "📐",
+      apply: (game) => { game.laserRicochet = true; },
+      revert: (game) => { game.laserRicochet = false; }
+    },
+    {
+      id: "relic_infinite_battery",
+      name: "BATERIA INFINITA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
+      rarity: "Lendária",
+      desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo.",
+      icon: "🔋",
+      apply: (game) => { game.infiniteBattery = true; },
+      revert: (game) => { game.infiniteBattery = false; }
+    },
+    {
+      id: "relic_straight_combo",
+      name: "COMBO EM LINHA RETA",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Comum",
+      desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult.",
+      icon: "📏",
+      apply: (game) => { game.straightLineCombo = true; },
+      revert: (game) => { game.straightLineCombo = false; }
     }
   ];
 
@@ -288,6 +368,59 @@
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
+    }
+  }
+
+  function generateMap(ante) {
+    if (ante === 3) {
+      // Mapa maior: 23x17 com praças centrais abertas
+      GRID_WIDTH = 23;
+      GRID_HEIGHT = 17;
+      return [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,4,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,4,1],
+        [1,2,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,2,1],
+        [1,3,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,3,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,1,1,2,1,1,2,2,2,2,2,1,1,2,1,1,1,1,2,1],
+        [1,2,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
+        [1,1,1,1,1,1,2,1,1,2,0,0,0,2,1,1,2,1,1,1,1,1,1],
+        [0,2,2,2,2,2,2,2,2,2,0,0,0,2,2,2,2,2,2,2,2,2,0], // Warp row
+        [1,1,1,1,1,1,2,1,1,2,0,0,0,2,1,1,2,1,1,1,1,1,1],
+        [1,2,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
+        [1,2,1,1,1,1,2,1,1,2,2,2,2,2,1,1,2,1,1,1,1,2,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,3,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,3,1],
+        [1,2,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,2,1],
+        [1,4,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,4,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+      ];
+    } else if (ante >= 4) {
+      // Mapa fragmentado com lasers (Laser = 5) e 4 warps nos cantos
+      GRID_WIDTH = 20;
+      GRID_HEIGHT = 15;
+      return [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [0,4,2,2,2,2,2,2,2,5,5,2,2,2,2,2,2,2,4,0], // Warp Corners (linha 1)
+        [1,2,1,1,5,1,1,1,2,1,1,2,1,1,1,5,1,1,2,1],
+        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,2,1,2,1,5,1,1,5,1,2,1,2,1,1,2,1],
+        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+        [0,2,5,1,2,1,1,1,0,1,1,0,1,1,1,2,1,5,2,0], // Centro e laterais
+        [1,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,1],
+        [1,2,1,1,2,1,2,1,5,1,1,5,1,2,1,2,1,1,2,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+        [1,2,1,1,5,1,1,1,2,1,1,2,1,1,1,5,1,1,2,1],
+        [0,4,2,2,2,2,2,2,2,5,5,2,2,2,2,2,2,2,4,0], // Warp Corners (linha 13)
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+      ];
+    } else {
+      // Mapas clássicos
+      GRID_WIDTH = 20;
+      GRID_HEIGHT = 15;
+      return BASE_MAP.map(row => [...row]);
     }
   }
 
@@ -541,7 +674,15 @@
       this.isGamblerSlime = (this.selectedSlime === 'gambler');
 
       // Copia o mapa padrão
-      this.map = BASE_MAP.map(row => [...row]);
+      this.map = generateMap(this.ante);
+
+      this.canvas.width = GRID_WIDTH * TILE_SIZE;
+      this.canvas.height = GRID_HEIGHT * TILE_SIZE;
+      const gameContainer = document.querySelector('.game-container');
+      if (gameContainer) gameContainer.style.width = (this.canvas.width + 60) + 'px';
+
+      this.laserWallTimer = 4000;
+      this.laserWallActive = false;
 
       // Coleta as posições livres para as pastilhas especiais
       const candidateTiles = [];
@@ -590,8 +731,15 @@
       this.totalPellets = this.remainingPellets;
 
       // Spawna o slime e os inimigos
-      this.player = new Player(9, 8, this.selectedSlime);
+      const startX = Math.floor(GRID_WIDTH / 2) - 1;
+      const startY = Math.floor(GRID_HEIGHT / 2) + 1;
+      this.player = new Player(startX, startY, this.selectedSlime);
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
+
+      if (this.activeBossBlind === 'O Olho Vigilante') {
+        this.blasterMaxCharges = 0;
+        this.blasterCharges = 0;
+      }
 
       this.projectiles = [];
       this.particles = [];
@@ -603,11 +751,15 @@
       this.chips = 0;
       this.mult = 1;
 
-      // Recarrega as cargas das habilidades para o máximo
-      this.vaultCharges = this.vaultMaxCharges;
-      this.blasterCharges = this.blasterMaxCharges;
-      this.vaultCooldown = 0;
-      this.blasterCooldown = 0;
+      // Recarrega as cargas das habilidades para o máximo APENAS se comprou o voucher
+      if (this.buyRecharge) {
+        this.vaultCharges = this.vaultMaxCharges;
+        this.blasterCharges = this.blasterMaxCharges;
+        this.vaultCooldown = 0;
+        this.blasterCooldown = 0;
+        this.buyRecharge = false;
+      }
+      
       this.stickyPools = [];
       this.pelletsEatenForVault = 0;
 
@@ -643,8 +795,10 @@
         this.phaseClearTimer = 1500; // Pausa rápida com efeitos visuais
         this.triggerScreenShake(12);
 
-        // Ouro ganho ao terminar a fase
-        this.gold += this.ante * 5;
+        // Ouro ganho ao terminar a fase (bônus base + juros)
+        let baseGold = this.ante * 5;
+        let interest = Math.min(25, Math.floor(this.gold / 10)); // Juros de Cassino (máx 25)
+        this.gold += baseGold + interest;
 
         // Registra incremento de Antes completados nas estatísticas
         let completed = parseInt(localStorage.getItem('munch_completed_antes')) || 0;
@@ -716,22 +870,22 @@
         return [spade];
       } else if (phase === 2) {
         const spade = new SpikeEnemy(2, 2, 'SPADE');
-        const diamond = new SpikeEnemy(17, 2, 'DIAMOND');
+        const diamond = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
         spade.speed *= speedMultiplier;
         diamond.speed *= speedMultiplier;
         return [spade, diamond];
       } else if (phase === 3) {
         const e1 = new SpikeEnemy(2, 2, 'SPADE');
-        const e2 = new SpikeEnemy(17, 2, 'DIAMOND');
-        const e3 = new SpikeEnemy(2, 12, 'SPADE');
+        const e2 = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
+        const e3 = new SpikeEnemy(2, GRID_HEIGHT - 3, 'SPADE');
         [e1, e2, e3].forEach(e => e.speed *= speedMultiplier);
         return [e1, e2, e3];
       } else {
         // 4 inimigos
         const e1 = new SpikeEnemy(2, 2, 'SPADE');
-        const e2 = new SpikeEnemy(17, 2, 'DIAMOND');
-        const e3 = new SpikeEnemy(2, 12, 'SPADE');
-        const e4 = new SpikeEnemy(17, 12, 'DIAMOND');
+        const e2 = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
+        const e3 = new SpikeEnemy(2, GRID_HEIGHT - 3, 'SPADE');
+        const e4 = new SpikeEnemy(GRID_WIDTH - 3, GRID_HEIGHT - 3, 'DIAMOND');
         [e1, e2, e3, e4].forEach(e => e.speed *= speedMultiplier);
         return [e1, e2, e3, e4];
       }
@@ -765,7 +919,7 @@
     triggerVault() {
       if (!this.player || this.vaultCharges <= 0 || this.player.isJumping || this.player.dir === DIRECTIONS.NONE) return;
       
-      const jumpDistance = 2;
+      const jumpDistance = this.hasQuantumLeap ? 3 : 2;
       const targetGridX = this.player.gridX + this.player.dir.x * jumpDistance;
       const targetGridY = this.player.gridY + this.player.dir.y * jumpDistance;
 
@@ -779,6 +933,22 @@
         this.vaultCharges--;
         this.player.jumpTo(targetGridX, targetGridY);
         this.triggerScreenShake(4);
+
+        if (this.hasAdrenaline) this.adrenalineTimer = 3000;
+
+        if (this.hasMidasTouch) {
+          let closest = null;
+          let minDist = Infinity;
+          for (let r = 0; r < GRID_HEIGHT; r++) {
+            for (let c = 0; c < GRID_WIDTH; c++) {
+              if (this.map[r][c] === 2) {
+                let dist = Math.hypot(this.player.gridX - c, this.player.gridY - r);
+                if (dist < minDist) { minDist = dist; closest = {r,c}; }
+              }
+            }
+          }
+          if (closest) this.map[closest.r][closest.c] = 3; // Transforma em ouro
+        }
 
         this.spawnDust(this.player.x + TILE_SIZE / 2, this.player.y + TILE_SIZE / 2, 8, '#ffffff');
         this.addFloatingText(this.player.x + TILE_SIZE/2, this.player.y, 'PULO!', '#00E5FF');
@@ -799,7 +969,8 @@
       const startY = this.player.y + TILE_SIZE/2;
 
       const isRailgun = this.activeRelics.some(r => r.id === 'relic_railgun');
-      this.projectiles.push(new Laser(startX, startY, shootDir, isRailgun));
+      const bounces = this.laserRicochet ? 2 : 0;
+      this.projectiles.push(new Laser(startX, startY, shootDir, isRailgun, bounces));
       this.triggerScreenShake(3);
 
       for (let i = 0; i < 6; i++) {
@@ -816,11 +987,15 @@
     }
 
     isWalkable(gridX, gridY) {
-      if (gridY === 7 && (gridX < 0 || gridX >= GRID_WIDTH)) {
-        return true;
-      }
       if (gridX < 0 || gridX >= GRID_WIDTH || gridY < 0 || gridY >= GRID_HEIGHT) {
+        if (gridX === -1 && gridY >= 0 && gridY < GRID_HEIGHT) return this.map[gridY][0] !== 1 && this.map[gridY][GRID_WIDTH - 1] !== 1;
+        if (gridX === GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) return this.map[gridY][GRID_WIDTH - 1] !== 1 && this.map[gridY][0] !== 1;
+        if (gridY === -1 && gridX >= 0 && gridX < GRID_WIDTH) return this.map[0][gridX] !== 1 && this.map[GRID_HEIGHT - 1][gridX] !== 1;
+        if (gridY === GRID_HEIGHT && gridX >= 0 && gridX < GRID_WIDTH) return this.map[GRID_HEIGHT - 1][gridX] !== 1 && this.map[0][gridX] !== 1;
         return false;
+      }
+      if (this.map[gridY][gridX] === 5) {
+        return !this.laserWallActive;
       }
       return this.map[gridY][gridX] !== 1;
     }
@@ -860,7 +1035,12 @@
 
       // Informações da fase e meta
       if (this.hudBlindBadge) {
-        this.hudBlindBadge.innerText = `NÍVEL ${this.ante} // ${blindName}`;
+        if (this.activeBossBlind) {
+          this.hudBlindBadge.style.display = 'inline-block';
+          this.hudBlindBadge.innerText = this.activeBossBlind;
+        } else {
+          this.hudBlindBadge.style.display = 'none';
+        }
       }
       this.hudBlindTarget.innerText = this.targetScore.toLocaleString();
       
@@ -884,7 +1064,7 @@
 
       // Contador de relíquias
       if (this.hudRelicsCount) {
-        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
+        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/${this.maxRelics})`;
       }
 
       // Atualiza recarga do pulo
@@ -939,7 +1119,7 @@
       if (!tray) return;
       tray.innerHTML = '';
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < this.maxRelics; i++) {
         const slot = document.createElement('div');
         if (i < this.activeRelics.length) {
           const card = this.activeRelics[i];
@@ -963,7 +1143,7 @@
 
       // Atualiza contador de relíquias no HUD
       if (this.hudRelicsCount) {
-        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/5)`;
+        this.hudRelicsCount.innerText = `(${this.activeRelics.length}/${this.maxRelics})`;
       }
     }
 
@@ -990,6 +1170,12 @@
         this.blasterMaxCharges = 2;
       }
 
+      this.vaultMaxCooldown = 7000;
+      this.blasterMaxCooldown = 6000;
+
+      this.maxRelics = 5;
+      this.purchasedVouchers = [];
+
       this.vaultCharges = this.vaultMaxCharges;
       this.blasterCharges = this.blasterMaxCharges;
       this.vaultCooldown = 0;
@@ -1004,6 +1190,7 @@
       this.score = 0;
       this.chips = 0;
       this.mult = 1;
+      this.activeBossBlind = null;
     }
 
     saveActiveRunState() {
@@ -1021,6 +1208,9 @@
         selectedSlime: this.selectedSlime,
         stake: this.stake,
         isEndless: this.isEndless,
+        activeBossBlind: this.activeBossBlind,
+        maxRelics: this.maxRelics,
+        purchasedVouchers: this.purchasedVouchers,
         activeRelics: this.activeRelics.map(r => ({ id: r.id, name: r.name, icon: r.icon, rarity: r.rarity, category: r.category, desc: r.desc }))
       };
       localStorage.setItem('munch_active_run', JSON.stringify(data));
@@ -1048,6 +1238,9 @@
         this.stake = data.stake || 'white';
         this.isEndless = data.isEndless || false;
         this.isGamblerSlime = (this.selectedSlime === 'gambler');
+        this.activeBossBlind = data.activeBossBlind || null;
+        this.maxRelics = data.maxRelics || 5;
+        this.purchasedVouchers = data.purchasedVouchers || [];
 
         this.activeRelics = [];
         if (data.activeRelics && Array.isArray(data.activeRelics)) {
@@ -1122,18 +1315,27 @@
         this.chips += earnedChips;
         this.scorePop(this.chipsBox);
       } else if (pelletType === 3) {
-        earnedChips = 50;
-        earnedMult = 1;
-        scoreColor = '#FFE600';
-        tag = '+50 FICHAS // +1 MULT';
+        let earnedGold = 1;
+        earnedChips = 0;
+        earnedMult = 0;
+        
+        // Cartão Black logic (se adicionado)
+        if (this.blackCardActive) {
+          earnedGold += 5;
+          earnedChips += 100;
+        }
+
+        if (this.activeBossBlind === 'Ouro Corrompido') {
+          this.mult = Math.max(1, this.mult - 0.2);
+        }
+
+        this.gold += earnedGold;
         this.chips += earnedChips;
         this.mult += earnedMult;
-        if (this.goldenMultFactor && this.goldenMultFactor > 1.0) {
-          const oldMult = this.mult;
-          this.mult = Math.round(this.mult * this.goldenMultFactor);
-          const multDiff = this.mult - oldMult;
-          tag = `+50 FICHAS // x${this.goldenMultFactor} MULT OURO (+${multDiff} Mult!)`;
-        }
+
+        scoreColor = '#FFE600';
+        tag = `+${earnedGold} OURO${earnedChips > 0 ? ` // +${earnedChips} FICHAS` : ''}`;
+        
         this.scorePop(this.chipsBox);
         this.scorePop(this.multBox);
       } else if (pelletType === 4) {
@@ -1425,9 +1627,15 @@
     showDraftShopModal() {
       this.gameState = GAME_STATES.WIN_MODAL;
       const container = document.getElementById('draftCardsContainer');
-      container.innerHTML = '';
-      container.closest('.draft-modal-content').classList.remove('replacement-mode');
+      const vouchersContainer = document.getElementById('vouchersContainer');
+      const goldDisplay = document.getElementById('shopGoldAmount');
       
+      if (goldDisplay) goldDisplay.innerText = this.gold.toString();
+
+      container.innerHTML = '';
+      if (vouchersContainer) vouchersContainer.innerHTML = '';
+      
+      container.closest('.draft-modal-content').classList.remove('replacement-mode');
       document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'ESCOLHA UMA RELIQUIA PARA A SUA RUN';
 
       // Sorteia 2 opções de relíquias
@@ -1480,11 +1688,75 @@
 
         container.appendChild(cardEl);
       });
+      
+      this.renderVouchers();
 
       document.getElementById('modalDraftShop').classList.add('visible');
       
       this.draftSelectedIndex = 0;
       this.updateDraftFocus();
+    }
+
+    renderVouchers() {
+      const vContainer = document.getElementById('vouchersContainer');
+      if (!vContainer) return;
+      vContainer.innerHTML = '';
+
+      const vouchers = [
+        { id: 'v_slot', name: 'EXPANSÃO DE BANDEJA', price: 50, desc: 'Expande o máximo de relíquias ativas de 5 para 6.', oneTime: true },
+        { id: 'v_reroll', name: 'REROLL DA LOJA', price: 10, desc: 'Substitui as opções atuais por 2 novas relíquias.', oneTime: false },
+        { id: 'v_recharge', name: 'BOLSA DE RECARGA', price: 20, desc: 'Inicia a próxima rodada com cargas de Pulo e Tiro em 100%.', oneTime: true }
+      ];
+
+      vouchers.forEach((v, index) => {
+        const vEl = document.createElement('div');
+        vEl.className = 'voucher-card';
+        if (this.purchasedVouchers && this.purchasedVouchers.includes(v.id) && v.oneTime) {
+          vEl.classList.add('purchased');
+        }
+
+        vEl.innerHTML = `
+          <div class="voucher-header">
+            <span class="voucher-name">${v.name}</span>
+            <span class="voucher-price">$${v.price} Ouros</span>
+          </div>
+          <div class="voucher-desc">${v.desc}</div>
+        `;
+
+        vEl.addEventListener('click', () => {
+          if (vEl.classList.contains('purchased')) return;
+          if (this.gold >= v.price) {
+            this.gold -= v.price;
+            document.getElementById('shopGoldAmount').innerText = this.gold.toString();
+            this.buyVoucher(v.id);
+            if (v.oneTime) {
+              if (!this.purchasedVouchers) this.purchasedVouchers = [];
+              this.purchasedVouchers.push(v.id);
+              vEl.classList.add('purchased');
+            }
+          } else {
+            // Efeito visual de erro caso falte ouro
+            vEl.style.borderColor = 'var(--red-primary)';
+            vEl.style.transform = 'translateX(-5px)';
+            setTimeout(() => { vEl.style.transform = 'translateX(5px)'; }, 50);
+            setTimeout(() => { vEl.style.transform = 'translateX(0)'; vEl.style.borderColor = ''; }, 100);
+          }
+        });
+
+        vContainer.appendChild(vEl);
+      });
+    }
+
+    buyVoucher(id) {
+      if (id === 'v_slot') {
+        this.maxRelics = 6;
+        this.updateRelicsTray();
+        this.updateHUD();
+      } else if (id === 'v_reroll') {
+        this.showDraftShopModal();
+      } else if (id === 'v_recharge') {
+        this.buyRecharge = true;
+      }
     }
 
     updateDraftFocus() {
@@ -1499,7 +1771,7 @@
     }
 
     selectDraftCard(card, cardEl) {
-      if (this.activeRelics.length >= 5) {
+      if (this.activeRelics.length >= (this.maxRelics || 5)) {
         this.showReplacementUI(card, cardEl);
         return;
       }
@@ -1537,6 +1809,13 @@
       if (this.blind > 3) {
         this.blind = 1;
         this.ante++;
+      }
+
+      if (this.ante === 4 && this.phase === 3) {
+        const bosses = ['O Olho Vigilante', 'Ouro Corrompido', 'Névoa Arcade'];
+        this.activeBossBlind = bosses[Math.floor(Math.random() * bosses.length)];
+      } else {
+        this.activeBossBlind = null;
       }
 
       if (this.ante > 8 && !this.isEndless) {
@@ -1614,14 +1893,16 @@
       if (this.lives <= 0) {
         this.triggerGameOver();
       } else {
-        this.player.resetPosition(9, 8);
+        const startX = Math.floor(GRID_WIDTH / 2) - 1;
+        const startY = Math.floor(GRID_HEIGHT / 2) + 1;
+        this.player.resetPosition(startX, startY);
 
         // Reseta inimigos nos cantos
         const spawnCoords = [
           { x: 2, y: 2 },
-          { x: 17, y: 2 },
-          { x: 2, y: 12 },
-          { x: 17, y: 12 }
+          { x: GRID_WIDTH - 3, y: 2 },
+          { x: 2, y: GRID_HEIGHT - 3 },
+          { x: GRID_WIDTH - 3, y: GRID_HEIGHT - 3 }
         ];
         this.ghosts.forEach((g, i) => {
           if (g) {
@@ -1662,6 +1943,20 @@
         `+200 Fichas x2 Mult`
       );
 
+      if (this.hasAdrenaline) this.adrenalineTimer = 3000;
+
+      if (this.infiniteBattery) {
+        if (this.infiniteBatteryWindow > 0) {
+          if (this.blasterMaxCharges > 0) {
+            this.blasterCharges = Math.min(this.blasterMaxCharges, this.blasterCharges + 1);
+            this.addFloatingText(this.player.x + TILE_SIZE/2, this.player.y - 20, 'RECARGA!', '#FFE600');
+          }
+          this.infiniteBatteryWindow = 0; // reset
+        } else {
+          this.infiniteBatteryWindow = 1500;
+        }
+      }
+
       this.updateHUD();
       this.checkWinCondition();
     }
@@ -1693,6 +1988,22 @@
       }
 
       if (this.gameState !== GAME_STATES.PLAYING) return;
+
+      if (this.adrenalineTimer > 0) this.adrenalineTimer -= dt;
+      if (this.infiniteBatteryWindow > 0) this.infiniteBatteryWindow -= dt;
+
+      if (this.ante >= 4) {
+        this.laserWallTimer -= dt;
+        if (this.laserWallTimer <= 0) {
+          this.laserWallTimer = 4000;
+          this.laserWallActive = !this.laserWallActive;
+          this.triggerScreenShake(2);
+        }
+        
+        if (this.laserWallActive && this.player && this.map[this.player.gridY][this.player.gridX] === 5) {
+          this.hurtPlayer();
+        }
+      }
 
       // Proteção temporária após spawnar
       if (this.spawnProtectionTimer > 0) {
@@ -1889,23 +2200,14 @@
               this.ctx.shadowBlur = 0;
               this.ctx.restore();
             } else if (tile === 5) {
-              // Pastilha energizada magenta
-              const pulse = 1 + Math.sin(performance.now() * 0.012) * 0.2;
-              const radius = 6 * pulse;
-              
+              // Parede de Laser Temporária
               this.ctx.save();
-              this.ctx.fillStyle = '#FF00FF';
-              this.ctx.shadowColor = '#FF00FF';
-              this.ctx.shadowBlur = 8 * pulse;
-              
-              this.ctx.beginPath();
-              this.ctx.moveTo(cx, cy - radius);
-              this.ctx.lineTo(cx + radius, cy);
-              this.ctx.lineTo(cx, cy + radius);
-              this.ctx.lineTo(cx - radius, cy);
-              this.ctx.closePath();
-              this.ctx.fill();
-              
+              this.ctx.fillStyle = this.laserWallActive ? '#FF00FF' : 'rgba(255, 0, 255, 0.1)';
+              if (this.laserWallActive) {
+                this.ctx.shadowColor = '#FF00FF';
+                this.ctx.shadowBlur = 12;
+              }
+              this.ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
               this.ctx.restore();
             }
           }
@@ -2005,6 +2307,22 @@
         this.ctx.shadowBlur = 4;
         this.ctx.fillText("ENTRADA SEGURA // INIMIGOS REAGINDO...", cx, cy + 24);
         
+        this.ctx.restore();
+      }
+
+      // Névoa Arcade (Fog of War)
+      if (this.activeBossBlind === 'Névoa Arcade' && this.player) {
+        this.ctx.save();
+        const px = this.player.x + TILE_SIZE / 2;
+        const py = this.player.y + TILE_SIZE / 2;
+        
+        const gradient = this.ctx.createRadialGradient(px, py, TILE_SIZE * 2, px, py, TILE_SIZE * 6);
+        gradient.addColorStop(0, 'rgba(8, 8, 12, 0)');
+        gradient.addColorStop(0.5, 'rgba(8, 8, 12, 0.7)');
+        gradient.addColorStop(1, 'rgba(8, 8, 12, 1)');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
       }
 
@@ -2253,7 +2571,11 @@
       }
 
       // Movimentação contínua
-      let step = this.speed * dt;
+      let currentSpeed = this.speed;
+      if (game.baseSpeedMult) currentSpeed *= game.baseSpeedMult;
+      if (game.adrenalineTimer > 0) currentSpeed *= 1.20;
+
+      let step = currentSpeed * dt;
 
       // Animação do slime balançando
       this.walkTimer += dt * 0.015;
@@ -2288,6 +2610,7 @@
                   this.angle = this.dir.angle;
                   this.inputBufferDir = DIRECTIONS.NONE;
                   this.inputBufferTime = 0;
+                  this.straightLineTiles = 0; // Reseta o combo
                   this.checkEatPellet(game);
 
                   if (game.activeRelics.some(r => r.id === 'relic_sharp_drift')) {
@@ -2315,15 +2638,30 @@
           this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
           this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
 
-          // Teleporte das bordas horizontais
-          if (this.gridY === 7) {
-            if (this.gridX < 0) {
-              this.gridX = GRID_WIDTH - 1;
-              this.x = this.gridX * TILE_SIZE;
-            } else if (this.gridX >= GRID_WIDTH) {
-              this.gridX = 0;
-              this.x = 0;
+          if (game.straightLineCombo) {
+            this.straightLineTiles = (this.straightLineTiles || 0) + 1;
+            if (this.straightLineTiles >= 5) {
+              game.mult += 1;
+              game.updateHUD();
+              game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+1 MULT', '#FFE600', 'COMBO RETA');
+              this.straightLineTiles = 0;
             }
+          }
+
+          // Teleporte das bordas
+          if (this.gridX < 0) {
+            this.gridX = GRID_WIDTH - 1;
+            this.x = this.gridX * TILE_SIZE;
+          } else if (this.gridX >= GRID_WIDTH) {
+            this.gridX = 0;
+            this.x = 0;
+          }
+          if (this.gridY < 0) {
+            this.gridY = GRID_HEIGHT - 1;
+            this.y = this.gridY * TILE_SIZE;
+          } else if (this.gridY >= GRID_HEIGHT) {
+            this.gridY = 0;
+            this.y = 0;
           }
 
           // Verifica pastilhas no novo tile
@@ -2351,6 +2689,13 @@
                 game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
               }
             } else {
+              // Se não conseguiu virar, continua na mesma direção se possível
+              const nextGridX = this.gridX + this.dir.x;
+              const nextGridY = this.gridY + this.dir.y;
+              if (!game.isWalkable(nextGridX, nextGridY)) {
+                this.dir = DIRECTIONS.NONE;
+                this.straightLineTiles = 0; // Bateu na parede, perde o combo
+              }
               // Ignora comando se for parede
               this.inputBufferDir = DIRECTIONS.NONE;
               this.inputBufferTime = 0;
@@ -2372,6 +2717,7 @@
               console.log(`[MUNCH DEBUG] Slime colidiu com parede na grade (${this.gridX}, ${this.gridY}). ${this.lastStopReason}`);
               
               this.dir = DIRECTIONS.NONE;
+              this.straightLineTiles = 0; // Perde o combo
               step = 0;
             }
           }
@@ -2517,14 +2863,15 @@
 
   // Classe do projétil laser
   class Laser {
-    constructor(x, y, dir, isRailgun = false) {
+    constructor(x, y, dir, isRailgun = false, bounces = 0) {
       this.x = x;
       this.y = y;
-      this.dir = dir;
+      this.dir = { x: dir.x, y: dir.y, angle: dir.angle };
       this.speed = 0.45;
       this.active = true;
       this.toRemove = false;
       this.isRailgun = isRailgun;
+      this.bounces = bounces;
     }
 
     update(dt, game) {
@@ -2535,11 +2882,27 @@
       const gridX = Math.floor(this.x / TILE_SIZE);
       const gridY = Math.floor(this.y / TILE_SIZE);
 
-      if (gridX < 0 || gridX >= GRID_WIDTH || gridY < 0 || gridY >= GRID_HEIGHT || game.map[gridY][gridX] === 1) {
-        this.active = false;
-        this.toRemove = true;
-        game.spawnDust(this.x, this.y, 4, '#FFE600');
-        return;
+      if (gridX < 0 || gridX >= GRID_WIDTH || gridY < 0 || gridY >= GRID_HEIGHT || (game.map[gridY] && game.map[gridY][gridX] === 1)) {
+        if (this.bounces > 0) {
+          this.bounces--;
+          this.x -= this.dir.x * step * 1.5; // recua para fora da parede
+          this.y -= this.dir.y * step * 1.5;
+          
+          const prevGridX = Math.floor(this.x / TILE_SIZE);
+          const prevGridY = Math.floor(this.y / TILE_SIZE);
+          
+          if (gridX !== prevGridX) this.dir.x *= -1;
+          if (gridY !== prevGridY) this.dir.y *= -1;
+          this.dir.angle = Math.atan2(this.dir.y, this.dir.x);
+          
+          game.spawnDust(this.x, this.y, 4, '#00E5FF');
+          return;
+        } else {
+          this.active = false;
+          this.toRemove = true;
+          game.spawnDust(this.x, this.y, 4, '#FFE600');
+          return;
+        }
       }
 
       // Colisão com fantasmas
@@ -2659,12 +3022,14 @@
       );
 
       // Manda de volta para a base
-      this.x = 8 * TILE_SIZE;
-      this.y = 7 * TILE_SIZE;
+      const baseX = Math.floor(GRID_WIDTH / 2) - 1;
+      const baseY = Math.floor(GRID_HEIGHT / 2);
+      this.x = baseX * TILE_SIZE;
+      this.y = baseY * TILE_SIZE;
       this.targetX = this.x;
       this.targetY = this.y;
-      this.gridX = 8;
-      this.gridY = 7;
+      this.gridX = baseX;
+      this.gridY = baseY;
 
       game.triggerScreenShake(6);
       game.updateHUD();
@@ -2672,12 +3037,15 @@
     }
 
     update(dt, game) {
+      const baseX = Math.floor(GRID_WIDTH / 2) - 1;
+      const baseY = Math.floor(GRID_HEIGHT / 2);
+      
       // Controle de respawn
       if (this.state === 'respawning') {
         this.respawnTimer -= dt;
         if (this.respawnTimer <= 0) {
           this.state = 'normal';
-          this.resetPosition(8, 7);
+          this.resetPosition(baseX, baseY);
         }
         return;
       }
@@ -2751,7 +3119,7 @@
             }
           }
 
-          if (this.state === 'eaten' && this.gridX === 8 && this.gridY === 7) {
+          if (this.state === 'eaten' && this.gridX === baseX && this.gridY === baseY) {
             this.state = 'normal';
           }
           
@@ -2775,13 +3143,13 @@
       if (!this.isMoving()) {
         // Retorna para a base se foi comido
         if (this.state === 'eaten') {
-          const path = this.findPath(this.gridX, this.gridY, 8, 7, game);
+          const path = this.findPath(this.gridX, this.gridY, baseX, baseY, game);
           if (path.length > 0) {
             this.dir = path[0];
             this.targetX = (this.gridX + this.dir.x) * TILE_SIZE;
             this.targetY = (this.gridY + this.dir.y) * TILE_SIZE;
           } else {
-            this.resetPosition(8, 7);
+            this.resetPosition(baseX, baseY);
           }
           return;
         }

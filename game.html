@@ -64,8 +64,9 @@
     <footer class="hud-footer">
       <div class="footer-stats">
         <div class="stat-label-box">
-          <span class="stat-title">Nivel</span>
-          <span class="stat-value-badge" id="hudRoundIndicator">ANTE 1 // BLIND 1</span>
+          <span class="stat-title">Nível</span>
+          <span class="stat-value-badge" id="hudRoundIndicator">NÍVEL 1 // ESTÁGIO 1</span>
+          <span class="boss-blind-badge" id="hudBlindBadge" style="display: none;"></span>
         </div>
       </div>
       
@@ -140,8 +141,23 @@
       <h2 class="modal-title win">RODADA COMPLETA</h2>
       <p class="modal-subtitle">ESCOLHA UMA RELIQUIA PARA A SUA RUN</p>
       
-      <div class="draft-cards-container" id="draftCardsContainer">
-        <!-- Inserido dinamicamente via JS -->
+      <div class="shop-economy-header">
+        <span class="shop-gold-display">BANCO: <span id="shopGoldAmount" class="gold-text">0</span> OUROS</span>
+      </div>
+      
+      <div class="shop-main-layout">
+        <div class="draft-section">
+          <div class="draft-cards-container" id="draftCardsContainer">
+            <!-- Inserido dinamicamente via JS -->
+          </div>
+        </div>
+        
+        <div class="vouchers-section">
+          <h3 class="vouchers-title">VOUCHERS</h3>
+          <div class="vouchers-container" id="vouchersContainer">
+            <!-- Inserido dinamicamente via JS -->
+          </div>
+        </div>
       </div>
     </div>
   </div>

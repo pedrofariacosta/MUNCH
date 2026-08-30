@@ -90,17 +90,25 @@ window.addEventListener('DOMContentLoaded', () => {
   // BASE DE DADOS DO COMPÊNDIO DE RELÍQUIAS (MATCHING CARD_POOL)
   // ==========================================================================
   const RELIC_CODEX = [
-    { id: "relic_jump_module", name: "Módulo de Salto", icon: "🚀", category: "ARSENAL", rarity: "Comum", desc: "Desbloqueia a habilidade de Pulo [ESPAÇO]." },
-    { id: "relic_blaster_core", name: "Núcleo Blaster", icon: "💥", category: "ARSENAL", rarity: "Comum", desc: "Desbloqueia a habilidade de Disparo [F]." },
-    { id: "relic_overclock", name: "Overclock de Pulo", icon: "⚡", category: "ARSENAL", rarity: "Incomum", desc: "Reduz o tempo de recarga das habilidades em 30%." },
-    { id: "relic_backup_battery", name: "Bateria Reserva", icon: "❤️", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "Aumenta sua vida máxima em +1." },
-    { id: "relic_steel_coating", name: "Revestimento de Aço", icon: "🛡️", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "+20 Fichas Base por pastilha devorada." },
-    { id: "relic_sharp_drift", name: "Drift Afiado", icon: "🏎️", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "+2 Mult permanente a cada curva perfeita de 90°." },
-    { id: "relic_bounty_hunter", name: "Caçador de Recompensas", icon: "🎯", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "+5 Mult extra ao destruir um inimigo." },
-    { id: "relic_gold_alchemist", name: "Alquimista de Ouro", icon: "✨", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Pastilhas Douradas multiplicam seu Mult total por x1.75." },
-    { id: "relic_slime_puddle", name: "Rastro Viscoso", icon: "🧪", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pulos deixam poças de lodo que reduzem a velocidade dos inimigos em 50%." },
-    { id: "relic_railgun", name: "Laser Perfurante", icon: "🔱", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Seu disparo laser atravessa múltiplos inimigos sem ser destruído." },
-    { id: "relic_magnetic_pull", name: "Vácuo Magnético", icon: "🧲", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Devora pastilhas adjacentes à distância automaticamente." }
+    { id: "relic_jump_module", name: "MOLA HIDRÁULICA", icon: "🦘", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Pulo. Permite saltar paredes e inimigos." },
+    { id: "relic_blaster_core", name: "CANHÃO DE PLASMA", icon: "🔫", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Disparo. Atordoa inimigos em linha reta." },
+    { id: "relic_overclock", name: "OVERCLOCK DE SISTEMA", icon: "⚡", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Reduz o tempo de recarga de todas as habilidades em 30%." },
+    { id: "relic_backup_battery", name: "BATERIA RESERVA", icon: "❤️", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Vida Máxima e recupera todas as vidas perdidas." },
+    { id: "relic_steel_coating", name: "REVESTIMENTO DE AÇO", icon: "🛡️", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Pastilhas normais concedem +20 Fichas base." },
+    { id: "relic_sharp_drift", name: "DRIFT PERFEITO", icon: "🌀", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Mudar de direção na quina exata concede +2 Mult na rodada." },
+    { id: "relic_bounty_hunter", name: "CAÇADOR DE NAIPES", icon: "🔥", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Destruir um inimigo com Blaster concede +5 Mult permanente no round." },
+    { id: "relic_gold_alchemist", name: "ALQUIMIA DOURADA", icon: "🪙", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas especiais concedem x1.75 Mult ao serem consumidas." },
+    { id: "relic_slime_puddle", name: "LODO VISCOSO", icon: "🦠", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular deixa poças de lodo que reduzem velocidade inimiga em 50% por 4s." },
+    { id: "relic_railgun", name: "TIRO PERFURANTE", icon: "☄️", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes." },
+    { id: "relic_magnetic_pull", name: "VÁCUO MAGNÉTICO", icon: "🧲", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime." },
+    { id: "relic_mercury_skates", name: "PATINS DE MERCÚRIO", icon: "🛼", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Aumenta a velocidade base de movimento do Slime em +10%." },
+    { id: "relic_adrenaline", name: "INJEÇÃO DE ADRENALINA", icon: "💉", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Rara", desc: "Concede +20% de velocidade por 3s após abater um inimigo ou saltar." },
+    { id: "relic_quantum_leap", name: "SALTO QUÂNTICO", icon: "🌌", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "O Pulo passa a atravessar 3 blocos de distância e recarrega 2s mais rápido." },
+    { id: "relic_midas_touch", name: "TOQUE DE MIDAS", icon: "✨", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Ao saltar, converte a pastilha mais próxima em uma Moeda Dourada." },
+    { id: "relic_black_card", name: "CARTÃO BLACK", icon: "💳", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas." },
+    { id: "relic_laser_ricochet", name: "RICOCHETE LASER", icon: "📐", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O disparo do Blaster rebate em até 2 paredes." },
+    { id: "relic_infinite_battery", name: "BATERIA INFINITA", icon: "🔋", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Lendária", desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo." },
+    { id: "relic_straight_combo", name: "COMBO EM LINHA RETA", icon: "📏", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult." }
   ];
 
   // ==========================================================================
