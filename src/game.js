@@ -711,10 +711,10 @@
         }
 
         // Buffer de entrada
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') this.player.setInput(DIRECTIONS.UP);
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') this.player.setInput(DIRECTIONS.DOWN);
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.player.setInput(DIRECTIONS.LEFT);
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.player.setInput(DIRECTIONS.RIGHT);
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') this.player.setInput(DIRECTIONS.UP, this);
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') this.player.setInput(DIRECTIONS.DOWN, this);
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.player.setInput(DIRECTIONS.LEFT, this);
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.player.setInput(DIRECTIONS.RIGHT, this);
 
         // Aciona pulo
         if (e.code === 'Space') {
@@ -842,6 +842,11 @@
             localStorage.setItem('munch_unlocked_stakes', JSON.stringify(unlockedStakes));
           }
 
+          if (window.AchievementManager) {
+            window.AchievementManager.recordAnte(this.ante);
+            window.AchievementManager.checkAll(false);
+          }
+
           // 4. Envia para o Leaderboard / Redis
           try {
             const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
@@ -879,6 +884,11 @@
             localStorage.setItem('munch_unlocked_stakes', JSON.stringify(unlockedStakes));
           } else if (this.stake === 'red') {
             localStorage.setItem('munch_unlocked_gold_stake', 'true');
+          }
+
+          if (window.AchievementManager) {
+            window.AchievementManager.recordAnte(this.ante);
+            window.AchievementManager.checkAll(false);
           }
 
           this.isEndless = true;
@@ -1203,6 +1213,14 @@
         let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
         localStorage.setItem('munch_completed_antes', completed + 1);
         localStorage.setItem('munch_total_antes', totalAntes + 1);
+
+        if (window.AchievementManager) {
+          if (this.blind === 3) window.AchievementManager.recordBossDefeated(1);
+          window.AchievementManager.recordAnte(this.ante);
+          window.AchievementManager.recordGoldHeld(this.gold);
+          window.AchievementManager.recordScore(this.score);
+          window.AchievementManager.recordMult(this.mult);
+        }
 
         // Acumula a pontuação da run
         this.accumulatedRunScore = (this.accumulatedRunScore || 0) + this.score;
@@ -1801,6 +1819,7 @@
       localStorage.setItem('munch_total_pellets', totalPellets);
       this.runPelletsEaten = (this.runPelletsEaten || 0) + 1;
       if (window.MetaProgression) window.MetaProgression.addPellet();
+      if (window.AchievementManager) window.AchievementManager.checkAll(false);
 
       if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
         this.pelletsEatenForVault = (this.pelletsEatenForVault || 0) + 1;
@@ -2165,6 +2184,7 @@
           if (price > 0 && this.gold >= price) {
             this.gold -= price;
             if (window.MetaProgression) window.MetaProgression.addGoldSpent(price);
+            if (window.AchievementManager) window.AchievementManager.recordGoldSpent(price);
             const goldDisplay = document.getElementById('shopGoldAmount');
             if (goldDisplay) goldDisplay.innerText = this.gold.toString();
           }
@@ -2351,6 +2371,7 @@
           if (this.gold >= v.price) {
             this.gold -= v.price;
             if (window.MetaProgression) window.MetaProgression.addGoldSpent(v.price);
+            if (window.AchievementManager) window.AchievementManager.recordGoldSpent(v.price);
             const goldDisplay = document.getElementById('shopGoldAmount');
             if (goldDisplay) goldDisplay.innerText = this.gold.toString();
 
@@ -2533,6 +2554,7 @@
         if (window.MetaProgression && typeof window.MetaProgression.discoverRelic === 'function') {
           window.MetaProgression.discoverRelic(card.id);
         }
+        if (window.AchievementManager) window.AchievementManager.checkAll(false);
 
         this.showToast('NOVA RELÍQUIA REGISTRADA NO ÁLBUM!', card.name, card.icon, '#FFE600');
       }
@@ -2592,6 +2614,7 @@
 
       this.gold -= price;
       if (window.MetaProgression) window.MetaProgression.addGoldSpent(price);
+      if (window.AchievementManager) window.AchievementManager.recordGoldSpent(price);
       const goldDisplay = document.getElementById('shopGoldAmount');
       if (goldDisplay) goldDisplay.innerText = this.gold.toString();
 
@@ -2955,6 +2978,7 @@
       if (window.MetaProgression && window.MetaProgression.addKills(1)) {
         this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 35, '★ SLIME BALÍSTICO DESBLOQUEADO! ★', '#00FF66');
       }
+      if (window.AchievementManager) window.AchievementManager.checkAll(false);
 
       const ghostBaseScore = 200;
       const ghostBaseMult = 2;
@@ -3661,14 +3685,40 @@
       return (dirA.x === -dirB.x && dirA.x !== 0) || (dirA.y === -dirB.y && dirA.y !== 0);
     }
 
-    setInput(dir) {
+    setInput(dir, game = null) {
+      const g = game || this.game;
+
       // Permite virar no sentido oposto na hora
       if (this.dir !== DIRECTIONS.NONE && this.isOpposite(this.dir, dir)) {
-        this.dir = dir;
-        this.angle = dir.angle;
-        this.inputBufferDir = DIRECTIONS.NONE;
-        this.inputBufferTime = 0;
-        return;
+        const isOffsetFromGrid = (Math.abs(this.x - this.gridX * TILE_SIZE) > 0.001) || (Math.abs(this.y - this.gridY * TILE_SIZE) > 0.001);
+
+        if (isOffsetFromGrid) {
+          // O jogador estava entre this.gridX e o próximo tile (this.gridX + this.dir.x).
+          // Ao inverter a direção, o tile de destino passa a ser o tile de retorno que ele acabou de deixar (this.gridX).
+          // Portanto, atualizamos this.gridX para o tile em direção ao qual ele estava se deslocando,
+          // de forma que (novo gridX + nova dir) aponte exatamente para o tile de retorno seguro.
+          this.gridX = this.gridX + this.dir.x;
+          this.gridY = this.gridY + this.dir.y;
+          this.dir = dir;
+          this.angle = dir.angle;
+          this.inputBufferDir = DIRECTIONS.NONE;
+          this.inputBufferTime = 0;
+          return;
+        } else {
+          // Se estava exatamente no centro do tile, só pode virar se o tile oposto for caminhável
+          const targetX = this.gridX + dir.x;
+          const targetY = this.gridY + dir.y;
+          if (g && !g.isWalkable(targetX, targetY)) {
+            this.inputBufferDir = DIRECTIONS.NONE;
+            this.inputBufferTime = 0;
+            return;
+          }
+          this.dir = dir;
+          this.angle = dir.angle;
+          this.inputBufferDir = DIRECTIONS.NONE;
+          this.inputBufferTime = 0;
+          return;
+        }
       }
 
       this.inputBufferDir = dir;
@@ -3704,6 +3754,35 @@
     }
 
     update(dt, game) {
+      this.game = game;
+
+      // Salvaguarda: se o jogador não estiver pulando e estiver dentro de uma parede, ejeta para o tile caminhável mais próximo
+      if (!this.isJumping && !game.isWalkable(this.gridX, this.gridY)) {
+        const snappedX = Math.round(this.x / TILE_SIZE);
+        const snappedY = Math.round(this.y / TILE_SIZE);
+        if (game.isWalkable(snappedX, snappedY)) {
+          this.gridX = snappedX;
+          this.gridY = snappedY;
+          this.x = snappedX * TILE_SIZE;
+          this.y = snappedY * TILE_SIZE;
+        } else {
+          const neighbors = [
+            { x: snappedX - 1, y: snappedY },
+            { x: snappedX + 1, y: snappedY },
+            { x: snappedX, y: snappedY - 1 },
+            { x: snappedX, y: snappedY + 1 }
+          ];
+          const valid = neighbors.find(n => game.isWalkable(n.x, n.y));
+          if (valid) {
+            this.gridX = valid.x;
+            this.gridY = valid.y;
+            this.x = valid.x * TILE_SIZE;
+            this.y = valid.y * TILE_SIZE;
+          }
+        }
+        this.dir = DIRECTIONS.NONE;
+      }
+
       // Tempo limite do buffer
       if (this.inputBufferTime > 0) {
         this.inputBufferTime -= dt;
@@ -3759,6 +3838,7 @@
                 '+CLOSE CALL! +250 Fichas x2 Mult',
                 '#FFE600'
               );
+              if (window.AchievementManager) window.AchievementManager.recordCloseCall(1);
             }
           });
         }
@@ -3821,6 +3901,8 @@
           const nextGridX = this.gridX + this.inputBufferDir.x;
           const nextGridY = this.gridY + this.inputBufferDir.y;
           if (game.isWalkable(nextGridX, nextGridY)) {
+            this.x = this.gridX * TILE_SIZE;
+            this.y = this.gridY * TILE_SIZE;
             this.dir = this.inputBufferDir;
             this.angle = this.dir.angle;
             this.inputBufferDir = DIRECTIONS.NONE;
@@ -3865,10 +3947,26 @@
       this.squishY = 1 - Math.sin(this.walkTimer) * 0.05;
 
       while (step > 0 && this.dir !== DIRECTIONS.NONE) {
+        // Tile de destino imediato
+        const targetGridX = this.gridX + this.dir.x;
+        const targetGridY = this.gridY + this.dir.y;
+
+        // Salvaguarda absoluta contra penetração de parede:
+        // Se o tile à frente for parede ou obstáculo não-caminhável, para o slime imediatamente
+        if (!game.isWalkable(targetGridX, targetGridY)) {
+          this.x = this.gridX * TILE_SIZE;
+          this.y = this.gridY * TILE_SIZE;
+          this.dir = DIRECTIONS.NONE;
+          this.straightLineTiles = 0;
+          game.tapeMeasureBonus = 0;
+          this.tapeMeasureTimer = 0;
+          break;
+        }
+
         // Coordenadas centrais do tile alvo
         const targetCenter = {
-          x: (this.gridX + this.dir.x) * TILE_SIZE,
-          y: (this.gridY + this.dir.y) * TILE_SIZE
+          x: targetGridX * TILE_SIZE,
+          y: targetGridY * TILE_SIZE
         };
 
         // Distância para o centro do tile
@@ -4281,6 +4379,7 @@
       if (window.MetaProgression && window.MetaProgression.addKills(1)) {
         game.addFloatingText(this.x + TILE_SIZE / 2, this.y - 35, '★ SLIME BALÍSTICO DESBLOQUEADO! ★', '#00FF66');
       }
+      if (window.AchievementManager) window.AchievementManager.checkAll(false);
 
       this.state = 'respawning';
       this.respawnTimer = 2500; // Tempo para renascer

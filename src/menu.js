@@ -128,7 +128,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // GERENCIAMENTO DE MODAIS E NAVEGAÇÃO
   // ==========================================================================
   const activeModalsStack = [];
-  const CURRENT_PATCH_VERSION = 'patch_2026_1';
+  const CURRENT_PATCH_VERSION = 'patch_2026_10_31';
 
   function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -141,6 +141,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (modalId === 'modalPlay') refreshPlayModal();
     if (modalId === 'modalDeck') refreshDeckModal();
     if (modalId === 'modalStats') refreshStatsModal();
+    if (modalId === 'modalAchievements') refreshAchievementsModal();
     if (modalId === 'modalOptions') refreshOptionsModal();
   }
 
@@ -249,9 +250,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Vinculação dos 4 Botões do Menu Principal aos Modais
+  // Vinculação dos Botões do Menu Principal e Placar aos Modais
   document.getElementById('menuBtnPlay').addEventListener('click', () => openModal('modalPlay'));
   document.getElementById('menuBtnDeck').addEventListener('click', () => openModal('modalDeck'));
+  
+  const btnAch = document.getElementById('menuBtnAchievements');
+  if (btnAch) btnAch.addEventListener('click', () => openModal('modalAchievements'));
+
+  const pillAch = document.getElementById('menuAchievementPill');
+  if (pillAch) pillAch.addEventListener('click', () => openModal('modalAchievements'));
+
   document.getElementById('menuBtnStats').addEventListener('click', () => openModal('modalStats'));
   document.getElementById('menuBtnOptions').addEventListener('click', () => openModal('modalOptions'));
 
@@ -767,8 +775,13 @@ window.addEventListener('DOMContentLoaded', () => {
     // Atualiza placar do canto superior direito do menu principal
     const topBestRunScore = document.getElementById('topBestRunScore');
     const topMaxMultValue = document.getElementById('topMaxMultValue');
+    const topAchievementsCount = document.getElementById('topAchievementsCount');
     if (topBestRunScore) topBestRunScore.innerText = bestRound.toLocaleString();
     if (topMaxMultValue) topMaxMultValue.innerText = `x${maxMult}`;
+    if (topAchievementsCount && window.AchievementManager) {
+      const plat = window.AchievementManager.getPlatinumProgress();
+      topAchievementsCount.innerText = `${plat.unlocked}/${plat.total}`;
+    }
 
     // Tabela de Histórico Recente
     const historyRaw = localStorage.getItem('munch_run_history') || '[]';
@@ -1014,6 +1027,145 @@ window.addEventListener('DOMContentLoaded', () => {
     applyTheme('default');
     updateMainSlimeCard();
     refreshStatsModal();
+    if (window.AchievementManager) {
+      window.AchievementManager.unlocked = {};
+      window.AchievementManager.saveUnlocked();
+    }
+  });
+
+  // ==========================================================================
+  // FUNCIONALIDADE 5: SALA DE TROFÉUS & CONQUISTAS (SISTEMA DE PLATINA)
+  // ==========================================================================
+  let currentAchFilter = 'all';
+
+  function refreshAchievementsModal(filter = currentAchFilter) {
+    currentAchFilter = filter;
+    if (!window.AchievementManager) return;
+
+    window.AchievementManager.checkAll(true);
+    const plat = window.AchievementManager.getPlatinumProgress();
+    const stats = window.AchievementManager.getGlobalStats();
+    const unlockedMap = window.AchievementManager.unlocked || {};
+    const list = window.AchievementManager.achievements;
+
+    // 1. Atualiza topo do banner de Platina
+    const lblPct = document.getElementById('lblPlatinumPercent');
+    const barProgress = document.getElementById('barPlatinumProgress');
+    const chipTotal = document.getElementById('chipTotalAch');
+    const topCount = document.getElementById('topAchievementsCount');
+
+    if (lblPct) lblPct.innerText = `${plat.percentage}%`;
+    if (barProgress) barProgress.style.width = `${plat.percentage}%`;
+    if (chipTotal) chipTotal.innerText = `${plat.unlocked} / ${plat.total} Desbloqueadas`;
+    if (topCount) topCount.innerText = `${plat.unlocked}/${plat.total}`;
+
+    // Contagem por Tiers
+    let bronzeUnlocked = 0, bronzeTotal = 0;
+    let silverUnlocked = 0, silverTotal = 0;
+    let goldUnlocked = 0, goldTotal = 0;
+    let platUnlocked = 0;
+
+    list.forEach(a => {
+      const isUnl = !!unlockedMap[a.id];
+      if (a.tier === 'bronze') { bronzeTotal++; if (isUnl) bronzeUnlocked++; }
+      else if (a.tier === 'silver') { silverTotal++; if (isUnl) silverUnlocked++; }
+      else if (a.tier === 'gold') { goldTotal++; if (isUnl) goldUnlocked++; }
+      else if (a.tier === 'platinum') { if (isUnl) platUnlocked++; }
+    });
+
+    const elBronze = document.getElementById('chipBronzeCount');
+    const elSilver = document.getElementById('chipSilverCount');
+    const elGold = document.getElementById('chipGoldCount');
+    const elPlat = document.getElementById('chipPlatCount');
+
+    if (elBronze) elBronze.innerText = `🥉 ${bronzeUnlocked}/${bronzeTotal}`;
+    if (elSilver) elSilver.innerText = `🥈 ${silverUnlocked}/${silverTotal}`;
+    if (elGold) elGold.innerText = `🥇 ${goldUnlocked}/${goldTotal}`;
+    if (elPlat) elPlat.innerText = `💎 ${platUnlocked}/1`;
+
+    // Atualiza contadores nas abas
+    const tabAll = document.getElementById('countTabAll');
+    const tabUnl = document.getElementById('countTabUnlocked');
+    const tabLck = document.getElementById('countTabLocked');
+    if (tabAll) tabAll.innerText = plat.total;
+    if (tabUnl) tabUnl.innerText = plat.unlocked;
+    if (tabLck) tabLck.innerText = plat.total - plat.unlocked;
+
+    // 2. Renderiza lista de cartões no Grid
+    const grid = document.getElementById('achievementsListGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    list.forEach(ach => {
+      const isUnl = !!unlockedMap[ach.id];
+      const unlockInfo = unlockedMap[ach.id];
+
+      // Filtro
+      if (filter === 'unlocked' && !isUnl) return;
+      if (filter === 'locked' && isUnl) return;
+
+      const card = document.createElement('div');
+      card.className = `achievement-card ${isUnl ? 'unlocked' : 'locked'} ${ach.tier}`;
+
+      // Progresso numérico para metas cumulativas
+      let progressHtml = '';
+      if (ach.max > 1) {
+        let currentProg = 0;
+        if (isUnl) {
+          currentProg = ach.max;
+        } else if (ach.getProgress) {
+          currentProg = ach.getProgress(stats, unlockedMap);
+        }
+        const pct = Math.min(100, Math.round((currentProg / ach.max) * 100));
+        progressHtml = `
+          <div class="ach-progress-box">
+            <div class="ach-progress-track">
+              <div class="ach-progress-fill" style="width: ${pct}%;"></div>
+            </div>
+            <div class="ach-progress-text">
+              <span>Progresso</span>
+              <span>${currentProg.toLocaleString()} / ${ach.max.toLocaleString()} (${pct}%)</span>
+            </div>
+          </div>
+        `;
+      }
+
+      const statusBadge = isUnl
+        ? `<span class="ach-status-badge completed">★ CONCLUÍDA</span>`
+        : `<span class="ach-status-badge locked-status">🔒 BLOQUEADA</span>`;
+
+      const dateText = (isUnl && unlockInfo && unlockInfo.date)
+        ? `<span class="ach-card-date">${unlockInfo.date}</span>`
+        : '';
+
+      card.innerHTML = `
+        <div class="ach-card-icon-box">${ach.icon}</div>
+        <div class="ach-card-content">
+          <div class="ach-card-header">
+            <span class="ach-card-title">${ach.name}</span>
+            <span class="ach-card-tier-badge ${ach.tier}">${ach.tier}</span>
+          </div>
+          <div class="ach-card-desc">${ach.desc}</div>
+          ${progressHtml}
+          <div class="ach-card-footer">
+            ${statusBadge}
+            ${dateText}
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  // Evento das abas de filtro das Conquistas
+  document.querySelectorAll('.ach-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.ach-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.getAttribute('data-filter') || 'all';
+      refreshAchievementsModal(filter);
+    });
   });
 
   // ==========================================================================
@@ -1173,6 +1325,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // Inicialização da Meta-Progressão no Menu
   refreshDeckModal();
   checkPendingUnlocks();
+
+  // Inicialização das Conquistas no Menu
+  if (window.AchievementManager) {
+    window.AchievementManager.checkAll(true);
+    const plat = window.AchievementManager.getPlatinumProgress();
+    const topCount = document.getElementById('topAchievementsCount');
+    if (topCount) topCount.innerText = `${plat.unlocked}/${plat.total}`;
+  }
 
   // Verificação e exibição automática do Patch Notes (Primeira vez nesta versão)
   try {

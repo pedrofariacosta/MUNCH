@@ -2424,3 +2424,429 @@ input:checked+.toggle-slider::before {
   text-shadow: 0 0 8px var(--cyan-primary);
 }
 
+/* ==========================================================================
+   SISTEMA DE CONQUISTAS E SALA DE TROFÉUS (PLATINA)
+   ========================================================================== */
+
+.stat-box.stat-clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.stat-box.stat-clickable:hover {
+  transform: translateY(-2px);
+}
+
+.stat-box.stat-clickable:hover .stat-label {
+  color: var(--cyan-primary);
+}
+
+.stat-value.highlight-cyan {
+  color: var(--cyan-primary);
+  text-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.arcade-modal-container.achievements-modal-large {
+  width: 860px;
+  max-width: 95vw;
+  max-height: 90vh;
+  padding: 24px 28px;
+  gap: 16px;
+}
+
+/* Banner da Platina */
+.platinum-showcase-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(14, 18, 30, 0.95) 0%, rgba(20, 30, 48, 0.85) 100%);
+  border: 1.5px solid #00E5FF;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.15), inset 0 0 15px rgba(0, 229, 255, 0.05);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.platinum-trophy-box {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.6));
+  animation: platFloat 3s ease-in-out infinite;
+}
+
+@keyframes platFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.04); }
+}
+
+.platinum-info-box {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.platinum-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.platinum-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--yellow-primary);
+  letter-spacing: 1px;
+}
+
+.platinum-percentage {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: #00E5FF;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+}
+
+.platinum-bar-wrapper {
+  width: 100%;
+  height: 12px;
+  background: #080a12;
+  border: 1.5px solid #2a344a;
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 1px;
+}
+
+.platinum-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00E5FF 0%, #FFE600 50%, #10B981 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.platinum-tier-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tier-chip {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #333a4c;
+}
+
+.tier-chip.tier-all { color: #fff; border-color: #00E5FF; background: rgba(0, 229, 255, 0.1); }
+.tier-chip.tier-bronze { color: #cd7f32; border-color: rgba(205, 127, 50, 0.4); }
+.tier-chip.tier-silver { color: #d1d5db; border-color: rgba(209, 213, 219, 0.4); }
+.tier-chip.tier-gold { color: #FFE600; border-color: rgba(255, 230, 0, 0.4); }
+.tier-chip.tier-plat { color: #00E5FF; border-color: rgba(0, 229, 255, 0.4); text-shadow: 0 0 6px var(--cyan-glow); }
+
+/* Filtros de Abas das Conquistas */
+.achievements-filter-tabs {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid #1a1e2c;
+  padding-bottom: 8px;
+}
+
+.ach-tab-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #71778d;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -10px;
+  transition: all 0.2s ease;
+}
+
+.ach-tab-btn:hover {
+  color: #fff;
+}
+
+.ach-tab-btn.active {
+  color: var(--yellow-primary);
+  border-bottom-color: var(--yellow-primary);
+  text-shadow: 0 0 8px var(--yellow-glow);
+}
+
+/* Grid de Conquistas */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 12px;
+  max-height: 48vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.achievement-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: rgba(14, 16, 24, 0.95);
+  border: 1.5px solid #1e2232;
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.achievement-card:hover {
+  transform: translateY(-2px);
+  border-color: #3b4258;
+}
+
+.achievement-card.unlocked {
+  background: linear-gradient(135deg, rgba(16, 22, 34, 0.95) 0%, rgba(12, 16, 24, 0.98) 100%);
+}
+
+.achievement-card.unlocked.bronze { border-color: rgba(205, 127, 50, 0.6); box-shadow: 0 4px 15px rgba(205, 127, 50, 0.08); }
+.achievement-card.unlocked.silver { border-color: rgba(209, 213, 219, 0.6); box-shadow: 0 4px 15px rgba(209, 213, 219, 0.08); }
+.achievement-card.unlocked.gold { border-color: rgba(255, 230, 0, 0.7); box-shadow: 0 4px 18px rgba(255, 230, 0, 0.12); }
+.achievement-card.unlocked.platinum {
+  border-color: #00E5FF;
+  box-shadow: 0 4px 25px rgba(0, 229, 255, 0.25);
+  background: linear-gradient(135deg, rgba(8, 28, 44, 0.95) 0%, rgba(12, 20, 36, 0.98) 100%);
+}
+
+.achievement-card.locked {
+  opacity: 0.75;
+}
+
+.achievement-card.locked:hover {
+  opacity: 0.9;
+}
+
+.ach-card-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #0a0c14;
+  border: 1px solid #252b3e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.achievement-card.locked .ach-card-icon-box {
+  filter: grayscale(1) brightness(0.6);
+}
+
+.achievement-card.unlocked.platinum .ach-card-icon-box {
+  border-color: #00E5FF;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+.ach-card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ach-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.ach-card-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #fff;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.achievement-card.unlocked.gold .ach-card-title { color: var(--yellow-primary); }
+.achievement-card.unlocked.platinum .ach-card-title { color: #00E5FF; text-shadow: 0 0 8px var(--cyan-glow); }
+
+.ach-card-tier-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.ach-card-tier-badge.bronze { background: rgba(205, 127, 50, 0.2); color: #cd7f32; border: 1px solid rgba(205, 127, 50, 0.4); }
+.ach-card-tier-badge.silver { background: rgba(209, 213, 219, 0.2); color: #d1d5db; border: 1px solid rgba(209, 213, 219, 0.4); }
+.ach-card-tier-badge.gold { background: rgba(255, 230, 0, 0.2); color: #FFE600; border: 1px solid rgba(255, 230, 0, 0.4); }
+.ach-card-tier-badge.platinum { background: rgba(0, 229, 255, 0.2); color: #00E5FF; border: 1px solid rgba(0, 229, 255, 0.5); }
+
+.ach-card-desc {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #9aa1b8;
+}
+
+/* Barra de progresso para conquistas com meta numérica */
+.ach-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.ach-progress-track {
+  width: 100%;
+  height: 6px;
+  background: #090a10;
+  border-radius: 3px;
+  border: 1px solid #202636;
+  overflow: hidden;
+}
+
+.ach-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00E5FF, #FFE600);
+  border-radius: 2px;
+}
+
+.ach-progress-text {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #6d758f;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ach-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.ach-status-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+}
+
+.ach-status-badge.completed {
+  color: #10B981;
+}
+
+.ach-status-badge.locked-status {
+  color: #555b72;
+}
+
+.ach-card-date {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #555b72;
+}
+
+/* Toast In-Game e no Menu */
+.achievement-toast-container {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100002;
+  pointer-events: none;
+}
+
+.achievement-toast {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(10, 14, 24, 0.96);
+  border: 2px solid #00E5FF;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 229, 255, 0.4);
+  border-radius: 8px;
+  padding: 12px 18px;
+  min-width: 340px;
+  max-width: 460px;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.achievement-toast.gold {
+  border-color: #FFE600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 230, 0, 0.4);
+}
+
+.achievement-toast.platinum {
+  border-color: #00E5FF;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 229, 255, 0.6);
+  background: linear-gradient(135deg, rgba(8, 28, 44, 0.98) 0%, rgba(12, 20, 36, 0.98) 100%);
+}
+
+.achievement-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.achievement-toast.hide {
+  opacity: 0;
+  transform: translateY(-15px) scale(0.95);
+}
+
+.ach-toast-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.ach-toast-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ach-toast-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ach-toast-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.ach-toast-badge.bronze { background: #cd7f32; color: #000; }
+.ach-toast-badge.silver { background: #d1d5db; color: #000; }
+.ach-toast-badge.gold { background: #FFE600; color: #000; }
+.ach-toast-badge.platinum { background: #00E5FF; color: #000; }
+
+.ach-toast-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--yellow-primary);
+  letter-spacing: 0.5px;
+}
+
+.ach-toast-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff;
+}
+
+.ach-toast-desc {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  color: #b0b8d2;
+}
+

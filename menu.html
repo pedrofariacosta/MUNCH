@@ -16,6 +16,7 @@
   <!-- CSS e Javascript -->
   <link rel="stylesheet" href="./styles/menu.css">
   <script src="./src/systems/MetaProgression.js"></script>
+  <script src="./src/systems/AchievementManager.js"></script>
   <script src="./src/leaderboard.js"></script>
   <script src="./src/systems/AudioManager.js"></script>
   <script src="./src/menu.js"></script>
@@ -41,6 +42,7 @@
       <nav class="button-group" aria-label="Menu Principal">
         <button class="btn btn-play" id="menuBtnPlay">Jogar</button>
         <button class="btn btn-secondary" id="menuBtnDeck">Baralho / Slimes</button>
+        <button class="btn btn-secondary" id="menuBtnAchievements">Conquistas</button>
         <button class="btn btn-secondary" id="menuBtnStats">Estatísticas</button>
         <button class="btn btn-secondary" id="menuBtnOptions">Opções</button>
       </nav>
@@ -57,6 +59,10 @@
         <div class="stat-box">
           <span class="stat-label">Max Multi</span>
           <span class="stat-value" id="topMaxMultValue">x1</span>
+        </div>
+        <div class="stat-box stat-clickable" id="menuAchievementPill" title="Ver Sala de Troféus (Conquistas)">
+          <span class="stat-label">Platina</span>
+          <span class="stat-value highlight-cyan" id="topAchievementsCount">0/39</span>
         </div>
       </aside>
 
@@ -614,7 +620,7 @@
     <div class="arcade-modal-container patch-modal">
       <header class="arcade-modal-header">
         <div class="patch-header-titles">
-          <span class="patch-version-tag">[ ATUALIZAÇÃO // V1.1 ]</span>
+          <span class="patch-version-tag">[ ATUALIZAÇÃO // V1.1 &bull; 31/10/2026 ]</span>
           <h2 class="arcade-modal-title">NOVIDADES NO LABIRINTO</h2>
         </div>
         <button class="arcade-modal-close" data-close="modalPatchNotes">[ ✕ / ESC ]</button>
@@ -622,6 +628,22 @@
 
       <div class="arcade-modal-body">
         <div class="patch-notes-list">
+          <div class="patch-note-card">
+            <div class="patch-note-icon">💎</div>
+            <div class="patch-note-content">
+              <div class="patch-note-title">Sala de Troféus & Platina</div>
+              <div class="patch-note-desc">Adicionadas <strong>39 conquistas retrô</strong>! Colete troféus comendo pastilhas, derrotando monstros e completando desafios até conquistar a Platina.</div>
+            </div>
+          </div>
+
+          <div class="patch-note-card">
+            <div class="patch-note-icon">🛠️</div>
+            <div class="patch-note-content">
+              <div class="patch-note-title">Correções de Bugs</div>
+              <div class="patch-note-desc">Corrigido o erro visual no topo que mostrava 1 vida a mais do que o real, e resolvido o bug em que o jogador atravessava paredes ao virar rápido.</div>
+            </div>
+          </div>
+
           <div class="patch-note-card">
             <div class="patch-note-icon">🏆</div>
             <div class="patch-note-content">
@@ -646,7 +668,7 @@
               <div class="patch-note-title">Novas Relíquias & Chefes</div>
               <div class="patch-note-desc">Dezenas de novas cartas no álbum, economia rebalanceada e <span
                   class="patch-highlight-boss">desafios surpresa no 3º estágio de cada nível</span>: cada chefe impõe
-                uma regra especial para desafiar você (como desativar uma relíquia ou acelerar os monstros!).</div>
+                uma regra especial para desafiar você.</div>
             </div>
           </div>
 
@@ -664,6 +686,58 @@
           <button class="btn-start-run btn-patch-action" id="btnClosePatchNotes" data-close="modalPatchNotes">[
             ENTENDIDO, BORA JOGAR! ]</button>
           <span class="patch-footer-hint">[ESC] ou clique fora para fechar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Sala de Troféus / Conquistas (SISTEMA DE PLATINA) -->
+  <div class="arcade-modal-overlay" id="modalAchievements">
+    <div class="arcade-modal-container achievements-modal-large">
+      <header class="arcade-modal-header">
+        <div class="patch-header-titles">
+          <span class="patch-version-tag">[ SALA DE TROFÉUS // SISTEMA DE PLATINA ]</span>
+          <h2 class="arcade-modal-title">🏆 CONQUISTAS DO LABIRINTO</h2>
+        </div>
+        <button class="arcade-modal-close" data-close="modalAchievements">[ ✕ / ESC ]</button>
+      </header>
+
+      <!-- Banner de Progresso da Platina -->
+      <div class="platinum-showcase-banner">
+        <div class="platinum-trophy-box" id="platinumTrophyIcon">💎</div>
+        <div class="platinum-info-box">
+          <div class="platinum-header-row">
+            <span class="platinum-title">PROGRESSO DA PLATINA</span>
+            <span class="platinum-percentage" id="lblPlatinumPercent">0%</span>
+          </div>
+          <div class="platinum-bar-wrapper">
+            <div class="platinum-bar-fill" id="barPlatinumProgress" style="width: 0%;"></div>
+          </div>
+          <div class="platinum-tier-counts">
+            <span class="tier-chip tier-all" id="chipTotalAch">0 / 39 Desbloqueadas</span>
+            <span class="tier-chip tier-bronze" id="chipBronzeCount">🥉 0/7</span>
+            <span class="tier-chip tier-silver" id="chipSilverCount">🥈 0/13</span>
+            <span class="tier-chip tier-gold" id="chipGoldCount">🥇 0/18</span>
+            <span class="tier-chip tier-plat" id="chipPlatCount">💎 0/1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros de Abas -->
+      <nav class="achievements-filter-tabs">
+        <button class="ach-tab-btn active" data-filter="all">TODAS (<span id="countTabAll">39</span>)</button>
+        <button class="ach-tab-btn" data-filter="unlocked">CONCLUÍDAS (<span id="countTabUnlocked">0</span>)</button>
+        <button class="ach-tab-btn" data-filter="locked">BLOQUEADAS (<span id="countTabLocked">39</span>)</button>
+      </nav>
+
+      <div class="arcade-modal-body">
+        <!-- Grid de Cartões de Conquistas -->
+        <div class="achievements-grid" id="achievementsListGrid">
+          <!-- Renderizado dinamicamente via JS -->
+        </div>
+
+        <div class="patch-footer-hint" style="text-align: center; margin-top: 6px;">
+          [ESC] ou clique fora para fechar
         </div>
       </div>
     </div>

@@ -628,6 +628,14 @@ body::after {
   color: var(--text-pure);
 }
 
+#hudLives {
+  font-size: 14px;
+  letter-spacing: 2px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
 .resource-value.gold {
   color: var(--yellow-primary);
   text-shadow: 0 0 5px var(--yellow-glow);
