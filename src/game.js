@@ -1,6 +1,60 @@
 // Munch - Motor de física e jogabilidade
 
 (function () {
+  // ==========================================================================
+  // BLINDAGEM ANTI-CHEAT: OBFUSCAÇÃO DE MEMÓRIA & TAMPER RESISTANCE (XOR + HASH)
+  // ==========================================================================
+  const CHEAT_SALT = (Math.floor(Math.random() * 0x7FFFFFFF) + 1) ^ 0x5A3C96E1;
+
+  function calculateChecksum(val, mask, salt) {
+    let h = 5381;
+    const vInt = (val | 0) ^ salt;
+    h = ((h << 5) + h) ^ (vInt & 0xFF);
+    h = ((h << 5) + h) ^ ((vInt >> 8) & 0xFF);
+    h = ((h << 5) + h) ^ ((vInt >> 16) & 0xFF);
+    h = ((h << 5) + h) ^ ((vInt >> 24) & 0xFF);
+    h = ((h << 5) + h) ^ (mask & 0xFF);
+    h = ((h << 5) + h) ^ ((mask >> 8) & 0xFF);
+    h = ((h << 5) + h) ^ ((mask >> 16) & 0xFF);
+    h = ((h << 5) + h) ^ ((mask >> 24) & 0xFF);
+    return h >>> 0;
+  }
+
+  class SecureVariable {
+    constructor(initialValue = 0, onTamper = null) {
+      this._onTamper = onTamper;
+      this._mask = (Math.floor(Math.random() * 0x7FFFFFFF) + 1) | 0;
+      this._maskedValue = 0;
+      this._checksum = 0;
+      this.set(initialValue);
+    }
+
+    get() {
+      const recovered = (this._maskedValue ^ this._mask) | 0;
+      const expectedChecksum = calculateChecksum(recovered, this._mask, CHEAT_SALT);
+
+      if (this._checksum !== expectedChecksum || typeof this._maskedValue !== 'number' || isNaN(recovered)) {
+        if (typeof this._onTamper === 'function') {
+          this._onTamper();
+        }
+        return 0;
+      }
+
+      return recovered;
+    }
+
+    set(newVal) {
+      const numVal = Math.floor(Number(newVal) || 0);
+      // Gera uma nova máscara aleatória a cada mutação para impedir rastreamento de memória
+      this._mask = (Math.floor(Math.random() * 0x7FFFFFFF) + 1) | 0;
+      this._maskedValue = (numVal ^ this._mask) | 0;
+      this._checksum = calculateChecksum(numVal, this._mask, CHEAT_SALT);
+    }
+  }
+
+  Object.freeze(SecureVariable.prototype);
+  Object.freeze(SecureVariable);
+
   // Favicon fixo do slime
   const faviconCanvas = document.createElement('canvas');
   faviconCanvas.width = 32;
@@ -616,6 +670,17 @@
       this.skillVault = document.getElementById('skillVault');
       this.skillBlaster = document.getElementById('skillBlaster');
 
+      // Blindagem Anti-Cheat: Detecção de adulteração de estado em memória
+      this.isCheater = false;
+      this.runStartTime = Date.now();
+      const onTamper = () => {
+        this.isCheater = true;
+      };
+      this._secureScore = new SecureVariable(0, onTamper);
+      this._secureAccumulatedRunScore = new SecureVariable(0, onTamper);
+      this._secureGold = new SecureVariable(0, onTamper);
+      this._secureChips = new SecureVariable(0, onTamper);
+
       // Estado inicial do jogo
       this.gameState = GAME_STATES.PLAYING;
       this.ante = 1;
@@ -676,6 +741,35 @@
       this.runPelletsEaten = 0;
 
       this.init();
+    }
+
+    // Getters & Setters blindados com mascaramento XOR e checksum
+    get score() {
+      return this._secureScore ? this._secureScore.get() : 0;
+    }
+    set score(v) {
+      if (this._secureScore) this._secureScore.set(v);
+    }
+
+    get accumulatedRunScore() {
+      return this._secureAccumulatedRunScore ? this._secureAccumulatedRunScore.get() : 0;
+    }
+    set accumulatedRunScore(v) {
+      if (this._secureAccumulatedRunScore) this._secureAccumulatedRunScore.set(v);
+    }
+
+    get gold() {
+      return this._secureGold ? this._secureGold.get() : 0;
+    }
+    set gold(v) {
+      if (this._secureGold) this._secureGold.set(v);
+    }
+
+    get chips() {
+      return this._secureChips ? this._secureChips.get() : 0;
+    }
+    set chips(v) {
+      if (this._secureChips) this._secureChips.set(v);
     }
 
     init() {
@@ -851,7 +945,15 @@
           try {
             const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
             if (lb) {
-              await lb.submitScore(name, finalScore, this.ante, this.stake, true);
+              const durationMs = Math.max(1, Date.now() - (this.runStartTime || Date.now()));
+              const itemsEaten = (this.runPelletsEaten || 0) + (this.runEnemiesKilled || 0);
+              await lb.submitScore(name, finalScore, this.ante, this.stake, true, {
+                durationMs,
+                itemsEaten,
+                kills: this.runEnemiesKilled || 0,
+                pellets: this.runPelletsEaten || 0,
+                isCheater: this.isCheater
+              });
             }
           } catch (err) {
             console.warn('[MUNCH] Erro ao sincronizar pontuação de vitória:', err);
@@ -943,7 +1045,16 @@
 
           const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
           if (lb) {
-            await lb.submitScore(name, this.score, this.ante, this.stake, this.runCleared);
+            const finalScore = Math.max(Math.round(this.accumulatedRunScore || 0), Math.round(this.score || 0));
+            const durationMs = Math.max(1, Date.now() - (this.runStartTime || Date.now()));
+            const itemsEaten = (this.runPelletsEaten || 0) + (this.runEnemiesKilled || 0);
+            await lb.submitScore(name, finalScore, this.ante, this.stake, this.runCleared, {
+              durationMs,
+              itemsEaten,
+              kills: this.runEnemiesKilled || 0,
+              pellets: this.runPelletsEaten || 0,
+              isCheater: this.isCheater
+            });
           }
           lblSubmitStatus.innerText = "✓ RECORD ENVIADO COM SUCESSO!";
           lblSubmitStatus.style.color = "#10B981";
@@ -1670,6 +1781,8 @@
       this.hasShownVictoryModal = false;
       this.isEndless = false;
       this.targetReachedInStage = false;
+      this.runStartTime = Date.now();
+      this.isCheater = false;
     }
 
     saveActiveRunState() {
@@ -1693,6 +1806,7 @@
         runMaxMult: this.runMaxMult,
         runEnemiesKilled: this.runEnemiesKilled,
         runPelletsEaten: this.runPelletsEaten,
+        runStartTime: this.runStartTime || Date.now(),
         activeBossBlind: this.activeBossBlind,
         maxRelics: this.maxRelics,
         purchasedVouchers: this.purchasedVouchers,
@@ -1728,6 +1842,7 @@
         this.runMaxMult = data.runMaxMult || 1;
         this.runEnemiesKilled = data.runEnemiesKilled || 0;
         this.runPelletsEaten = data.runPelletsEaten || 0;
+        this.runStartTime = data.runStartTime || Date.now();
         this.isGamblerSlime = (this.selectedSlime === 'gambler');
         this.activeBossBlind = data.activeBossBlind || null;
         this.maxRelics = data.maxRelics || 5;
@@ -4898,8 +5013,8 @@
     }
   }
 
-  // Inicialização do jogo
+  // Inicialização isolada do jogo (Sem vazamento de instâncias para o objeto global window)
   window.addEventListener('DOMContentLoaded', () => {
-    window.munchGame = new Game();
+    const munchGame = new Game();
   });
 })();

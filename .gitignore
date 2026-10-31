@@ -1,13 +1,21 @@
 # Variáveis de Ambiente e Segredos (Vercel / Local)
 .env
 .env.local
+.env.production
 .env.*.local
+.env.*
+*.pem
+*.key
 .vercel
 
+# Source Maps e Arquivos de Depuração
+*.map
 
-# Dependências
+# Dependências e Build
 node_modules/
 dist/
+build/
+.cache/
 
 # IDE e editores
 .vscode/

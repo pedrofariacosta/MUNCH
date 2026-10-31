@@ -27,15 +27,20 @@
     },
 
     // Envia o recorde para a API online e persiste também localmente
-    async submitScore(playerName, score, ante, stake = 'white', cleared = false) {
+    async submitScore(playerName, score, ante, stake = 'white', cleared = false, metrics = {}) {
+      // Se flag de cheater estiver ativa, neutraliza a pontuação silenciosamente
+      const finalScore = metrics.isCheater ? 0 : Math.round(Number(score) || 0);
+
       const entry = {
         name: (playerName || "SLIME_ANONIMO").toUpperCase().trim().slice(0, 12),
-        score: Math.round(score),
+        score: finalScore,
         ante: ante || 1,
         stake: stake || 'white',
         cleared: !!cleared,
         date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        durationMs: Number(metrics.durationMs) || 0,
+        itemsEaten: Number(metrics.itemsEaten) || 0
       };
 
       // 1. Grava no LocalStorage imediatamente
@@ -84,8 +89,16 @@
     }
   };
 
+  // Blindagem anti-tampering: Congela o objeto do leaderboard contra monkey-patching
+  Object.freeze(MunchLeaderboard);
+
   if (typeof window !== 'undefined') {
-    window.MunchLeaderboard = MunchLeaderboard;
+    Object.defineProperty(window, 'MunchLeaderboard', {
+      value: MunchLeaderboard,
+      writable: false,
+      configurable: false,
+      enumerable: true
+    });
   }
   if (typeof global !== 'undefined') {
     global.MunchLeaderboard = MunchLeaderboard;
