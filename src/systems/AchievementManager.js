@@ -678,6 +678,12 @@
         container = document.createElement('div');
         container.id = 'achievementToastContainer';
         container.className = 'achievement-toast-container';
+        container.style.position = 'fixed';
+        container.style.top = '18px';
+        container.style.left = '50%';
+        container.style.transform = 'translateX(-50%)';
+        container.style.zIndex = '100002';
+        container.style.pointerEvents = 'none';
         document.body.appendChild(container);
       }
 
