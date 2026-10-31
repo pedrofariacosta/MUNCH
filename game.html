@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUNCH — Jogando</title>
-  
+
   <!-- Fontes do projeto -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
+
   <!-- Estilos e Favicon -->
   <link rel="icon" id="dynamic-favicon" type="image/png" href="">
   <link rel="stylesheet" href="./styles/game.css">
 </head>
+
 <body class="crt-flicker">
 
+  <!-- Botão Fixo de Mudo Rápido -->
+  <button class="global-mute-btn" id="btnGlobalMute" title="Silenciar Áudio [M]" aria-label="Silenciar Áudio">
+    <span class="mute-icon">🔊</span>
+  </button>
+
   <div class="game-container">
-    
+
     <!-- HUD superior -->
     <header class="hud-header">
       <!-- Placar e meta de pontuação -->
@@ -28,26 +37,27 @@
           <span class="hud-target-value" id="hudBlindTarget">1,500</span>
         </div>
         <div class="hud-current-score" id="hudCurrentScore">0</div>
-        <div class="progress-container">
+        <div class="progress-container" id="hudProgressContainer">
           <div class="progress-bar" id="hudProgressBar"></div>
+          <div class="progress-text-overlay" id="hudProgressText">0 / 1,500 (0%)</div>
         </div>
       </div>
-      
+
       <!-- Bandeja de relíquias coletadas -->
       <div class="hud-relics-wrapper">
         <div class="hud-relics-label">JOKERS <span class="relics-count" id="relicsCount">(0/5)</span></div>
         <div class="relics-tray" id="relicsTray"></div>
       </div>
-      
+
       <!-- Multiplicadores de pontuação -->
       <div class="balatro-scoring">
         <div class="score-box chips-box" id="chipsBox">
           <span class="score-box-label">Fichas</span>
           <span class="score-box-value" id="hudChipsValue">0</span>
         </div>
-        
+
         <span class="calc-operator">&times;</span>
-        
+
         <div class="score-box mult-box" id="multBox">
           <span class="score-box-label">Mult</span>
           <span class="score-box-value" id="hudMultValue">1</span>
@@ -66,10 +76,10 @@
         <div class="stat-label-box">
           <span class="stat-title">Nível</span>
           <span class="stat-value-badge" id="hudRoundIndicator">NÍVEL 1 // ESTÁGIO 1</span>
-          <span class="boss-blind-badge" id="hudBlindBadge" style="display: none;"></span>
+          <span class="boss-blind-badge" id="hudBossBlindIndicator" style="display: none;"></span>
         </div>
       </div>
-      
+
       <div class="footer-resources">
         <div class="resource-item">
           <span class="resource-icon">❤️</span>
@@ -80,7 +90,7 @@
           <span class="resource-value gold" id="hudGold">0</span>
         </div>
       </div>
-      
+
       <div class="footer-skills">
         <!-- Habilidade Pulo (Vault) -->
         <div class="skill-indicator" id="skillVault">
@@ -92,7 +102,7 @@
             <div class="skill-bar-fill" id="vaultCooldownFill"></div>
           </div>
         </div>
-        
+
         <!-- Habilidade Disparo (Blaster) -->
         <div class="skill-indicator" id="skillBlaster">
           <div class="skill-info">
@@ -105,17 +115,17 @@
         </div>
       </div>
     </footer>
-    
+
   </div>
 
   <!-- Modais de sobreposição de tela -->
-     
+
   <!-- Modal de vitória -->
   <div class="overlay-modal" id="modalWin">
     <div class="modal-content">
       <h2 class="modal-title win">Rodada Vencida!</h2>
       <p class="modal-subtitle">Voce atingiu a meta do estágio com maestria. Prepare-se para o proximo desafio!</p>
-      
+
       <div class="modal-stats-box">
         <div class="modal-stat-row">
           <span class="modal-stat-label">Pontos Feitos:</span>
@@ -130,7 +140,7 @@
           <span class="modal-stat-value highlight" id="winModalGold">0</span>
         </div>
       </div>
-      
+
       <button class="btn-arcade-modal blue-theme" id="btnNextBlind">Proximo Estágio</button>
     </div>
   </div>
@@ -140,18 +150,18 @@
     <div class="modal-content draft-modal-content">
       <h2 class="modal-title win">RODADA COMPLETA</h2>
       <p class="modal-subtitle">ESCOLHA UMA RELIQUIA PARA A SUA RUN</p>
-      
+
       <div class="shop-economy-header">
         <span class="shop-gold-display">BANCO: <span id="shopGoldAmount" class="gold-text">0</span> OUROS</span>
       </div>
-      
+
       <div class="shop-main-layout">
         <div class="draft-section">
           <div class="draft-cards-container" id="draftCardsContainer">
             <!-- Inserido dinamicamente via JS -->
           </div>
         </div>
-        
+
         <div class="vouchers-section">
           <h3 class="vouchers-title">VOUCHERS</h3>
           <div class="vouchers-container" id="vouchersContainer">
@@ -159,46 +169,144 @@
           </div>
         </div>
       </div>
+
+      <div class="shop-actions">
+        <button class="btn-skip-shop" id="btnSkipShop">CONTINUAR RUN [ PRÓXIMO ESTÁGIO ] ▶</button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal de derrota -->
-  <div class="overlay-modal" id="modalGameOver">
-    <div class="modal-content">
-      <h2 class="modal-title lose">Fim de Jogo</h2>
-      <p class="modal-subtitle">Seu slime sucumbiu aos corredores do labirinto. Tente novamente e supere seu recorde!</p>
-      
-      <div class="modal-stats-box">
+  <!-- Alerta Visual de Boss Blind (Estágio 3) -->
+  <div id="bossBlindBanner" class="boss-blind-alert-banner" style="display: none;">
+    <div class="boss-blind-alert-glow"></div>
+    <div class="boss-blind-alert-header">⚠️ BOSS BLIND ATIVADO ⚠️</div>
+    <div class="boss-blind-alert-name" id="bossBlindAlertName">O SILENCIADOR</div>
+    <div class="boss-blind-alert-desc" id="bossBlindAlertDesc">A 1ª relíquia equipada está desativada!</div>
+  </div>
+
+  <!-- Modal Comemorativo de Vitória (RUN CLEARED) -->
+  <div class="overlay-modal" id="modalRunCleared">
+    <div class="modal-content victory-modal-content">
+      <div class="victory-header-badge">★ RUN CLEARED ★</div>
+      <h2 class="modal-title run-cleared-title">VITÓRIA // RUN CLEARED</h2>
+      <div class="victory-stake-badge" id="victoryStakeBadge">⚪ FICHA BRANCA CONCLUÍDA</div>
+      <p class="modal-subtitle victory-subtitle">Você dominou o labirinto e superou todas as metas do Nível 8!</p>
+
+      <!-- Resumo Detalhado da Partida -->
+      <div class="modal-stats-box victory-stats-box">
         <div class="modal-stat-row">
-          <span class="modal-stat-label">Pontuação Final:</span>
-          <span class="modal-stat-value highlight" id="loseModalScore">0</span>
+          <span class="modal-stat-label">🏆 Pontuação Final:</span>
+          <span class="modal-stat-value highlight-gold" id="victoryFinalScore">0</span>
         </div>
         <div class="modal-stat-row">
-          <span class="modal-stat-label">Melhor Pontuação:</span>
-          <span class="modal-stat-value" id="loseModalHighScore">0</span>
+          <span class="modal-stat-label">⚡ Maior Mult Atingido:</span>
+          <span class="modal-stat-value highlight-cyan" id="victoryMaxMult">x1</span>
+        </div>
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">⚔️ Inimigos / Pastilhas:</span>
+          <span class="modal-stat-value" id="victoryKillsPellets">0 / 0</span>
+        </div>
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">👾 Slime Utilizado:</span>
+          <span class="modal-stat-value highlight" id="victorySlimeUsed">🟢 Slime Clássico</span>
+        </div>
+        <div class="victory-relics-container">
+          <span class="modal-stat-label">🃏 Relíquias da Build:</span>
+          <div class="victory-relics-list" id="victoryRelicsList"></div>
         </div>
       </div>
-      
+
+      <!-- Formulário de Registro no Ranking Global -->
+      <div class="victory-leaderboard-box">
+        <label class="victory-lb-label">🏆 REGISTRAR VITÓRIA NO RANKING</label>
+        <div class="victory-lb-input-group">
+          <input type="text" id="victoryPlayerName" placeholder="SEU APELIDO" maxlength="12" class="victory-input-name">
+        </div>
+        <span id="victorySubmitStatus" class="victory-submit-status"></span>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="victory-actions-grid">
+        <button class="btn-arcade-modal victory-btn-finish" id="btnFinishRun">
+          [ FINALIZAR PARTIDA ]
+        </button>
+        <button class="btn-arcade-modal victory-btn-endless" id="btnContinueEndless">
+          [ MODO SEM FIM (ENDLESS) ]
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta Central de Meta Atingida -->
+  <div id="stageGoalAlert" class="stage-goal-alert-banner" style="display: none;">
+    <div class="stage-goal-alert-text">META ATINGIDA</div>
+  </div>
+
+  <!-- Container de Notificações Flutuantes (Toasts) -->
+  <div class="in-game-toast-container" id="inGameToastContainer"></div>
+
+  <!-- Modal de derrota -->
+  <div class="overlay-modal" id="modalGameOver">
+    <div class="modal-content game-over-modal-content">
+      <div class="game-over-header-badge" id="gameOverHeaderBadge" style="display: none;"></div>
+      <h2 class="modal-title lose" id="gameOverTitle">Fim de Jogo</h2>
+      <p class="modal-subtitle" id="gameOverSubtitle">Seu slime sucumbiu aos corredores do labirinto. Tente novamente!</p>
+
+      <!-- Relatório Completo da Partida (Run Recap) -->
+      <div class="modal-stats-box game-over-stats-box">
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">🏆 Pontuação Final:</span>
+          <span class="modal-stat-value highlight-gold" id="loseModalScore">0</span>
+        </div>
+        <div class="modal-stat-row" id="rowPersonalBest" style="display: none;">
+          <span class="modal-stat-label">⭐ RECORDE:</span>
+          <span class="modal-stat-value highlight-cyan new-record-pulse">★ NOVO RECORDE PESSOAL! ★</span>
+        </div>
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">📍 Ponto da Derrota:</span>
+          <span class="modal-stat-value highlight-cyan" id="loseModalStage">NÍVEL 1 // ESTÁGIO 1</span>
+        </div>
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">🪙 Moedas Coletadas:</span>
+          <span class="modal-stat-value highlight-gold" id="loseModalGold">0</span>
+        </div>
+        <div class="modal-stat-row">
+          <span class="modal-stat-label">⚔️ Inimigos / Pastilhas:</span>
+          <span class="modal-stat-value" id="loseModalKillsPellets">0 / 0</span>
+        </div>
+        <div class="victory-relics-container" style="margin-top: 6px;">
+          <span class="modal-stat-label">🃏 Relíquias da Build:</span>
+          <div class="victory-relics-list" id="loseModalRelicsList"></div>
+        </div>
+      </div>
+
       <!-- Formulário de Envio para o Ranking Global -->
-      <div class="leaderboard-submit-box" style="margin-top:12px; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid #333;">
-        <label style="font-size:9px; color:#FFE600; font-weight:bold; font-family:'Press Start 2P', monospace;">🏆 REGISTRAR NO RANKING GLOBAL</label>
+      <div class="leaderboard-submit-box" id="gameOverLeaderboardBox"
+        style="margin-top:12px; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid #333;">
+        <label style="font-size:9px; color:#FFE600; font-weight:bold; font-family:'Press Start 2P', monospace;">🏆
+          REGISTRAR NO RANKING GLOBAL</label>
         <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="text" id="txtPlayerName" placeholder="SEU APELIDO" maxlength="12" style="font-family:'Press Start 2P', monospace; font-size:9px; padding:8px; background:#08080d; color:#fff; border:1.5px solid #FFE600; border-radius:4px; flex-grow:1; text-transform:uppercase; outline:none;">
-          <button id="btnSubmitScore" style="font-family:'Press Start 2P', monospace; font-size:8px; padding:8px 12px; background:#FFE600; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">ENVIAR</button>
+          <input type="text" id="txtPlayerName" placeholder="SEU APELIDO" maxlength="12"
+            style="font-family:'Press Start 2P', monospace; font-size:9px; padding:8px; background:#08080d; color:#fff; border:1.5px solid #FFE600; border-radius:4px; flex-grow:1; text-transform:uppercase; outline:none;">
+          <button id="btnSubmitScore"
+            style="font-family:'Press Start 2P', monospace; font-size:8px; padding:8px 12px; background:#FFE600; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">ENVIAR</button>
         </div>
         <span id="lblSubmitStatus" style="font-size:9px; color:#10B981; margin-top:6px; display:block;"></span>
       </div>
 
-      <div style="display:flex; gap:10px; width:100%; margin-top:12px;">
-        <button class="btn-arcade-modal" id="btnRestart" style="flex:1;">Jogar Novamente</button>
-        <button class="btn-arcade-modal" id="btnReturnMenu" style="flex:1; background:#2a2a3a;">Menu Principal</button>
+      <div style="display:flex; gap:10px; width:100%; margin-top:14px;">
+        <button class="btn-arcade-modal" id="btnRestart" style="flex:1;">[ RECOMEÇAR ]</button>
+        <button class="btn-arcade-modal" id="btnReturnMenu" style="flex:1; background:#2a2a3a;">[ VOLTAR AO MENU ]</button>
       </div>
     </div>
   </div>
 
   <!-- Scripts do jogo -->
   <script src="./src/leaderboard.js"></script>
+  <script src="./src/systems/MetaProgression.js"></script>
+  <script src="./src/systems/AudioManager.js"></script>
   <script src="./src/game.js"></script>
 
 </body>
+
 </html>

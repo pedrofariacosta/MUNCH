@@ -1,12 +1,12 @@
 // Munch - Motor de física e jogabilidade
 
-(function() {
+(function () {
   // Favicon fixo do slime
   const faviconCanvas = document.createElement('canvas');
   faviconCanvas.width = 32;
   faviconCanvas.height = 32;
   const faviconCtx = faviconCanvas.getContext('2d');
-  
+
   let faviconLink = document.getElementById('dynamic-favicon');
   if (!faviconLink) {
     faviconLink = document.createElement('link');
@@ -15,12 +15,12 @@
     faviconLink.type = 'image/png';
     document.head.appendChild(faviconLink);
   }
-  
+
   function drawStaticFavicon() {
     faviconCtx.clearRect(0, 0, 32, 32);
     faviconCtx.save();
     faviconCtx.translate(16, 16);
-    
+
     faviconCtx.beginPath();
     faviconCtx.roundRect(-9, -9, 18, 18, 3.5);
     faviconCtx.fillStyle = '#9e9e9e';
@@ -28,7 +28,7 @@
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 2.5;
     faviconCtx.stroke();
-    
+
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 1.8;
     faviconCtx.lineCap = 'round';
@@ -40,7 +40,7 @@
     faviconCtx.moveTo(7, -4.5);
     faviconCtx.lineTo(2, -2.5);
     faviconCtx.stroke();
-    
+
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.beginPath();
     faviconCtx.moveTo(-7, -1);
@@ -54,25 +54,25 @@
     faviconCtx.lineTo(7, 2.5);
     faviconCtx.closePath();
     faviconCtx.fill();
-    
+
     faviconCtx.fillStyle = '#1a1a1a';
     faviconCtx.fillRect(-5, 0.2, 1.5, 1.5);
     faviconCtx.fillRect(3.5, 0.2, 1.5, 1.5);
-    
+
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.fillRect(-1.2, 3.5, 0.8, 0.8);
     faviconCtx.fillRect(0.8, 3.5, 0.8, 0.8);
-    
+
     faviconCtx.fillStyle = '#1a1a1a';
     faviconCtx.fillRect(-4, 5.5, 8, 2.5);
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 0.6;
     faviconCtx.strokeRect(-4, 5.5, 8, 2.5);
-    
+
     faviconCtx.restore();
     faviconLink.href = faviconCanvas.toDataURL('image/png');
   }
-  
+
   drawStaticFavicon();
 
   // Configurações do Jogo
@@ -81,37 +81,38 @@
   let GRID_HEIGHT = 15;
 
   const DIRECTIONS = {
-    UP:    { x: 0,  y: -1, angle: -Math.PI / 2 },
-    DOWN:  { x: 0,  y: 1,  angle: Math.PI / 2  },
-    LEFT:  { x: -1, y: 0,  angle: Math.PI      },
-    RIGHT: { x: 1,  y: 0,  angle: 0           },
-    NONE:  { x: 0,  y: 0,  angle: 0           }
+    UP: { x: 0, y: -1, angle: -Math.PI / 2 },
+    DOWN: { x: 0, y: 1, angle: Math.PI / 2 },
+    LEFT: { x: -1, y: 0, angle: Math.PI },
+    RIGHT: { x: 1, y: 0, angle: 0 },
+    NONE: { x: 0, y: 0, angle: 0 }
   };
 
   const GAME_STATES = {
     PLAYING: 'playing',
     PHASE_CLEAR: 'phase_clear',
     WIN_MODAL: 'win_modal',
+    RUN_CLEARED: 'run_cleared',
     GAME_OVER: 'game_over'
   };
 
   // Mapa do labirinto: 0 = vazio, 1 = parede, 2 = pastilha, 3 = ouro, 4 = azul
   const BASE_MAP = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,4,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,4,1],
-    [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
-    [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
-    [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
-    [0,2,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,2,0], // Wrap portal nas extremidades (linha 7)
-    [1,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,1],
-    [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
-    [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
-    [1,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,4,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 4, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+    [1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1],
+    [1, 3, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 3, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+    [0, 2, 1, 1, 2, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 2, 1, 1, 2, 0], // Wrap portal nas extremidades (linha 7)
+    [1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 3, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 3, 1],
+    [1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1],
+    [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   ];
 
   // Lista de relíquias disponíveis
@@ -199,8 +200,8 @@
       rarity: "Incomum",
       desc: "Mudar de direção na quina exata concede +2 Mult na rodada.",
       icon: "🌀",
-      apply: (game) => {},
-      revert: (game) => {}
+      apply: (game) => { },
+      revert: (game) => { }
     },
     {
       id: "relic_bounty_hunter",
@@ -251,8 +252,8 @@
       rarity: "Rara",
       desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes.",
       icon: "☄️",
-      apply: (game) => {},
-      revert: (game) => {}
+      apply: (game) => { },
+      revert: (game) => { }
     },
     {
       id: "relic_magnetic_pull",
@@ -261,8 +262,8 @@
       rarity: "Rara",
       desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime.",
       icon: "🧲",
-      apply: (game) => {},
-      revert: (game) => {}
+      apply: (game) => { },
+      revert: (game) => { }
     },
     {
       id: "relic_mercury_skates",
@@ -343,6 +344,149 @@
       icon: "📏",
       apply: (game) => { game.straightLineCombo = true; },
       revert: (game) => { game.straightLineCombo = false; }
+    },
+    {
+      id: "relic_slime_meteor",
+      name: "METEORO DE GOSMA",
+      category: "AÇÃO & SOBREVIVÊNCIA",
+      rarity: "Incomum",
+      desc: "Ao aterrissar do pulo, gera choque de 2.5 blocos atordoando inimigos por 2s. Cooldown do pulo +25%.",
+      icon: "☄️",
+      apply: (game) => { game.hasSlimeMeteor = true; game.vaultMaxCooldown *= 1.25; },
+      revert: (game) => { game.hasSlimeMeteor = false; game.vaultMaxCooldown /= 1.25; }
+    },
+    {
+      id: "relic_quantum_jump",
+      name: "SALTO QUÂNTICO",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Incomum",
+      desc: "Pular por cima de um perseguidor (Close Call) e aterrissar em pastilha comum restaura 50% da recarga do pulo.",
+      icon: "🌌",
+      apply: (game) => { game.hasQuantumJump = true; },
+      revert: (game) => { game.hasQuantumJump = false; }
+    },
+    {
+      id: "relic_gravity_boots",
+      name: "BOTAS GRAVITACIONAIS",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Rara",
+      desc: "Permite saltar por cima das paredes do labirinto. Enquanto o pulo recarrega, tem -10% de velocidade.",
+      icon: "🥾",
+      apply: (game) => { game.hasGravityBoots = true; },
+      revert: (game) => { game.hasGravityBoots = false; }
+    },
+    {
+      id: "relic_slam_dunk",
+      name: "ENTERRADA TRIUNFAL",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Comum",
+      desc: "Enquanto o Slime estiver no ar, qualquer pontuação gerada recebe um multiplicador temporário de x2.0 Mult.",
+      icon: "🏀",
+      apply: (game) => { game.hasSlamDunk = true; },
+      revert: (game) => { game.hasSlamDunk = false; }
+    },
+    {
+      id: "relic_loan_shark",
+      name: "EMPRÉSTIMO TUBARÃO",
+      category: "ECONOMIA & RISCO",
+      rarity: "Incomum",
+      desc: "Concede +15 moedas agora. As próximas 3 lojas cobram taxa de 5 moedas ou custam 1 vida.",
+      icon: "🦈",
+      apply: (game) => {
+        game.hasLoanShark = true;
+        game.gold += 15;
+        game.runGoldCollected = (game.runGoldCollected || 0) + 15;
+        game.loanSharkFeeRemaining = (game.loanSharkFeeRemaining || 0) + 3;
+      },
+      revert: (game) => { game.hasLoanShark = false; }
+    },
+    {
+      id: "relic_piggy_bank",
+      name: "COFRINHO DE CERÂMICA",
+      category: "ECONOMIA & RISCO",
+      rarity: "Comum",
+      desc: "+1 moeda por fase concluída sem usar pulo. Ao sofrer dano, quebra, concede as moedas e é destruído.",
+      icon: "🐷",
+      apply: (game) => { game.hasPiggyBank = true; game.piggyBankCoins = 0; },
+      revert: (game) => { game.hasPiggyBank = false; }
+    },
+    {
+      id: "relic_leaky_bag",
+      name: "BOLSA FURADA",
+      category: "ECONOMIA & RISCO",
+      rarity: "Rara",
+      desc: "Reduz o preço da loja em 50%. Perde 1 moeda a cada 8s de fase sem super-pastilha ativa.",
+      icon: "👜",
+      apply: (game) => { game.hasLeakyBag = true; game.leakyBagTimer = 0; },
+      revert: (game) => { game.hasLeakyBag = false; }
+    },
+    {
+      id: "relic_saber_tooth",
+      name: "DENTE DE SABRE",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Comum",
+      desc: "+10 fichas por pastilha devorada em movimento retilíneo contínuo por mais de 2 segundos.",
+      icon: "🦷",
+      apply: (game) => { game.hasSaberTooth = true; },
+      revert: (game) => { game.hasSaberTooth = false; }
+    },
+    {
+      id: "relic_tape_measure",
+      name: "FITA MÉTRICA",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Incomum",
+      desc: "+0.1 Mult por segundo de movimento sem colidir em paredes (acumula até +3.0 Mult; zera se colidir).",
+      icon: "📐",
+      apply: (game) => { game.hasTapeMeasure = true; game.tapeMeasureBonus = 0; game.tapeMeasureTimer = 0; },
+      revert: (game) => { game.hasTapeMeasure = false; game.tapeMeasureBonus = 0; }
+    },
+    {
+      id: "relic_unstable_gunpowder",
+      name: "PÓLVORA INSTÁVEL",
+      category: "QUEBRA DE REGRAS",
+      rarity: "Incomum",
+      desc: "Eliminar inimigos vulneráveis explode e devora pastilhas normais em raio de 3 blocos. Super-pastilha dura 30% a menos.",
+      icon: "🧨",
+      apply: (game) => { game.hasUnstableGunpowder = true; },
+      revert: (game) => { game.hasUnstableGunpowder = false; }
+    },
+    {
+      id: "relic_wicked_shadow",
+      name: "SOMBRA PERVERSA",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Incomum",
+      desc: "Até x1.75 Mult por proximidade de inimigo perigoso pelas costas. Toque nas costas causa dano imediato sem imunidade.",
+      icon: "👥",
+      apply: (game) => { game.hasWickedShadow = true; },
+      revert: (game) => { game.hasWickedShadow = false; }
+    },
+    {
+      id: "relic_faustian_bargain",
+      name: "CONTRATO FAUSTO",
+      category: "ECONOMIA & RISCO",
+      rarity: "Rara",
+      desc: "Concede +100.000 pontos no início de cada estágio. A vida máxima fica travada em exatamente 1.",
+      icon: "📜",
+      apply: (game) => {
+        game.hasFaustianBargain = true;
+        game.savedMaxLives = game.maxLives || 2;
+        game.maxLives = 1;
+        game.lives = 1;
+      },
+      revert: (game) => {
+        game.hasFaustianBargain = false;
+        game.maxLives = game.savedMaxLives || 2;
+      }
+    },
+    {
+      id: "relic_pure_adrenaline",
+      name: "ADRENALINA PURA",
+      category: "MULTIPLICADORES & PONTUAÇÃO",
+      rarity: "Rara",
+      desc: "Enquanto estiver com apenas 1 vida restante, todas as pastilhas devoradas aplicam x2.0 Mult.",
+      icon: "💉",
+      apply: (game) => { game.hasPureAdrenaline = true; },
+      revert: (game) => { game.hasPureAdrenaline = false; }
     }
   ];
 
@@ -362,7 +506,7 @@
       ctx.save();
       ctx.fillStyle = 'rgba(0, 229, 255, 0.3)';
       ctx.beginPath();
-      ctx.arc(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, TILE_SIZE/2.5, 0, Math.PI*2);
+      ctx.arc(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, TILE_SIZE / 2.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
       ctx.lineWidth = 2;
@@ -377,44 +521,44 @@
       GRID_WIDTH = 23;
       GRID_HEIGHT = 17;
       return [
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,4,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,4,1],
-        [1,2,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,2,1],
-        [1,3,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,3,1],
-        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-        [1,2,1,1,1,1,2,1,1,2,2,2,2,2,1,1,2,1,1,1,1,2,1],
-        [1,2,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
-        [1,1,1,1,1,1,2,1,1,2,0,0,0,2,1,1,2,1,1,1,1,1,1],
-        [0,2,2,2,2,2,2,2,2,2,0,0,0,2,2,2,2,2,2,2,2,2,0], // Warp row
-        [1,1,1,1,1,1,2,1,1,2,0,0,0,2,1,1,2,1,1,1,1,1,1],
-        [1,2,2,2,2,2,2,1,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
-        [1,2,1,1,1,1,2,1,1,2,2,2,2,2,1,1,2,1,1,1,1,2,1],
-        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-        [1,3,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,3,1],
-        [1,2,1,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,1,2,1],
-        [1,4,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,4,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+        [1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1],
+        [1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 0, 0, 0, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0], // Warp row
+        [1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 0, 0, 0, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1],
+        [1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 3, 1],
+        [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1],
+        [1, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       ];
     } else if (ante >= 4) {
       // Mapa fragmentado com lasers (Laser = 5) e 4 warps nos cantos
       GRID_WIDTH = 20;
       GRID_HEIGHT = 15;
       return [
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [0,4,2,2,2,2,2,2,2,5,5,2,2,2,2,2,2,2,4,0], // Warp Corners (linha 1)
-        [1,2,1,1,5,1,1,1,2,1,1,2,1,1,1,5,1,1,2,1],
-        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
-        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-        [1,2,1,1,2,1,2,1,5,1,1,5,1,2,1,2,1,1,2,1],
-        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
-        [0,2,5,1,2,1,1,1,0,1,1,0,1,1,1,2,1,5,2,0], // Centro e laterais
-        [1,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,1],
-        [1,2,1,1,2,1,2,1,5,1,1,5,1,2,1,2,1,1,2,1],
-        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
-        [1,2,1,1,5,1,1,1,2,1,1,2,1,1,1,5,1,1,2,1],
-        [0,4,2,2,2,2,2,2,2,5,5,2,2,2,2,2,2,2,4,0], // Warp Corners (linha 13)
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 4, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 4, 0], // Warp Corners (linha 1)
+        [1, 2, 1, 1, 5, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 5, 1, 1, 2, 1],
+        [1, 3, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 3, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 2, 1, 2, 1, 5, 1, 1, 5, 1, 2, 1, 2, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+        [0, 2, 5, 1, 2, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 2, 1, 5, 2, 0], // Centro e laterais
+        [1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1],
+        [1, 2, 1, 1, 2, 1, 2, 1, 5, 1, 1, 5, 1, 2, 1, 2, 1, 1, 2, 1],
+        [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+        [1, 3, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 3, 1],
+        [1, 2, 1, 1, 5, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 5, 1, 1, 2, 1],
+        [0, 4, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 4, 0], // Warp Corners (linha 13)
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
       ];
     } else {
       // Mapas clássicos
@@ -434,21 +578,32 @@
       // Modais
       this.modalWin = document.getElementById('modalWin');
       this.modalGameOver = document.getElementById('modalGameOver');
+      this.modalRunCleared = document.getElementById('modalRunCleared');
       this.btnNextBlind = document.getElementById('btnNextBlind');
       this.btnRestart = document.getElementById('btnRestart');
 
       // Elementos do HUD
       this.hudBlindTarget = document.getElementById('hudBlindTarget');
       this.hudBlindBadge = document.getElementById('hudBlindBadge');
+      this.hudBossBlindIndicator = document.getElementById('hudBossBlindIndicator');
       this.hudRelicsCount = document.getElementById('relicsCount');
       this.hudCurrentScore = document.getElementById('hudCurrentScore');
       this.hudProgressBar = document.getElementById('hudProgressBar');
+      this.hudProgressContainer = document.getElementById('hudProgressContainer');
+      this.hudProgressText = document.getElementById('hudProgressText');
+      this.stageGoalAlert = document.getElementById('stageGoalAlert');
+      this.inGameToastContainer = document.getElementById('inGameToastContainer');
       this.hudChipsValue = document.getElementById('hudChipsValue');
       this.hudMultValueEl = document.getElementById('hudMultValue');
       this.hudRoundIndicator = document.getElementById('hudRoundIndicator');
       this.hudLives = document.getElementById('hudLives');
       this.hudGold = document.getElementById('hudGold');
-      
+
+      // Suporte a toque: fecha tooltips abertos ao tocar fora
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.relic-badge.touch-open').forEach(el => el.classList.remove('touch-open'));
+      });
+
       this.chipsBox = document.getElementById('chipsBox');
       this.multBox = document.getElementById('multBox');
 
@@ -457,7 +612,7 @@
       this.vaultCooldownFill = document.getElementById('vaultCooldownFill');
       this.blasterChargesEl = document.getElementById('blasterCharges');
       this.blasterCooldownFill = document.getElementById('blasterCooldownFill');
-      
+
       this.skillVault = document.getElementById('skillVault');
       this.skillBlaster = document.getElementById('skillBlaster');
 
@@ -510,6 +665,16 @@
       this.debugMode = false; // Alterna com F3
       this.overchargeShockwave = null;
 
+      // Estado e estatísticas de vitória (Run Cleared)
+      this.animationFrameId = null;
+      this.isVictoryPaused = false;
+      this.runCleared = false;
+      this.hasShownVictoryModal = false;
+      this.accumulatedRunScore = 0;
+      this.runMaxMult = 1;
+      this.runEnemiesKilled = 0;
+      this.runPelletsEaten = 0;
+
       this.init();
     }
 
@@ -525,12 +690,23 @@
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
           return;
         }
+        if (this.isVictoryPaused || this.gameState === GAME_STATES.RUN_CLEARED) {
+          return;
+        }
         if (!this.player) return;
 
         // Abre/fecha depurador com F3
         if (e.code === 'F3') {
           e.preventDefault();
           this.debugMode = !this.debugMode;
+          return;
+        }
+
+        if (this.gameState !== GAME_STATES.PLAYING) {
+          // Atalho para reiniciar
+          if (this.gameState === GAME_STATES.GAME_OVER && e.code === 'KeyR') {
+            this.restartGame();
+          }
           return;
         }
 
@@ -568,21 +744,21 @@
         if (modalDraft && modalDraft.classList.contains('visible')) {
           const cards = document.querySelectorAll('#draftCardsContainer .relic-card');
           const interactables = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card, #draftCardsContainer .btn-discard-new'));
-          
+
           if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
             e.preventDefault();
             this.draftSelectedIndex = (this.draftSelectedIndex - 1 + interactables.length) % interactables.length;
             this.updateDraftFocus();
             return;
           }
-          
+
           if (e.code === 'ArrowRight' || e.code === 'ArrowDown') {
             e.preventDefault();
             this.draftSelectedIndex = (this.draftSelectedIndex + 1) % interactables.length;
             this.updateDraftFocus();
             return;
           }
-          
+
           if (e.code === 'Enter') {
             e.preventDefault();
             if (interactables[this.draftSelectedIndex]) {
@@ -590,13 +766,13 @@
             }
             return;
           }
-          
+
           if (e.code === 'Digit1' || e.code === 'Numpad1') { if (cards.length > 0) { e.preventDefault(); cards[0].click(); return; } }
           if (e.code === 'Digit2' || e.code === 'Numpad2') { if (cards.length > 1) { e.preventDefault(); cards[1].click(); return; } }
           if (e.code === 'Digit3' || e.code === 'Numpad3') { if (cards.length > 2) { e.preventDefault(); cards[2].click(); return; } }
           if (e.code === 'Digit4' || e.code === 'Numpad4') { if (cards.length > 3) { e.preventDefault(); cards[3].click(); return; } }
           if (e.code === 'Digit5' || e.code === 'Numpad5') { if (cards.length > 4) { e.preventDefault(); cards[4].click(); return; } }
-          
+
           if (e.code === 'Escape' || e.code === 'Backspace' || e.code === 'Delete') {
             const skipBtn = document.querySelector('.btn-discard-new');
             if (skipBtn) { e.preventDefault(); skipBtn.click(); return; }
@@ -606,7 +782,7 @@
 
       // Clique esquerdo para atirar
       this.canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 0 && this.gameState === GAME_STATES.PLAYING) {
+        if (e.button === 0 && this.gameState === GAME_STATES.PLAYING && !this.isVictoryPaused) {
           this.triggerBlaster();
         }
       });
@@ -618,9 +794,121 @@
       });
       this.btnRestart.addEventListener('click', () => this.restartGame());
 
+      // Botões do Modal de Vitória (Run Cleared)
+      const btnFinishRun = document.getElementById('btnFinishRun');
+      if (btnFinishRun) {
+        btnFinishRun.addEventListener('click', async () => {
+          btnFinishRun.disabled = true;
+          const statusEl = document.getElementById('victorySubmitStatus');
+          if (statusEl) {
+            statusEl.innerText = "Registrando vitória...";
+            statusEl.style.color = "#FFE600";
+          }
+
+          const txtPlayerName = document.getElementById('victoryPlayerName');
+          const name = (txtPlayerName && txtPlayerName.value.trim()) ? txtPlayerName.value.trim() : (localStorage.getItem('munch_last_player_name') || 'SLIME_ANONIMO');
+          localStorage.setItem('munch_last_player_name', name);
+
+          const finalScore = Math.max(Math.round(this.accumulatedRunScore || 0), Math.round(this.score || 0));
+
+          // 1. Marca cleared: true e salva histórico
+          this.runCleared = true;
+          this.recordRunHistory(true);
+
+          // 2. Registra nas estatísticas
+          let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
+          localStorage.setItem('munch_total_antes', totalAntes + 1);
+
+          const previousRecord = parseInt(localStorage.getItem('munch_best_round_score')) || 0;
+          if (finalScore > previousRecord) {
+            localStorage.setItem('munch_best_round_score', finalScore);
+          }
+
+          // 3. Desbloqueia Ficha Vermelha/Dourada e temas via MetaProgression
+          if (window.MetaProgression) {
+            window.MetaProgression.recordVictory(this.selectedSlime, this.stake);
+          }
+          if (this.stake === 'white') {
+            localStorage.setItem('munch_unlocked_red_stake', 'true');
+            let unlockedStakes = ['white'];
+            try { unlockedStakes = JSON.parse(localStorage.getItem('munch_unlocked_stakes')) || ['white']; } catch (e) { }
+            if (!unlockedStakes.includes('red')) unlockedStakes.push('red');
+            localStorage.setItem('munch_unlocked_stakes', JSON.stringify(unlockedStakes));
+          } else if (this.stake === 'red') {
+            localStorage.setItem('munch_unlocked_gold_stake', 'true');
+            let unlockedStakes = ['white', 'red'];
+            try { unlockedStakes = JSON.parse(localStorage.getItem('munch_unlocked_stakes')) || ['white', 'red']; } catch (e) { }
+            if (!unlockedStakes.includes('gold')) unlockedStakes.push('gold');
+            localStorage.setItem('munch_unlocked_stakes', JSON.stringify(unlockedStakes));
+          }
+
+          // 4. Envia para o Leaderboard / Redis
+          try {
+            const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
+            if (lb) {
+              await lb.submitScore(name, finalScore, this.ante, this.stake, true);
+            }
+          } catch (err) {
+            console.warn('[MUNCH] Erro ao sincronizar pontuação de vitória:', err);
+          }
+
+          // 5. Remove run ativa
+          localStorage.removeItem('munch_active_run');
+
+          // 6. Retorna ao menu
+          window.location.href = 'menu.html';
+        });
+      }
+
+      const btnContinueEndless = document.getElementById('btnContinueEndless');
+      if (btnContinueEndless) {
+        btnContinueEndless.addEventListener('click', () => {
+          if (this.modalRunCleared) {
+            this.modalRunCleared.classList.remove('visible');
+          }
+
+          // Garante desbloqueio da Ficha Vermelha/Dourada e temas via MetaProgression
+          if (window.MetaProgression) {
+            window.MetaProgression.recordVictory(this.selectedSlime, this.stake);
+          }
+          if (this.stake === 'white') {
+            localStorage.setItem('munch_unlocked_red_stake', 'true');
+            let unlockedStakes = ['white'];
+            try { unlockedStakes = JSON.parse(localStorage.getItem('munch_unlocked_stakes')) || ['white']; } catch (e) { }
+            if (!unlockedStakes.includes('red')) unlockedStakes.push('red');
+            localStorage.setItem('munch_unlocked_stakes', JSON.stringify(unlockedStakes));
+          } else if (this.stake === 'red') {
+            localStorage.setItem('munch_unlocked_gold_stake', 'true');
+          }
+
+          this.isEndless = true;
+          this.runCleared = true;
+          this.hasShownVictoryModal = true;
+          this.isVictoryPaused = false;
+
+          localStorage.setItem('munch_run_setup', JSON.stringify({
+            stake: this.stake,
+            endless: true
+          }));
+
+          // Avança para o Nível 9 Estágio 1
+          this.ante = 9;
+          this.blind = 1;
+          this.phase = 1;
+
+          this.gameState = GAME_STATES.PLAYING;
+          this.loadLevel();
+
+          this.lastTime = performance.now();
+          this.animationFrameId = requestAnimationFrame((t) => this.gameLoop(t));
+        });
+      }
+
       const btnReturnMenu = document.getElementById('btnReturnMenu');
       if (btnReturnMenu) {
         btnReturnMenu.addEventListener('click', () => {
+          this.recordRunHistory(this.runCleared);
+          localStorage.removeItem('munch_active_run');
           window.location.href = 'menu.html';
         });
       }
@@ -643,7 +931,10 @@
           lblSubmitStatus.style.color = "#FFE600";
           btnSubmitScore.disabled = true;
 
-          await MunchLeaderboard.submitScore(name, this.score, this.ante, this.stake);
+          const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
+          if (lb) {
+            await lb.submitScore(name, this.score, this.ante, this.stake, this.runCleared);
+          }
           lblSubmitStatus.innerText = "✓ RECORD ENVIADO COM SUCESSO!";
           lblSubmitStatus.style.color = "#10B981";
         });
@@ -659,16 +950,16 @@
       }
 
       this.lastTime = performance.now();
-      requestAnimationFrame((t) => this.gameLoop(t));
+      this.animationFrameId = requestAnimationFrame((t) => this.gameLoop(t));
     }
 
     loadLevel() {
       // Carrega setup da partida e variante do slime
       const setupRaw = localStorage.getItem('munch_run_setup');
       let setup = { stake: 'white', endless: false };
-      if (setupRaw) { try { setup = JSON.parse(setupRaw); } catch(e) {} }
-      this.stake = setup.stake || 'white';
-      this.isEndless = setup.endless || false;
+      if (setupRaw) { try { setup = JSON.parse(setupRaw); } catch (e) { } }
+      this.stake = setup.stake || this.stake || 'white';
+      this.isEndless = this.isEndless || setup.endless || false;
 
       this.selectedSlime = localStorage.getItem('munch_selected_slime') || 'classic';
       this.isGamblerSlime = (this.selectedSlime === 'gambler');
@@ -708,16 +999,56 @@
       }
 
       // Coloca 4 pastilhas azuis
+      const bluePellets = [];
       for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
         const t = candidateTiles.pop();
         this.map[t.r][t.c] = 4;
+        bluePellets.push(t);
       }
 
-      // Coloca 4 pastilhas douradas (Ficha Dourada não gera pastilhas douradas de cura)
-      if (this.stake !== 'gold') {
-        for (let i = 0; i < 4 && candidateTiles.length > 0; i++) {
-          const t = candidateTiles.pop();
-          this.map[t.r][t.c] = 3;
+      // Spawning de Moedas Físicas em Posição de Risco (Estritamente 2 a 3 moedas)
+      // Se Boss Blind "Vácuo de Moedas", nenhuma moeda física nasce no mapa!
+      if (this.activeBossBlind !== 'Vácuo de Moedas') {
+        const coinCount = Math.floor(Math.random() * 2) + 2; // 2 ou 3 moedas
+
+        const deadEnds = [];
+        const normalCandidates = [];
+
+        candidateTiles.forEach(tile => {
+          let wallCount = 0;
+          const neighbors = [
+            { r: tile.r - 1, c: tile.c },
+            { r: tile.r + 1, c: tile.c },
+            { r: tile.r, c: tile.c - 1 },
+            { r: tile.r, c: tile.c + 1 }
+          ];
+          neighbors.forEach(n => {
+            if (n.r < 0 || n.r >= GRID_HEIGHT || n.c < 0 || n.c >= GRID_WIDTH || this.map[n.r][n.c] === 1) {
+              wallCount++;
+            }
+          });
+
+          let minBlueDist = Infinity;
+          bluePellets.forEach(bp => {
+            const d = Math.hypot(tile.c - bp.c, tile.r - bp.r);
+            if (d < minBlueDist) minBlueDist = d;
+          });
+          tile.minBlueDist = minBlueDist;
+
+          if (wallCount >= 3) {
+            deadEnds.push(tile);
+          } else {
+            normalCandidates.push(tile);
+          }
+        });
+
+        deadEnds.sort((a, b) => b.minBlueDist - a.minBlueDist);
+        normalCandidates.sort((a, b) => b.minBlueDist - a.minBlueDist);
+        const prioritized = [...deadEnds, ...normalCandidates];
+
+        for (let i = 0; i < coinCount && prioritized.length > 0; i++) {
+          const coinTile = prioritized[i];
+          this.map[coinTile.r][coinTile.c] = 3;
         }
       }
 
@@ -730,15 +1061,40 @@
       }
       this.totalPellets = this.remainingPellets;
 
+      // Reseta rastreadores do estágio
+      this.stageDamageTaken = false;
+      this.jumpUsedInStage = false;
+      this.targetReachedInStage = false;
+      if (this.hudProgressContainer) {
+        this.hudProgressContainer.classList.remove('goal-cleared-glitch');
+      }
+      this.leakyBagTimer = 0;
+      this.landingBoostTimer = 0;
+      this.corridorTrail = [];
+      this.fakeWallsCooldownTimer = 15000;
+      this.fakeWallsDurationTimer = 0;
+      this.activeFakeWalls = [];
+
       // Spawna o slime e os inimigos
       const startX = Math.floor(GRID_WIDTH / 2) - 1;
       const startY = Math.floor(GRID_HEIGHT / 2) + 1;
       this.player = new Player(startX, startY, this.selectedSlime);
       this.ghosts = this.spawnEnemiesForPhase(this.phase);
 
-      if (this.activeBossBlind === 'O Olho Vigilante') {
-        this.blasterMaxCharges = 0;
-        this.blasterCharges = 0;
+      // Boss Blind: Inimigo Fantasma (um dos perseguidores fica invisível com olhos espreitantes e +10% vel)
+      if (this.activeBossBlind === 'Inimigo Fantasma' && this.ghosts && this.ghosts.length > 0) {
+        this.ghosts[0].isPhantom = true;
+        this.ghosts[0].speed *= 1.10;
+      }
+
+      // Boss Blind: O Silenciador (desativa temporariamente o efeito da 1ª relíquia equipada)
+      if (this.activeBossBlind === 'O Silenciador' && this.activeRelics.length > 0 && typeof this.activeRelics[0].revert === 'function') {
+        this.activeRelics[0].revert(this);
+      }
+
+      // Alerta de Boss Blind
+      if (this.activeBossBlind) {
+        this.showBossBlindBanner(this.activeBossBlind);
       }
 
       this.projectiles = [];
@@ -747,9 +1103,23 @@
       this.frightenedTimer = 0;
       this.phaseClearTimer = 0;
       this.targetScore = this.getTargetScore(this.ante, this.blind);
+
+      // Boss Blind: Vácuo de Moedas (+15% na meta)
+      if (this.activeBossBlind === 'Vácuo de Moedas') {
+        this.targetScore = Math.round(this.targetScore * 1.15);
+      }
+
       this.score = 0;
       this.chips = 0;
       this.mult = 1;
+
+      // Relíquia Contrato Fausto: +100.000 pontos no início do estágio; vida máxima travada em 1
+      if (this.hasFaustianBargain) {
+        this.score += 100000;
+        this.maxLives = 1;
+        this.lives = 1;
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 35, '+100.000 PONTOS (FAUSTO)', '#FFE600');
+      }
 
       // Recarrega as cargas das habilidades para o máximo APENAS se comprou o voucher
       if (this.buyRecharge) {
@@ -759,7 +1129,7 @@
         this.blasterCooldown = 0;
         this.buyRecharge = false;
       }
-      
+
       this.stickyPools = [];
       this.pelletsEatenForVault = 0;
 
@@ -769,6 +1139,13 @@
     }
 
     getTargetScore(ante, blind) {
+      if (ante >= 9) {
+        // Escalonamento exponencial do Modo Sem Fim (Endless Mode)
+        // Meta_N = Meta_8 * (1.8)^(N - 8)
+        const target8 = this.getTargetScore(8, blind);
+        return Math.round(target8 * Math.pow(1.8, ante - 8));
+      }
+
       let baseTarget = 2000;
       if (ante === 1) {
         if (blind === 1) baseTarget = 2000;
@@ -795,16 +1172,40 @@
         this.phaseClearTimer = 1500; // Pausa rápida com efeitos visuais
         this.triggerScreenShake(12);
 
-        // Ouro ganho ao terminar a fase (bônus base + juros)
-        let baseGold = this.ante * 5;
-        let interest = Math.min(25, Math.floor(this.gold / 10)); // Juros de Cassino (máx 25)
-        this.gold += baseGold + interest;
+        // Recompensa Meritocrática ao Concluir Estágio (Fase 3)
+        let earnedCoins = 2; // Base: +2 moedas
+        let noDamage = !this.stageDamageTaken;
+        let overTarget = (this.score >= this.targetScore * 1.5);
+        if (noDamage) earnedCoins += 1; // Sem Dano: +1 moeda
+        if (overTarget) earnedCoins += 1; // Meta Superada (>= 150%): +1 moeda
+        earnedCoins = Math.min(4, earnedCoins); // Teto máximo por fase: 4 moedas
+        this.gold += earnedCoins;
+        this.runGoldCollected = (this.runGoldCollected || 0) + earnedCoins;
+
+        // Bônus Cofrinho de Cerâmica (se completou a fase sem usar pulo)
+        if (this.hasPiggyBank && !this.jumpUsedInStage) {
+          this.piggyBankCoins = (this.piggyBankCoins || 0) + 1;
+          this.addFloatingText(this.player ? this.player.x + TILE_SIZE / 2 : 200, this.player ? this.player.y - 35 : 200, `🐷 COFRINHO +1 MOEDA (${this.piggyBankCoins} no cofre)`, '#FFB703');
+        }
+
+        // Restaura a 1ª relíquia se estava sob efeito de 'O Silenciador'
+        if (this.activeBossBlind === 'O Silenciador' && this.activeRelics.length > 0 && typeof this.activeRelics[0].apply === 'function') {
+          this.activeRelics[0].apply(this);
+        }
+
+        let rewardDetails = `+${earnedCoins} MOEDAS (Base 2${noDamage ? ' +1 Sem Dano' : ''}${overTarget ? ' +1 Meta 150%' : ''})`;
+        if (this.player) {
+          this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 15, rewardDetails, '#FFE600');
+        }
 
         // Registra incremento de Antes completados nas estatísticas
         let completed = parseInt(localStorage.getItem('munch_completed_antes')) || 0;
         let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
         localStorage.setItem('munch_completed_antes', completed + 1);
         localStorage.setItem('munch_total_antes', totalAntes + 1);
+
+        // Acumula a pontuação da run
+        this.accumulatedRunScore = (this.accumulatedRunScore || 0) + this.score;
 
         // Confetes e efeitos de vitória
         for (let i = 0; i < 40; i++) {
@@ -901,6 +1302,11 @@
       if (this.stake === 'red') mult *= 1.10;
       if (this.stake === 'gold') mult *= 1.20;
 
+      // Incremento passivo no Modo Sem Fim (+5% cumulativo por nível além do 8)
+      if (this.ante > 8) {
+        mult *= (1 + (this.ante - 8) * 0.05);
+      }
+
       return mult;
     }
 
@@ -918,10 +1324,19 @@
 
     triggerVault() {
       if (!this.player || this.vaultCharges <= 0 || this.player.isJumping || this.player.dir === DIRECTIONS.NONE) return;
-      
+
       const jumpDistance = this.hasQuantumLeap ? 3 : 2;
       const targetGridX = this.player.gridX + this.player.dir.x * jumpDistance;
       const targetGridY = this.player.gridY + this.player.dir.y * jumpDistance;
+
+      // Sem Botas Gravitacionais, não pode saltar através de paredes intermediárias
+      if (!this.hasGravityBoots) {
+        for (let step = 1; step < jumpDistance; step++) {
+          const midX = this.player.gridX + this.player.dir.x * step;
+          const midY = this.player.gridY + this.player.dir.y * step;
+          if (!this.isWalkable(midX, midY)) return;
+        }
+      }
 
       if (this.isWalkable(targetGridX, targetGridY)) {
         // Poças de lodo deixadas pelo pulo
@@ -929,6 +1344,10 @@
           this.stickyPools.push(new StickyPool(this.player.gridX, this.player.gridY));
           this.stickyPools.push(new StickyPool(targetGridX, targetGridY));
         }
+
+        this.jumpUsedInStage = true;
+        this.player.jumpCrossedEnemies = new Set();
+        this.player.hasMadeCloseCallInCurrentJump = false;
 
         this.vaultCharges--;
         this.player.jumpTo(targetGridX, targetGridY);
@@ -943,7 +1362,7 @@
             for (let c = 0; c < GRID_WIDTH; c++) {
               if (this.map[r][c] === 2) {
                 let dist = Math.hypot(this.player.gridX - c, this.player.gridY - r);
-                if (dist < minDist) { minDist = dist; closest = {r,c}; }
+                if (dist < minDist) { minDist = dist; closest = { r, c }; }
               }
             }
           }
@@ -951,7 +1370,7 @@
         }
 
         this.spawnDust(this.player.x + TILE_SIZE / 2, this.player.y + TILE_SIZE / 2, 8, '#ffffff');
-        this.addFloatingText(this.player.x + TILE_SIZE/2, this.player.y, 'PULO!', '#00E5FF');
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y, 'PULO!', '#00E5FF');
       }
     }
 
@@ -964,9 +1383,9 @@
       }
 
       this.blasterCharges--;
-      
-      const startX = this.player.x + TILE_SIZE/2;
-      const startY = this.player.y + TILE_SIZE/2;
+
+      const startX = this.player.x + TILE_SIZE / 2;
+      const startY = this.player.y + TILE_SIZE / 2;
 
       const isRailgun = this.activeRelics.some(r => r.id === 'relic_railgun');
       const bounces = this.laserRicochet ? 2 : 0;
@@ -987,6 +1406,11 @@
     }
 
     isWalkable(gridX, gridY) {
+      // Bloqueio temporário por Paredes Falsas (Boss Blind)
+      if (this.activeFakeWalls && this.activeFakeWalls.some(w => w.r === gridY && w.c === gridX)) {
+        return false;
+      }
+
       if (gridX < 0 || gridX >= GRID_WIDTH || gridY < 0 || gridY >= GRID_HEIGHT) {
         if (gridX === -1 && gridY >= 0 && gridY < GRID_HEIGHT) return this.map[gridY][0] !== 1 && this.map[gridY][GRID_WIDTH - 1] !== 1;
         if (gridX === GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) return this.map[gridY][GRID_WIDTH - 1] !== 1 && this.map[gridY][0] !== 1;
@@ -1035,20 +1459,35 @@
 
       // Informações da fase e meta
       if (this.hudBlindBadge) {
+        this.hudBlindBadge.innerText = `NÍVEL ${this.ante} // ${blindName}`;
+      }
+
+      if (this.hudBossBlindIndicator) {
         if (this.activeBossBlind) {
-          this.hudBlindBadge.style.display = 'inline-block';
-          this.hudBlindBadge.innerText = this.activeBossBlind;
+          this.hudBossBlindIndicator.style.display = 'inline-flex';
+          this.hudBossBlindIndicator.innerText = `⚠️ ${this.activeBossBlind.toUpperCase()}`;
+          this.hudBossBlindIndicator.title = this.getBossBlindDescription(this.activeBossBlind);
         } else {
-          this.hudBlindBadge.style.display = 'none';
+          this.hudBossBlindIndicator.style.display = 'none';
         }
       }
+
       this.hudBlindTarget.innerText = this.targetScore.toLocaleString();
-      
+
       const pct = Math.min(100, (this.score / this.targetScore) * 100);
       this.hudProgressBar.style.width = pct + '%';
-      
+      if (this.hudProgressText) {
+        this.hudProgressText.innerText = `${Math.round(this.score).toLocaleString()} / ${Math.round(this.targetScore).toLocaleString()} (${Math.floor(pct)}%)`;
+      }
+
       if (pct >= 100) {
         this.hudProgressBar.classList.add('gold-pulsing');
+        if (!this.targetReachedInStage) {
+          this.targetReachedInStage = true;
+          if (this.hudProgressContainer) this.hudProgressContainer.classList.add('goal-cleared-glitch');
+          this.playSFX('target_cleared');
+          this.showStageGoalAlert('META ATINGIDA');
+        }
       } else {
         this.hudProgressBar.classList.remove('gold-pulsing');
       }
@@ -1078,7 +1517,7 @@
         document.querySelector('#skillVault .skill-key').innerText = '[ESPACO] PULO';
         this.vaultChargesEl.innerText = `${this.vaultCharges}/${this.vaultMaxCharges}`;
         this.skillVault.classList.remove('blocked');
-        
+
         if (this.vaultCharges < this.vaultMaxCharges) {
           const currentMaxCld = this.vaultMaxCooldown * (this.cooldownMultiplier || 1.0);
           const cldPct = 100 - (this.vaultCooldown / currentMaxCld) * 100;
@@ -1124,16 +1563,26 @@
         if (i < this.activeRelics.length) {
           const card = this.activeRelics[i];
           const rarityClass = card.rarity === 'Rara' ? 'rara' : card.rarity.toLowerCase();
-          slot.className = `relic-badge occupied ${rarityClass}`;
+          const isSilenced = (i === 0 && this.activeBossBlind === 'O Silenciador');
+
+          slot.className = `relic-badge occupied ${rarityClass}${isSilenced ? ' silenced' : ''}`;
           slot.innerHTML = `
-            ${card.icon}
+            <span class="relic-icon-display">${card.icon}</span>
             <div class="relic-tooltip">
-              <div class="tooltip-rarity ${rarityClass}">${card.rarity.toUpperCase()}</div>
+              <div class="tooltip-rarity ${rarityClass}">${card.rarity.toUpperCase()}${isSilenced ? ' [SILENCIADA]' : ''}</div>
               <div class="tooltip-name">${card.name}</div>
               <div class="tooltip-category">${card.category}</div>
-              <div class="tooltip-desc">${card.desc}</div>
+              <div class="tooltip-desc">${isSilenced ? '⚠️ EFEITO DESATIVADO POR O SILENCIADOR!' : card.desc}</div>
             </div>
           `;
+
+          // Suporte a toque para abrir/fechar tooltip
+          slot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = slot.classList.contains('touch-open');
+            document.querySelectorAll('.relic-badge.touch-open').forEach(el => el.classList.remove('touch-open'));
+            if (!isOpen) slot.classList.add('touch-open');
+          });
         } else {
           slot.className = 'relic-badge empty';
           slot.innerHTML = '';
@@ -1154,7 +1603,7 @@
       this.goldenMultFactor = 1.0;
       this.hasStickyJump = false;
       this.cooldownMultiplier = 1.0;
-      
+
       this.selectedSlime = localStorage.getItem('munch_selected_slime') || 'classic';
       this.isGamblerSlime = (this.selectedSlime === 'gambler');
       this.initialRunRecord = parseInt(localStorage.getItem('munch_best_round_score')) || 0;
@@ -1184,6 +1633,7 @@
       this.maxLives = 2;
       this.lives = 2;
       this.gold = 0;
+      this.runGoldCollected = 0;
       this.phase = 1;
       this.ante = 1;
       this.blind = 1;
@@ -1191,6 +1641,17 @@
       this.chips = 0;
       this.mult = 1;
       this.activeBossBlind = null;
+
+      // Estatísticas da run atual
+      this.runPelletsEaten = 0;
+      this.runEnemiesKilled = 0;
+      this.runMaxMult = 1;
+      this.accumulatedRunScore = 0;
+      this.isVictoryPaused = false;
+      this.runCleared = false;
+      this.hasShownVictoryModal = false;
+      this.isEndless = false;
+      this.targetReachedInStage = false;
     }
 
     saveActiveRunState() {
@@ -1208,6 +1669,12 @@
         selectedSlime: this.selectedSlime,
         stake: this.stake,
         isEndless: this.isEndless,
+        runCleared: this.runCleared,
+        hasShownVictoryModal: this.hasShownVictoryModal,
+        accumulatedRunScore: this.accumulatedRunScore,
+        runMaxMult: this.runMaxMult,
+        runEnemiesKilled: this.runEnemiesKilled,
+        runPelletsEaten: this.runPelletsEaten,
         activeBossBlind: this.activeBossBlind,
         maxRelics: this.maxRelics,
         purchasedVouchers: this.purchasedVouchers,
@@ -1237,6 +1704,12 @@
         this.selectedSlime = data.selectedSlime || 'classic';
         this.stake = data.stake || 'white';
         this.isEndless = data.isEndless || false;
+        this.runCleared = data.runCleared || false;
+        this.hasShownVictoryModal = data.hasShownVictoryModal || false;
+        this.accumulatedRunScore = data.accumulatedRunScore || 0;
+        this.runMaxMult = data.runMaxMult || 1;
+        this.runEnemiesKilled = data.runEnemiesKilled || 0;
+        this.runPelletsEaten = data.runPelletsEaten || 0;
         this.isGamblerSlime = (this.selectedSlime === 'gambler');
         this.activeBossBlind = data.activeBossBlind || null;
         this.maxRelics = data.maxRelics || 5;
@@ -1264,22 +1737,29 @@
       }
     }
 
-    recordRunHistory() {
+    recordRunHistory(cleared = false) {
       const historyRaw = localStorage.getItem('munch_run_history') || '[]';
       let history = [];
-      try { history = JSON.parse(historyRaw); } catch(e) {}
-      
+      try { history = JSON.parse(historyRaw); } catch (e) { }
+
       const now = new Date();
-      const dateStr = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-      
+      const dateStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      const finalScore = Math.max(Math.round(this.accumulatedRunScore || 0), Math.round(this.score || 0));
+
       history.unshift({
         date: dateStr,
         stake: this.stake || 'white',
         ante: this.ante || 1,
-        score: Math.round(this.score || 0),
-        relics: this.activeRelics.map(r => ({ icon: r.icon, id: r.id }))
+        score: finalScore,
+        relics: this.activeRelics.map(r => ({ icon: r.icon, id: r.id, name: r.name })),
+        cleared: !!cleared,
+        maxMult: Math.round(this.runMaxMult || this.mult || 1),
+        kills: this.runEnemiesKilled || 0,
+        pellets: this.runPelletsEaten || 0,
+        slime: this.selectedSlime || 'classic'
       });
-      
+
       if (history.length > 10) history.pop();
       localStorage.setItem('munch_run_history', JSON.stringify(history));
     }
@@ -1291,6 +1771,27 @@
     }
 
     addPoints(pelletType) {
+      // Modificador Boss Blind: O Olho Vigilante (0 pontos se no mesmo corredor nos últimos 3s)
+      if (this.activeBossBlind === 'O Olho Vigilante' && this.player) {
+        const now = Date.now();
+        if (!this.corridorTrail) this.corridorTrail = [];
+        const isHorizontal = this.player.dir.x !== 0;
+        const isVertical = this.player.dir.y !== 0;
+        const inRecentCorridor = this.corridorTrail.some(entry => {
+          if (now - entry.time > 3000) return false;
+          if (isHorizontal && entry.row === this.player.gridY) return true;
+          if (isVertical && entry.col === this.player.gridX) return true;
+          return false;
+        });
+        this.corridorTrail.push({ row: this.player.gridY, col: this.player.gridX, time: now });
+        this.corridorTrail = this.corridorTrail.filter(e => now - e.time <= 4000);
+
+        if (inRecentCorridor) {
+          this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 20, 'VIGILANTE! 0 PTS', '#ff4444');
+          return;
+        }
+      }
+
       let earnedChips = 0;
       let earnedMult = 0;
       let scoreColor = '#ffffff';
@@ -1298,6 +1799,8 @@
 
       let totalPellets = (parseInt(localStorage.getItem('munch_total_pellets')) || 0) + 1;
       localStorage.setItem('munch_total_pellets', totalPellets);
+      this.runPelletsEaten = (this.runPelletsEaten || 0) + 1;
+      if (window.MetaProgression) window.MetaProgression.addPellet();
 
       if (this.vaultMaxCharges > 0 && this.vaultCharges < this.vaultMaxCharges) {
         this.pelletsEatenForVault = (this.pelletsEatenForVault || 0) + 1;
@@ -1310,15 +1813,28 @@
 
       if (pelletType === 2) {
         earnedChips = 10 + (this.pelletChipBonus || 0);
+
+        // Relíquia Dente de Sabre: +10 fichas se em linha reta há mais de 2 segundos
+        if (this.hasSaberTooth && this.player && (this.player.straightLineTimer || 0) >= 2000) {
+          earnedChips += 10;
+        }
+
+        // Relíquia Fita Métrica: bônus acumulado de mult por mover sem bater
+        if (this.hasTapeMeasure && this.tapeMeasureBonus > 0) {
+          earnedMult += this.tapeMeasureBonus;
+        }
+
         scoreColor = '#ffffff';
-        tag = `+${earnedChips} FICHAS`;
+        tag = `+${earnedChips} FICHAS${earnedMult > 0 ? ` +${earnedMult.toFixed(1)} MULT` : ''}`;
         this.chips += earnedChips;
+        this.mult += earnedMult;
         this.scorePop(this.chipsBox);
+        if (earnedMult > 0) this.scorePop(this.multBox);
       } else if (pelletType === 3) {
         let earnedGold = 1;
         earnedChips = 0;
         earnedMult = 0;
-        
+
         // Cartão Black logic (se adicionado)
         if (this.blackCardActive) {
           earnedGold += 5;
@@ -1330,12 +1846,13 @@
         }
 
         this.gold += earnedGold;
+        this.runGoldCollected = (this.runGoldCollected || 0) + earnedGold;
         this.chips += earnedChips;
         this.mult += earnedMult;
 
         scoreColor = '#FFE600';
         tag = `+${earnedGold} OURO${earnedChips > 0 ? ` // +${earnedChips} FICHAS` : ''}`;
-        
+
         this.scorePop(this.chipsBox);
         this.scorePop(this.multBox);
       } else if (pelletType === 4) {
@@ -1345,7 +1862,8 @@
         this.chips += earnedChips;
         this.scorePop(this.chipsBox);
 
-        this.frightenedTimer = 6000;
+        // Pólvora Instável reduz duração em 30% (4200ms vs 6000ms)
+        this.frightenedTimer = this.hasUnstableGunpowder ? 4200 : 6000;
         this.ghosts.forEach(g => {
           if (g && g.state !== 'eaten' && g.state !== 'respawning') {
             g.state = 'frightened';
@@ -1364,19 +1882,38 @@
         this.mult = Math.max(1, Math.round(this.mult * randFactor));
       }
 
+      // Relíquia Enterrada Triunfal: x2.0 Mult enquanto estiver no ar
+      if (this.hasSlamDunk && this.player && this.player.isJumping) {
+        this.mult = Math.round(this.mult * 2);
+      }
+
+      // Relíquia Adrenalina Pura: x2.0 Mult se estiver com 1 vida
+      if (this.hasPureAdrenaline && this.lives === 1) {
+        this.mult = Math.round(this.mult * 2);
+      }
+
+      // Relíquia Sombra Perversa: até x1.75 Mult baseado na proximidade traseira
+      if (this.hasWickedShadow && this.wickedShadowMultBonus > 1.0) {
+        this.mult = Math.round(this.mult * this.wickedShadowMultBonus);
+      }
+
       const oldScore = this.score;
       this.score = this.chips * this.mult;
+      this.runMaxMult = Math.max(this.runMaxMult || 1, this.mult);
 
       // Registra recorde de multiplicador máximo na rodada
       const currentMaxMult = parseInt(localStorage.getItem('munch_max_mult')) || 1;
       if (this.mult > currentMaxMult) {
         localStorage.setItem('munch_max_mult', Math.round(this.mult));
       }
+      if (window.MetaProgression && window.MetaProgression.checkMult(this.mult)) {
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 30, '★ SLIME GAMBLER DESBLOQUEADO! ★', '#FFE600');
+      }
 
       const diff = this.score - oldScore;
       if (diff > 0 && this.player) {
         this.addFloatingText(
-          this.player.x + TILE_SIZE/2,
+          this.player.x + TILE_SIZE / 2,
           this.player.y,
           `+${Math.round(diff).toLocaleString()}`,
           scoreColor,
@@ -1398,11 +1935,11 @@
     getWeightedRandomCard(excludeList = []) {
       const candidates = CARD_POOL.filter(card => {
         if (excludeList.some(c => c.id === card.id)) return false;
-        
+
         // Exclui relíquias de efeito único já ativas
         const isUnique = ['relic_overclock', 'relic_slime_puddle', 'relic_railgun', 'relic_magnetic_pull', 'relic_gold_alchemist'].includes(card.id);
         if (isUnique && this.activeRelics.some(r => r.id === card.id)) return false;
-        
+
         return true;
       });
 
@@ -1439,7 +1976,7 @@
       const rect = cardElement.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2 + window.scrollX;
       const centerY = rect.top + rect.height / 2 + window.scrollY;
-      
+
       for (let i = 0; i < 20; i++) {
         const p = document.createElement('div');
         p.style.position = 'fixed';
@@ -1453,17 +1990,17 @@
         p.style.pointerEvents = 'none';
         p.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
         document.body.appendChild(p);
-        
+
         const angle = Math.random() * Math.PI * 2;
         const speed = 2 + Math.random() * 6;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
-        
+
         requestAnimationFrame(() => {
           p.style.transform = `translate(${vx * 35}px, ${vy * 35}px) scale(0)`;
           p.style.opacity = '0';
         });
-        
+
         setTimeout(() => p.remove(), 500);
       }
     }
@@ -1471,11 +2008,11 @@
     animateCardToTray(cardElement, targetSlotElement, callback) {
       const cardRect = cardElement.getBoundingClientRect();
       const trayRect = targetSlotElement.getBoundingClientRect();
-      
+
       const clone = document.createElement('div');
       clone.className = cardElement.className;
       clone.innerHTML = cardElement.innerHTML;
-      
+
       clone.style.animation = 'none';
       clone.style.position = 'fixed';
       clone.style.top = (cardRect.top + window.scrollY) + 'px';
@@ -1486,9 +2023,9 @@
       clone.style.zIndex = '9999';
       clone.style.transformOrigin = 'top left';
       clone.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-      
+
       document.body.appendChild(clone);
-      
+
       requestAnimationFrame(() => {
         clone.style.top = (trayRect.top + window.scrollY) + 'px';
         clone.style.left = (trayRect.left + window.scrollX) + 'px';
@@ -1497,7 +2034,7 @@
         clone.style.opacity = '0.3';
         clone.style.transform = 'scale(0.2)';
       });
-      
+
       setTimeout(() => {
         clone.remove();
         callback();
@@ -1508,7 +2045,7 @@
       let rarityText = 'COMMON';
       if (card.rarity === 'Incomum') rarityText = 'UNCOMMON';
       else if (card.rarity === 'Rara') rarityText = 'RARE';
-      
+
       let categoryText = 'ARSENAL';
       if (card.category === 'MULTIPLICADORES & PONTUAÇÃO') categoryText = 'MULTIPLIER';
       else if (card.category === 'QUEBRA DE REGRAS') categoryText = 'GAME BREAKER';
@@ -1556,32 +2093,89 @@
           ${statBadgeHtml ? `<div class="card-stat-badge-wrapper">${statBadgeHtml}</div>` : ''}
           <div class="relic-card-desc-text">${formattedDesc}</div>
         </div>
+        ${!isReplacementOption ? (() => {
+          const price = this.getCardPrice(card);
+          const canAfford = this.gold >= price;
+          return `<div class="card-price-tag ${canAfford ? 'affordable' : 'unaffordable'}">🪙 $${price} OUROS</div>`;
+        })() : ''}
         ${isReplacementOption ? `<div class="btn-replace-action">SUBSTITUIR</div>` : ''}
       `;
     }
 
-    showReplacementUI(newCard, selectedEl) {
+    getCardPrice(card) {
+      let base = 5;
+      const r = (card.rarity || 'comum').toLowerCase();
+      if (r === 'comum') base = 5;
+      else if (r === 'incomum') base = 8;
+      else if (r === 'rara' || r === 'lendária') base = 12;
+
+      // Inflação contínua a partir do Nível 4 (+1 a cada 2 níveis completados)
+      if (this.ante >= 4) {
+        base += Math.floor((this.ante - 2) / 2);
+      }
+
+      // Relíquia Bolsa Furada: reduz o preço em 50%
+      if (this.hasLeakyBag) {
+        base = Math.max(1, Math.floor(base * 0.5));
+      }
+
+      return base;
+    }
+
+    getShopRerollPrice() {
+      let base = 3;
+      if (this.shopRerollCount === 1) base = 6;
+      else if (this.shopRerollCount >= 2) base = 10;
+
+      if (this.ante >= 4) {
+        base += Math.floor((this.ante - 2) / 2);
+      }
+      return base;
+    }
+
+    removeRelic(id) {
+      const idx = this.activeRelics.findIndex(r => r.id === id);
+      if (idx !== -1) {
+        const relic = this.activeRelics[idx];
+        if (typeof relic.revert === 'function') {
+          relic.revert(this);
+        }
+        this.activeRelics.splice(idx, 1);
+        this.updateRelicsTray();
+        this.saveActiveRunState();
+      }
+    }
+
+    showReplacementUI(newCard, selectedEl, price = 0) {
       const container = document.getElementById('draftCardsContainer');
       container.innerHTML = '';
       container.closest('.draft-modal-content').classList.add('replacement-mode');
-      
-      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'BANDEJA CHEIA // ESCOLHA UMA RELIQUIA PARA SUBSTITUIR';
+
+      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'LIMITE DE 5 SLOTS ATINGIDO // ESCOLHA UMA RELÍQUIA PARA SUBSTITUIR';
 
       this.activeRelics.forEach((relic, idx) => {
         const cardEl = document.createElement('div');
         const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
         cardEl.className = `relic-card active-relic-option ${rarityClass}`;
         cardEl.innerHTML = this.createRelicCardHTML(relic, true);
-        
+
         cardEl.addEventListener('click', () => {
           this.spawnCardParticles(selectedEl || cardEl);
-          
-          relic.revert(this);
-          
+
+          if (price > 0 && this.gold >= price) {
+            this.gold -= price;
+            if (window.MetaProgression) window.MetaProgression.addGoldSpent(price);
+            const goldDisplay = document.getElementById('shopGoldAmount');
+            if (goldDisplay) goldDisplay.innerText = this.gold.toString();
+          }
+
+          if (typeof relic.revert === 'function') relic.revert(this);
+
+          this.recordDiscoveredRelic(newCard);
           this.activeRelics.splice(idx, 1);
           this.activeRelics.push(newCard);
-          newCard.apply(this);
-          
+          if (typeof newCard.apply === 'function') newCard.apply(this);
+
           const traySlot = document.getElementById('relicsTray').children[idx] || document.getElementById('relicsTray');
           this.animateCardToTray(selectedEl || cardEl, traySlot, () => {
             this.modalWin.classList.remove('visible');
@@ -1591,10 +2185,10 @@
             this.nextRound();
           });
         });
-        
+
         container.appendChild(cardEl);
       });
-      
+
       const divider = document.createElement('div');
       divider.className = 'replacement-divider';
       divider.innerText = '- - - OU - - -';
@@ -1602,12 +2196,12 @@
 
       const skipBtn = document.createElement('button');
       skipBtn.className = 'btn-discard-new';
-      skipBtn.innerText = 'RECUSAR E DESCARTAR NOVA RELIQUIA';
+      skipBtn.innerText = 'CANCELAR E DESCARTAR NOVA COMPRA';
       skipBtn.addEventListener('click', () => {
         document.getElementById('modalDraftShop').classList.remove('visible');
         this.nextRound();
       });
-      
+
       container.appendChild(skipBtn);
 
       this.draftSelectedIndex = 0;
@@ -1623,20 +2217,35 @@
         .replace(/(Disparo)/g, '<span class="highlight-shoot">$1</span>');
     }
 
-    // Exibe a tela de escolha de relíquias
+    // Exibe a tela da loja de relíquias e itens
     showDraftShopModal() {
       this.gameState = GAME_STATES.WIN_MODAL;
       const container = document.getElementById('draftCardsContainer');
       const vouchersContainer = document.getElementById('vouchersContainer');
       const goldDisplay = document.getElementById('shopGoldAmount');
-      
+
       if (goldDisplay) goldDisplay.innerText = this.gold.toString();
 
       container.innerHTML = '';
       if (vouchersContainer) vouchersContainer.innerHTML = '';
-      
+
       container.closest('.draft-modal-content').classList.remove('replacement-mode');
-      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'ESCOLHA UMA RELIQUIA PARA A SUA RUN';
+      document.querySelector('#modalDraftShop .modal-subtitle').innerText = 'LOJA ARCADE // ESCOLHA UMA RELÍQUIA OU ITEM PARA A SUA BUILD';
+
+      // Taxa do Empréstimo Tubarão (5 moedas nas 3 primeiras lojas, ou -1 vida)
+      if (this.loanSharkFeeRemaining > 0 && !this.loanSharkPaidThisVisit) {
+        this.loanSharkFeeRemaining--;
+        this.loanSharkPaidThisVisit = true;
+        if (this.gold >= 5) {
+          this.gold -= 5;
+          if (this.player) this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 30, '🦈 TAXA DO TUBARÃO: -5 OUROS', '#ff4444');
+        } else {
+          this.lives = Math.max(1, this.lives - 1);
+          if (this.player) this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 30, '🦈 TUBARÃO COBROU COM SANGUE! -1 VIDA', '#ff0055');
+          this.updateHUD();
+        }
+        if (goldDisplay) goldDisplay.innerText = this.gold.toString();
+      }
 
       // Sorteia 2 opções de relíquias
       const card1 = this.getWeightedRandomCard([]);
@@ -1667,7 +2276,7 @@
             const rotateY = ((x - centerX) / centerX) * 12;
             const rotateX = ((centerY - y) / centerY) * 12;
             cardEl.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.04) translateZ(0)`;
-            
+
             const pctX = (x / rect.width) * 100;
             const pctY = (y / rect.height) * 100;
             cardEl.style.setProperty('--sheen-x', `${pctX}%`);
@@ -1688,11 +2297,20 @@
 
         container.appendChild(cardEl);
       });
-      
+
       this.renderVouchers();
 
+      // Botão para avançar sem comprar relíquia
+      const btnSkip = document.getElementById('btnSkipShop');
+      if (btnSkip) {
+        btnSkip.onclick = () => {
+          document.getElementById('modalDraftShop').classList.remove('visible');
+          this.nextRound();
+        };
+      }
+
       document.getElementById('modalDraftShop').classList.add('visible');
-      
+
       this.draftSelectedIndex = 0;
       this.updateDraftFocus();
     }
@@ -1702,13 +2320,18 @@
       if (!vContainer) return;
       vContainer.innerHTML = '';
 
+      const inflation = this.ante >= 4 ? Math.floor((this.ante - 2) / 2) : 0;
+      const rerollPrice = this.getShopRerollPrice();
+      const healPrice = 7 + inflation;
+      const rechargePrice = 15 + inflation;
+
       const vouchers = [
-        { id: 'v_slot', name: 'EXPANSÃO DE BANDEJA', price: 50, desc: 'Expande o máximo de relíquias ativas de 5 para 6.', oneTime: true },
-        { id: 'v_reroll', name: 'REROLL DA LOJA', price: 10, desc: 'Substitui as opções atuais por 2 novas relíquias.', oneTime: false },
-        { id: 'v_recharge', name: 'BOLSA DE RECARGA', price: 20, desc: 'Inicia a próxima rodada com cargas de Pulo e Tiro em 100%.', oneTime: true }
+        { id: 'v_reroll', name: 'REROLL DA LOJA', price: rerollPrice, desc: `Substitui por 2 novas opções (${(this.shopRerollCount || 0) + 1}º reroll).`, oneTime: false },
+        { id: 'v_heal', name: 'CURA (+1 VIDA)', price: healPrice, desc: 'Recupera 1 vida perdida até a vida máxima.', oneTime: false },
+        { id: 'v_recharge', name: 'BOLSA DE RECARGA', price: rechargePrice, desc: 'Inicia o próximo estágio com Pulo e Tiro em 100%.', oneTime: true }
       ];
 
-      vouchers.forEach((v, index) => {
+      vouchers.forEach((v) => {
         const vEl = document.createElement('div');
         vEl.className = 'voucher-card';
         if (this.purchasedVouchers && this.purchasedVouchers.includes(v.id) && v.oneTime) {
@@ -1727,7 +2350,10 @@
           if (vEl.classList.contains('purchased')) return;
           if (this.gold >= v.price) {
             this.gold -= v.price;
-            document.getElementById('shopGoldAmount').innerText = this.gold.toString();
+            if (window.MetaProgression) window.MetaProgression.addGoldSpent(v.price);
+            const goldDisplay = document.getElementById('shopGoldAmount');
+            if (goldDisplay) goldDisplay.innerText = this.gold.toString();
+
             this.buyVoucher(v.id);
             if (v.oneTime) {
               if (!this.purchasedVouchers) this.purchasedVouchers = [];
@@ -1748,15 +2374,193 @@
     }
 
     buyVoucher(id) {
-      if (id === 'v_slot') {
-        this.maxRelics = 6;
-        this.updateRelicsTray();
-        this.updateHUD();
-      } else if (id === 'v_reroll') {
+      if (id === 'v_reroll') {
+        this.shopRerollCount = (this.shopRerollCount || 0) + 1;
         this.showDraftShopModal();
+      } else if (id === 'v_heal') {
+        if (this.lives < this.maxLives) {
+          this.lives++;
+          this.updateHUD();
+          if (this.player) this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 25, '❤️ +1 VIDA RECUPERADA!', '#00FF66');
+        } else {
+          if (this.player) this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 25, 'VIDA JÁ NO MÁXIMO!', '#FFE600');
+        }
       } else if (id === 'v_recharge') {
         this.buyRecharge = true;
       }
+    }
+
+    getBossBlindDescription(bossName) {
+      const descs = {
+        'O Silenciador': 'A 1ª relíquia equipada no inventário está desativada!',
+        'Paredes Falsas': 'A cada 15s, 2 corredores são bloqueados por espinhos por 5s!',
+        'O Olho Vigilante': 'Devorar no mesmo corredor dos últimos 3s rende 0 pontos!',
+        'Vácuo de Moedas': 'Sem moedas físicas no mapa e meta de pontuação +15%!',
+        'Inimigo Fantasma': 'Um perseguidor fica invisível com olhos espreitantes e +10% vel!'
+      };
+      return descs[bossName] || 'Modificador de Chefe Ativo!';
+    }
+
+    playSFX(type) {
+      try {
+        const volumeFactor = window.AudioManager ? window.AudioManager.getEffectiveSFXVolume() : (() => {
+          const sfxVol = parseInt(localStorage.getItem('munch_audio_sfx'));
+          return isNaN(sfxVol) ? 1.0 : (sfxVol / 100);
+        })();
+        if (volumeFactor <= 0) return;
+
+        const ctx = window.AudioManager ? window.AudioManager.getAudioContext() : (window.AudioContext || window.webkitAudioContext ? new (window.AudioContext || window.webkitAudioContext)() : null);
+        if (!ctx) return;
+        const destination = (window.AudioManager && window.AudioManager.sfxGainNode) ? window.AudioManager.sfxGainNode : ctx.destination;
+
+        if (type === 'target_cleared') {
+          const notes = [
+            { freq: 587.33, time: 0.0, dur: 0.08 },
+            { freq: 880.00, time: 0.09, dur: 0.10 },
+            { freq: 1174.66, time: 0.20, dur: 0.35 }
+          ];
+          notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
+            gain.gain.setValueAtTime(0, ctx.currentTime + n.time);
+            gain.gain.linearRampToValueAtTime(0.25 * volumeFactor, ctx.currentTime + n.time + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.time + n.dur);
+            osc.connect(gain);
+            gain.connect(destination);
+            osc.start(ctx.currentTime + n.time);
+            osc.stop(ctx.currentTime + n.time + n.dur + 0.05);
+          });
+        } else if (type === 'boss_alert') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.3 * volumeFactor, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(destination);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.45);
+        } else if (type === 'toast') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(1318.5, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.2 * volumeFactor, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+          osc.connect(gain);
+          gain.connect(destination);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        }
+      } catch (e) {}
+    }
+
+    showStageGoalAlert(text) {
+      const alertEl = document.getElementById('stageGoalAlert');
+      if (!alertEl) return;
+      const textEl = alertEl.querySelector('.stage-goal-alert-text');
+      if (textEl) textEl.innerText = text;
+      alertEl.style.display = 'block';
+      alertEl.style.opacity = '1';
+
+      setTimeout(() => {
+        alertEl.style.transition = 'opacity 0.25s ease';
+        alertEl.style.opacity = '0';
+        setTimeout(() => {
+          alertEl.style.display = 'none';
+          alertEl.style.transition = '';
+        }, 250);
+      }, 500);
+    }
+
+    showToast(title, desc = '', icon = '✨', color = '#FFE600') {
+      let container = document.getElementById('inGameToastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'inGameToastContainer';
+        container.className = 'in-game-toast-container';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = 'in-game-toast';
+      toast.style.borderColor = color;
+      toast.style.boxShadow = `0 0 15px ${color}55`;
+      toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <div class="toast-body">
+          <div class="toast-title" style="color: ${color};">${title}</div>
+          ${desc ? `<div class="toast-desc">${desc}</div>` : ''}
+        </div>
+      `;
+      container.appendChild(toast);
+      this.playSFX('toast');
+
+      setTimeout(() => {
+        toast.style.transition = 'all 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 400);
+      }, 3000);
+    }
+
+    recordDiscoveredRelic(card) {
+      if (!card || !card.id) return;
+      const discoveredRaw = localStorage.getItem('munch_discovered_relics') || '[]';
+      let discovered = [];
+      try { discovered = JSON.parse(discoveredRaw); } catch (e) { discovered = []; }
+
+      const unlockedRaw = localStorage.getItem('unlockedRelics') || '[]';
+      let unlocked = [];
+      try { unlocked = JSON.parse(unlockedRaw); } catch (e) { unlocked = []; }
+
+      const isNew = !discovered.includes(card.id) && !unlocked.includes(card.id);
+
+      if (isNew) {
+        discovered.push(card.id);
+        localStorage.setItem('munch_discovered_relics', JSON.stringify(discovered));
+
+        unlocked.push(card.id);
+        localStorage.setItem('unlockedRelics', JSON.stringify(unlocked));
+
+        if (window.MetaProgression && typeof window.MetaProgression.discoverRelic === 'function') {
+          window.MetaProgression.discoverRelic(card.id);
+        }
+
+        this.showToast('NOVA RELÍQUIA REGISTRADA NO ÁLBUM!', card.name, card.icon, '#FFE600');
+      }
+    }
+
+    showBossBlindBanner(bossName) {
+      const banner = document.getElementById('bossBlindBanner');
+      const nameEl = document.getElementById('bossBlindAlertName');
+      const descEl = document.getElementById('bossBlindAlertDesc');
+      if (!banner || !nameEl || !descEl) return;
+
+      const desc = this.getBossBlindDescription(bossName);
+      nameEl.innerText = bossName.toUpperCase();
+      descEl.innerText = desc;
+      banner.style.display = 'flex';
+      banner.style.opacity = '1';
+
+      this.playSFX('boss_alert');
+
+      setTimeout(() => {
+        banner.style.opacity = '0';
+        banner.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          banner.style.display = 'none';
+          banner.style.opacity = '1';
+          banner.style.transition = '';
+        }, 500);
+      }, 3000);
     }
 
     updateDraftFocus() {
@@ -1771,24 +2575,33 @@
     }
 
     selectDraftCard(card, cardEl) {
-      if (this.activeRelics.length >= (this.maxRelics || 5)) {
-        this.showReplacementUI(card, cardEl);
+      const price = this.getCardPrice(card);
+      if (this.gold < price) {
+        cardEl.style.borderColor = 'var(--red-primary)';
+        cardEl.style.transform = 'translateX(-5px)';
+        setTimeout(() => { cardEl.style.transform = 'translateX(5px)'; }, 50);
+        setTimeout(() => { cardEl.style.transform = 'translateX(0)'; cardEl.style.borderColor = ''; }, 100);
         return;
       }
+
+      // Limite estrito de exatamente 5 slots
+      if (this.activeRelics.length >= 5) {
+        this.showReplacementUI(card, cardEl, price);
+        return;
+      }
+
+      this.gold -= price;
+      if (window.MetaProgression) window.MetaProgression.addGoldSpent(price);
+      const goldDisplay = document.getElementById('shopGoldAmount');
+      if (goldDisplay) goldDisplay.innerText = this.gold.toString();
 
       this.spawnCardParticles(cardEl);
 
       // Adiciona relíquia descoberta no compêndio
-      const discoveredRaw = localStorage.getItem('munch_discovered_relics') || '[]';
-      let discovered = [];
-      try { discovered = JSON.parse(discoveredRaw); } catch(e) {}
-      if (!discovered.includes(card.id)) {
-        discovered.push(card.id);
-        localStorage.setItem('munch_discovered_relics', JSON.stringify(discovered));
-      }
+      this.recordDiscoveredRelic(card);
 
       this.activeRelics.push(card);
-      card.apply(this);
+      if (typeof card.apply === 'function') card.apply(this);
 
       // Slot de destino para a animação
       const slotIndex = this.activeRelics.length - 1;
@@ -1803,6 +2616,131 @@
       });
     }
 
+    playVictoryFanfare() {
+      try {
+        const volumeFactor = window.AudioManager ? window.AudioManager.getEffectiveSFXVolume() : (() => {
+          const sfxVol = parseInt(localStorage.getItem('munch_audio_sfx'));
+          return isNaN(sfxVol) ? 1.0 : (sfxVol / 100);
+        })();
+        if (volumeFactor <= 0) return;
+
+        const ctx = window.AudioManager ? window.AudioManager.getAudioContext() : (window.AudioContext || window.webkitAudioContext ? new (window.AudioContext || window.webkitAudioContext)() : null);
+        if (!ctx) return;
+        const destination = (window.AudioManager && window.AudioManager.sfxGainNode) ? window.AudioManager.sfxGainNode : ctx.destination;
+
+        const notes = [
+          { freq: 523.25, time: 0.0, dur: 0.12 }, // C5
+          { freq: 659.25, time: 0.14, dur: 0.12 }, // E5
+          { freq: 783.99, time: 0.28, dur: 0.14 }, // G5
+          { freq: 1046.50, time: 0.44, dur: 0.60 }, // C6
+          { freq: 783.99, time: 0.48, dur: 0.55 }, // G5 (harmonia)
+          { freq: 1318.51, time: 0.54, dur: 0.50 }  // E6 (brilho)
+        ];
+
+        notes.forEach(n => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(n.freq, ctx.currentTime + n.time);
+
+          gain.gain.setValueAtTime(0, ctx.currentTime + n.time);
+          gain.gain.linearRampToValueAtTime(0.25 * volumeFactor, ctx.currentTime + n.time + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.time + n.dur);
+
+          osc.connect(gain);
+          gain.connect(destination);
+
+          osc.start(ctx.currentTime + n.time);
+          osc.stop(ctx.currentTime + n.time + n.dur + 0.05);
+        });
+      } catch (e) {
+        console.warn('[MUNCH] Fanfarra de vitória indisponível:', e);
+      }
+    }
+
+    triggerRunCleared() {
+      this.hasShownVictoryModal = true;
+      this.runCleared = true;
+      this.gameState = GAME_STATES.RUN_CLEARED;
+      this.isVictoryPaused = true;
+
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+
+      this.playVictoryFanfare();
+
+      const finalScore = Math.max(Math.round(this.accumulatedRunScore || 0), Math.round(this.score || 0));
+
+      // 1. Selo da Dificuldade
+      let stakeText = '⚪ FICHA BRANCA CONCLUÍDA';
+      let stakeClass = 'white-stake';
+      if (this.stake === 'red') {
+        stakeText = '🔴 FICHA VERMELHA CONCLUÍDA';
+        stakeClass = 'red-stake';
+      } else if (this.stake === 'gold') {
+        stakeText = '🟡 FICHA DOURADA CONCLUÍDA';
+        stakeClass = 'gold-stake';
+      }
+      const stakeBadge = document.getElementById('victoryStakeBadge');
+      if (stakeBadge) {
+        stakeBadge.innerText = stakeText;
+        stakeBadge.className = `victory-stake-badge ${stakeClass}`;
+      }
+
+      // 2. Pontuação Final
+      const scoreEl = document.getElementById('victoryFinalScore');
+      if (scoreEl) scoreEl.innerText = finalScore.toLocaleString();
+
+      // 3. Maior Mult
+      const multEl = document.getElementById('victoryMaxMult');
+      if (multEl) multEl.innerText = `x${Math.round(this.runMaxMult || this.mult || 1)}`;
+
+      // 4. Inimigos / Pastilhas
+      const kpEl = document.getElementById('victoryKillsPellets');
+      if (kpEl) kpEl.innerText = `${(this.runEnemiesKilled || 0).toLocaleString()} / ${(this.runPelletsEaten || 0).toLocaleString()}`;
+
+      // 5. Slime Utilizado
+      const slimeMap = {
+        classic: '🟢 Slime Clássico',
+        metallic: '🟩 Slime Mercenário',
+        ballistic: '🔴 Slime Balístico',
+        gambler: '🟡 Slime Gambler'
+      };
+      const slimeEl = document.getElementById('victorySlimeUsed');
+      if (slimeEl) slimeEl.innerText = slimeMap[this.selectedSlime] || '🟢 Slime Clássico';
+
+      // 6. Relíquias Equipadas
+      const relicsContainer = document.getElementById('victoryRelicsList');
+      if (relicsContainer) {
+        relicsContainer.innerHTML = '';
+        if (this.activeRelics && this.activeRelics.length > 0) {
+          this.activeRelics.forEach(r => {
+            const item = document.createElement('div');
+            const rarity = (r.rarity || 'comum').toLowerCase();
+            item.className = `victory-relic-item rarity-${rarity}`;
+            item.innerHTML = `<span class="relic-item-icon">${r.icon || '🃏'}</span> <span class="relic-item-name">${r.name}</span>`;
+            relicsContainer.appendChild(item);
+          });
+        } else {
+          relicsContainer.innerHTML = '<span style="color:#666; font-size:11px;">Nenhuma relíquia equipada</span>';
+        }
+      }
+
+      // 7. Apelido
+      const nameInput = document.getElementById('victoryPlayerName');
+      if (nameInput) {
+        nameInput.value = localStorage.getItem('munch_last_player_name') || '';
+      }
+      const statusEl = document.getElementById('victorySubmitStatus');
+      if (statusEl) statusEl.innerText = '';
+
+      if (this.modalRunCleared) {
+        this.modalRunCleared.classList.add('visible');
+      }
+    }
+
     nextRound() {
       this.phase++;
       this.blind++;
@@ -1811,19 +2749,17 @@
         this.ante++;
       }
 
-      if (this.ante === 4 && this.phase === 3) {
-        const bosses = ['O Olho Vigilante', 'Ouro Corrompido', 'Névoa Arcade'];
+      // Boss Blinds sorteado no Estágio 3 (Chefão) de cada ciclo
+      if (this.blind === 3) {
+        const bosses = ['O Silenciador', 'Paredes Falsas', 'O Olho Vigilante', 'Vácuo de Moedas', 'Inimigo Fantasma'];
         this.activeBossBlind = bosses[Math.floor(Math.random() * bosses.length)];
       } else {
         this.activeBossBlind = null;
       }
 
-      if (this.ante > 8 && !this.isEndless) {
+      if (this.ante > 8 && !this.isEndless && !this.hasShownVictoryModal) {
         // Run concluída com vitória total no Ante 8
-        this.recordRunHistory();
-        localStorage.removeItem('munch_active_run');
-        alert("PARABÉNS! VOCÊ CONCLUIU A RUN NO NÍVEL 8!");
-        window.location.href = 'menu.html';
+        this.triggerRunCleared();
         return;
       }
 
@@ -1832,29 +2768,111 @@
     }
 
     async triggerGameOver() {
+      // Diferenciação estrita: tela de Game Over só aparece se vidas chegarem a 0
+      if (this.lives > 0) return;
+
       this.gameState = GAME_STATES.GAME_OVER;
       this.triggerScreenShake(16);
 
       let totalAntes = parseInt(localStorage.getItem('munch_total_antes')) || 0;
       localStorage.setItem('munch_total_antes', totalAntes + 1);
 
-      this.recordRunHistory();
+      this.recordRunHistory(this.runCleared);
       localStorage.removeItem('munch_active_run');
 
+      const finalScore = Math.max(Math.round(this.accumulatedRunScore || 0), Math.round(this.score || 0));
       const previousRecord = (this.initialRunRecord !== undefined) ? this.initialRunRecord : (parseInt(localStorage.getItem('munch_best_round_score')) || 0);
-      if (this.score > previousRecord) {
-        localStorage.setItem('munch_best_round_score', Math.round(this.score));
+      const isNewRecord = finalScore > previousRecord;
+      if (isNewRecord) {
+        localStorage.setItem('munch_best_round_score', finalScore);
       }
 
-      document.getElementById('loseModalScore').innerText = Math.round(this.score).toLocaleString();
-      document.getElementById('loseModalHighScore').innerText = Math.max(previousRecord, Math.round(this.score)).toLocaleString();
+      // Elementos visuais da tela de Game Over
+      const titleEl = document.getElementById('gameOverTitle');
+      const subtitleEl = document.getElementById('gameOverSubtitle');
+      const badgeEl = document.getElementById('gameOverHeaderBadge');
+      const rowPersonalBest = document.getElementById('rowPersonalBest');
+      const stageEl = document.getElementById('loseModalStage');
+      const goldEl = document.getElementById('loseModalGold');
+      const killsPelletsEl = document.getElementById('loseModalKillsPellets');
+      const relicsListEl = document.getElementById('loseModalRelicsList');
+
+      // Diferenciação estrita: Modo Normal vs Modo Sem Fim (Endless)
+      if (this.isEndless || this.ante >= 9) {
+        if (titleEl) {
+          titleEl.innerText = 'RUN FINALIZADA // MODO SEM FIM';
+          titleEl.className = 'modal-title endless-game-over';
+        }
+        if (subtitleEl) {
+          subtitleEl.innerText = 'Você levou sua build ao limite absoluto no labirinto infinito!';
+        }
+        if (badgeEl) {
+          badgeEl.style.display = 'block';
+          badgeEl.innerText = `🔥 NÍVEL MÁXIMO ATINGIDO: NÍVEL ${this.ante} // ESTÁGIO ${this.blind} 🔥`;
+        }
+      } else {
+        if (titleEl) {
+          titleEl.innerText = 'FIM DE JOGO';
+          titleEl.className = 'modal-title lose';
+        }
+        if (subtitleEl) {
+          subtitleEl.innerText = 'Seu slime sucumbiu aos corredores do labirinto. Tente novamente!';
+        }
+        if (badgeEl) {
+          badgeEl.style.display = 'none';
+        }
+      }
+
+      // Pontuação e recorde pessoal
+      const scoreEl = document.getElementById('loseModalScore');
+      if (scoreEl) scoreEl.innerText = finalScore.toLocaleString();
+
+      if (rowPersonalBest) {
+        rowPersonalBest.style.display = isNewRecord ? 'flex' : 'none';
+      }
+
+      // Ponto da derrota (Nível e Estágio)
+      if (stageEl) {
+        const blindName = this.blind === 3 ? 'CHEFÃO' : `ESTÁGIO ${this.blind}`;
+        stageEl.innerText = `NÍVEL ${this.ante} // ${blindName}`;
+      }
+
+      // Total de moedas coletadas na run
+      if (goldEl) {
+        goldEl.innerText = (this.runGoldCollected || this.gold || 0).toString();
+      }
+
+      // Inimigos devorados e pastilhas
+      if (killsPelletsEl) {
+        killsPelletsEl.innerText = `${this.runEnemiesKilled || 0} / ${this.runPelletsEaten || 0}`;
+      }
+
+      // 5 Relíquias equipadas no momento da derrota
+      if (relicsListEl) {
+        relicsListEl.innerHTML = '';
+        if (this.activeRelics && this.activeRelics.length > 0) {
+          this.activeRelics.forEach(relic => {
+            const rItem = document.createElement('div');
+            const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
+            rItem.className = `relic-mini-badge ${rarityClass}`;
+            rItem.innerHTML = `
+              <span class="mini-icon">${relic.icon}</span>
+              <span class="mini-name">${relic.name}</span>
+            `;
+            relicsListEl.appendChild(rItem);
+          });
+        } else {
+          relicsListEl.innerHTML = '<span style="font-size:9px; color:#666; font-family:\'Press Start 2P\', monospace;">NENHUMA RELÍQUIA EQUIPADA</span>';
+        }
+      }
 
       const submitBox = document.querySelector('.leaderboard-submit-box');
       const btnSubmitScore = document.getElementById('btnSubmitScore');
       const lblSubmitStatus = document.getElementById('lblSubmitStatus');
 
       // Verifica se a pontuação entra no Top 5 de Todos os Tempos na categoria atual
-      const isTop5 = await MunchLeaderboard.isTop5(this.stake || 'white', this.score);
+      const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
+      const isTop5 = lb ? await lb.isTop5(this.stake || 'white', finalScore) : false;
 
       if (submitBox) {
         if (isTop5) {
@@ -1885,10 +2903,22 @@
 
     hurtPlayer() {
       if (!this.player) return;
+      this.stageDamageTaken = true;
+
+      // Cofrinho de Cerâmica: quebra se sofrer dano, concede todas as moedas e se destrói
+      if (this.hasPiggyBank) {
+        const brokenCoins = this.piggyBankCoins || 0;
+        this.gold += brokenCoins;
+        this.runGoldCollected = (this.runGoldCollected || 0) + brokenCoins;
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 25, `🐷 COFRINHO QUEBROU! +${brokenCoins} MOEDAS`, '#FFB703');
+        this.removeRelic('relic_piggy_bank');
+        this.piggyBankCoins = 0;
+      }
+
       this.lives--;
       this.triggerScreenShake(14);
 
-      this.spawnDust(this.player.x + TILE_SIZE/2, this.player.y + TILE_SIZE/2, 12, '#FF2E2E');
+      this.spawnDust(this.player.x + TILE_SIZE / 2, this.player.y + TILE_SIZE / 2, 12, '#FF2E2E');
 
       if (this.lives <= 0) {
         this.triggerGameOver();
@@ -1921,22 +2951,54 @@
 
       let totalKills = (parseInt(localStorage.getItem('munch_total_kills')) || 0) + 1;
       localStorage.setItem('munch_total_kills', totalKills);
-      
+      this.runEnemiesKilled = (this.runEnemiesKilled || 0) + 1;
+      if (window.MetaProgression && window.MetaProgression.addKills(1)) {
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 35, '★ SLIME BALÍSTICO DESBLOQUEADO! ★', '#00FF66');
+      }
+
       const ghostBaseScore = 200;
       const ghostBaseMult = 2;
-      
+
       this.chips += ghostBaseScore;
       this.mult += ghostBaseMult;
-      
+      this.runMaxMult = Math.max(this.runMaxMult || 1, this.mult);
+      if (window.MetaProgression && window.MetaProgression.checkMult(this.mult)) {
+        this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 50, '★ SLIME GAMBLER DESBLOQUEADO! ★', '#FFE600');
+      }
+
+      // Relíquia Pólvora Instável: devora pastilhas normais em raio de 3 blocos
+      if (this.hasUnstableGunpowder) {
+        const centerCol = Math.floor((ghost.x + TILE_SIZE / 2) / TILE_SIZE);
+        const centerRow = Math.floor((ghost.y + TILE_SIZE / 2) / TILE_SIZE);
+        let devoured = 0;
+        for (let r = centerRow - 3; r <= centerRow + 3; r++) {
+          for (let c = centerCol - 3; c <= centerCol + 3; c++) {
+            if (r >= 0 && r < GRID_HEIGHT && c >= 0 && c < GRID_WIDTH) {
+              const d = Math.hypot(c - centerCol, r - centerRow);
+              if (d <= 3.2 && this.map[r][c] === 2) {
+                this.map[r][c] = 0;
+                devoured++;
+                this.remainingPellets--;
+                this.chips += 10 + (this.pelletChipBonus || 0);
+              }
+            }
+          }
+        }
+        if (devoured > 0) {
+          this.triggerScreenShake(8);
+          this.addFloatingText(ghost.x + TILE_SIZE / 2, ghost.y - 30, `💥 PÓLVORA! +${devoured} PASTILHAS`, '#ff4400');
+        }
+      }
+
       const oldScore = this.score;
       this.score = this.chips * this.mult;
       const diff = this.score - oldScore;
 
       this.triggerScreenShake(6);
-      this.spawnDust(ghost.x + TILE_SIZE/2, ghost.y + TILE_SIZE/2, 15, '#ffffff');
+      this.spawnDust(ghost.x + TILE_SIZE / 2, ghost.y + TILE_SIZE / 2, 15, '#ffffff');
 
       this.addFloatingText(
-        ghost.x + TILE_SIZE/2,
+        ghost.x + TILE_SIZE / 2,
         ghost.y,
         `DEVORADO! +${Math.round(diff).toLocaleString()}`,
         '#00E5FF',
@@ -1949,7 +3011,7 @@
         if (this.infiniteBatteryWindow > 0) {
           if (this.blasterMaxCharges > 0) {
             this.blasterCharges = Math.min(this.blasterMaxCharges, this.blasterCharges + 1);
-            this.addFloatingText(this.player.x + TILE_SIZE/2, this.player.y - 20, 'RECARGA!', '#FFE600');
+            this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 20, 'RECARGA!', '#FFE600');
           }
           this.infiniteBatteryWindow = 0; // reset
         } else {
@@ -1978,6 +3040,12 @@
         this.particles.forEach(p => { if (p) p.update(dt); });
         this.particles = this.particles.filter(p => p && p.active && !p.toRemove);
         if (this.phaseClearTimer <= 0) {
+          // Checagem de vitória de fim de run: Nível 8 Estágio 3
+          if (this.ante === 8 && this.blind === 3 && !this.isEndless && !this.hasShownVictoryModal) {
+            this.triggerRunCleared();
+            return;
+          }
+
           this.gameState = GAME_STATES.WIN_MODAL;
           document.getElementById('winModalScore').innerText = Math.round(this.score).toLocaleString();
           document.getElementById('winModalTarget').innerText = Math.round(this.targetScore).toLocaleString();
@@ -1989,8 +3057,65 @@
 
       if (this.gameState !== GAME_STATES.PLAYING) return;
 
+      if (this.landingBoostTimer > 0) this.landingBoostTimer -= dt;
       if (this.adrenalineTimer > 0) this.adrenalineTimer -= dt;
       if (this.infiniteBatteryWindow > 0) this.infiniteBatteryWindow -= dt;
+
+      // Boss Blind: Paredes Falsas (bloqueia 2 corredores a cada 15s por 5s)
+      if (this.activeBossBlind === 'Paredes Falsas') {
+        if (this.fakeWallsDurationTimer > 0) {
+          this.fakeWallsDurationTimer -= dt;
+          if (this.fakeWallsDurationTimer <= 0) {
+            this.activeFakeWalls = [];
+            this.fakeWallsCooldownTimer = 15000;
+          }
+        } else {
+          this.fakeWallsCooldownTimer -= dt;
+          if (this.fakeWallsCooldownTimer <= 0) {
+            this.fakeWallsDurationTimer = 5000;
+            this.activeFakeWalls = [];
+            const candidates = [];
+            for (let r = 1; r < GRID_HEIGHT - 1; r++) {
+              for (let c = 1; c < GRID_WIDTH - 1; c++) {
+                if (this.map[r][c] !== 1) {
+                  if (this.player && this.player.gridX === c && this.player.gridY === r) continue;
+                  if (r >= 8 && r <= 14 && c >= 7 && c <= 15) continue;
+                  candidates.push({ r, c });
+                }
+              }
+            }
+            if (candidates.length >= 2) {
+              for (let i = 0; i < 2; i++) {
+                const idx = Math.floor(Math.random() * candidates.length);
+                this.activeFakeWalls.push(candidates.splice(idx, 1)[0]);
+              }
+            }
+            this.triggerScreenShake(4);
+            if (this.player) {
+              this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 15, '⚠️ PAREDES FALSAS ATIVADAS!', '#ff0055');
+            }
+          }
+        }
+      }
+
+      // Relíquia Bolsa Furada: perde 1 moeda a cada 8s sem pastilha especial ativa
+      if (this.hasLeakyBag) {
+        if (this.frightenedTimer <= 0) {
+          this.leakyBagTimer = (this.leakyBagTimer || 0) + dt;
+          if (this.leakyBagTimer >= 8000) {
+            this.leakyBagTimer = 0;
+            if (this.gold > 0) {
+              this.gold--;
+              this.updateHUD();
+              if (this.player) {
+                this.addFloatingText(this.player.x + TILE_SIZE / 2, this.player.y - 18, '👜 -1 MOEDA (BOLSA FURADA)', '#ff5555');
+              }
+            }
+          }
+        } else {
+          this.leakyBagTimer = 0;
+        }
+      }
 
       if (this.ante >= 4) {
         this.laserWallTimer -= dt;
@@ -1999,7 +3124,7 @@
           this.laserWallActive = !this.laserWallActive;
           this.triggerScreenShake(2);
         }
-        
+
         if (this.laserWallActive && this.player && this.map[this.player.gridY][this.player.gridX] === 5) {
           this.hurtPlayer();
         }
@@ -2065,14 +3190,54 @@
       });
       this.ghosts = this.ghosts.filter(ghost => ghost && !ghost.toRemove);
 
+      // Relíquia Sombra Perversa: cálculo de proximidade e derrota pelas costas
+      if (this.hasWickedShadow && this.player) {
+        let maxProxBonus = 1.0;
+        const pDir = this.player.dir;
+        if (pDir && (pDir.x !== 0 || pDir.y !== 0)) {
+          const backX = -pDir.x;
+          const backY = -pDir.y;
+          const px = this.player.x + TILE_SIZE / 2;
+          const py = this.player.y + TILE_SIZE / 2;
+
+          for (const ghost of this.ghosts) {
+            if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning' || ghost.state === 'frightened') continue;
+            const gx = ghost.x + TILE_SIZE / 2;
+            const gy = ghost.y + TILE_SIZE / 2;
+            const dx = gx - px;
+            const dy = gy - py;
+            const dist = Math.hypot(dx, dy);
+
+            const proj = dx * backX + dy * backY;
+            const perp = Math.abs(dx * backY - dy * backX);
+
+            if (proj > 0 && perp < TILE_SIZE * 0.85 && dist < TILE_SIZE * 3.5) {
+              const factor = 1 - (dist / (TILE_SIZE * 3.5));
+              const currentBonus = 1.0 + factor * 0.75;
+              if (currentBonus > maxProxBonus) maxProxBonus = currentBonus;
+
+              if (dist < TILE_SIZE * 0.55 && !this.player.isJumping) {
+                this.spawnProtectionTimer = 0;
+                this.addFloatingText(px, py - 20, '☠️ GOLPE PELAS COSTAS!', '#ff0033');
+                this.hurtPlayer();
+                break;
+              }
+            }
+          }
+        }
+        this.wickedShadowMultBonus = maxProxBonus;
+      } else {
+        this.wickedShadowMultBonus = 1.0;
+      }
+
       // Colisões do slime com inimigos
       if (this.player && !this.player.isJumping) {
         this.ghosts.forEach(ghost => {
           if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning') return;
 
           const dist = Math.hypot(
-            (this.player.x + TILE_SIZE/2) - (ghost.x + TILE_SIZE/2),
-            (this.player.y + TILE_SIZE/2) - (ghost.y + TILE_SIZE/2)
+            (this.player.x + TILE_SIZE / 2) - (ghost.x + TILE_SIZE / 2),
+            (this.player.y + TILE_SIZE / 2) - (ghost.y + TILE_SIZE / 2)
           );
 
           // Área de colisão efetiva
@@ -2123,12 +3288,12 @@
       for (let r = 0; r < GRID_HEIGHT; r++) {
         for (let c = 0; c < GRID_WIDTH; c++) {
           const tile = this.map[r][c];
-          
+
           if (tile === 1) {
             // Paredes
             this.ctx.fillStyle = '#1b1b22';
             this.ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            
+
             this.ctx.strokeStyle = '#4a4b57';
             this.ctx.lineWidth = 1.8;
             this.ctx.strokeRect(c * TILE_SIZE + 1.5, r * TILE_SIZE + 1.5, TILE_SIZE - 3, TILE_SIZE - 3);
@@ -2148,8 +3313,8 @@
             this.ctx.arc(c * TILE_SIZE + TILE_SIZE, r * TILE_SIZE + TILE_SIZE, 2, 0, Math.PI * 2);
             this.ctx.fill();
 
-            } else {
-              // Desenha itens
+          } else {
+            // Desenha itens
             const cx = c * TILE_SIZE + TILE_SIZE / 2;
             const cy = r * TILE_SIZE + TILE_SIZE / 2;
 
@@ -2167,11 +3332,11 @@
               // Pastilha dourada
               const pulse = 1 + Math.sin(performance.now() * 0.008) * 0.12;
               const rVal = 5.5 * pulse;
-              
+
               this.ctx.fillStyle = '#FFE600';
               this.ctx.shadowColor = 'rgba(255, 230, 0, 0.55)';
               this.ctx.shadowBlur = 6;
-              
+
               this.ctx.beginPath();
               for (let i = 0; i < 8; i++) {
                 const angle = (i * Math.PI) / 4;
@@ -2212,6 +3377,32 @@
             }
           }
         }
+      }
+
+      // Renderiza Paredes Falsas (Boss Blind)
+      if (this.activeFakeWalls && this.activeFakeWalls.length > 0) {
+        this.ctx.save();
+        for (const fw of this.activeFakeWalls) {
+          const fx = fw.c * TILE_SIZE;
+          const fy = fw.r * TILE_SIZE;
+          this.ctx.fillStyle = 'rgba(255, 0, 85, 0.75)';
+          this.ctx.shadowColor = '#ff0055';
+          this.ctx.shadowBlur = 10;
+          this.ctx.fillRect(fx + 2, fy + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+          this.ctx.strokeStyle = '#ffffff';
+          this.ctx.lineWidth = 2;
+          this.ctx.strokeRect(fx + 3, fy + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+
+          // Padrão de espinhos / barreira de perigo
+          this.ctx.beginPath();
+          this.ctx.moveTo(fx + 4, fy + 4);
+          this.ctx.lineTo(fx + TILE_SIZE - 4, fy + TILE_SIZE - 4);
+          this.ctx.moveTo(fx + TILE_SIZE - 4, fy + 4);
+          this.ctx.lineTo(fx + 4, fy + TILE_SIZE - 4);
+          this.ctx.stroke();
+        }
+        this.ctx.restore();
       }
 
       // Desenha as poças de lodo
@@ -2272,7 +3463,7 @@
         const alpha = t.life / t.maxLife;
         this.ctx.globalAlpha = alpha;
         this.ctx.textAlign = 'center';
-        
+
         this.ctx.font = 'bold 12px "Space Grotesk", sans-serif';
         this.ctx.fillStyle = t.color;
         this.ctx.fillText(t.text, t.x, t.y);
@@ -2290,23 +3481,23 @@
         this.ctx.save();
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        
+
         const cx = this.canvas.width / 2;
         const cy = this.canvas.height / 2 - 35;
         const alpha = Math.min(1, this.spawnProtectionTimer / 300);
-        
+
         this.ctx.globalAlpha = alpha;
         this.ctx.font = '900 24px "Space Grotesk", sans-serif';
         this.ctx.fillStyle = '#FFE600';
         this.ctx.shadowColor = 'rgba(255, 230, 0, 0.8)';
         this.ctx.shadowBlur = 14;
         this.ctx.fillText("PREPARE-SE!", cx, cy);
-        
+
         this.ctx.font = '8px "Press Start 2P", monospace';
         this.ctx.fillStyle = '#ffffff';
         this.ctx.shadowBlur = 4;
         this.ctx.fillText("ENTRADA SEGURA // INIMIGOS REAGINDO...", cx, cy + 24);
-        
+
         this.ctx.restore();
       }
 
@@ -2315,12 +3506,12 @@
         this.ctx.save();
         const px = this.player.x + TILE_SIZE / 2;
         const py = this.player.y + TILE_SIZE / 2;
-        
+
         const gradient = this.ctx.createRadialGradient(px, py, TILE_SIZE * 2, px, py, TILE_SIZE * 6);
         gradient.addColorStop(0, 'rgba(8, 8, 12, 0)');
         gradient.addColorStop(0.5, 'rgba(8, 8, 12, 0.7)');
         gradient.addColorStop(1, 'rgba(8, 8, 12, 1)');
-        
+
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
@@ -2371,6 +3562,8 @@
     }
 
     gameLoop(currentTime) {
+      if (this.isVictoryPaused) return;
+
       const dt = currentTime - this.lastTime;
       this.lastTime = currentTime;
 
@@ -2379,7 +3572,9 @@
       this.update(cappedDt);
       this.draw();
 
-      requestAnimationFrame((t) => this.gameLoop(t));
+      if (!this.isVictoryPaused) {
+        this.animationFrameId = requestAnimationFrame((t) => this.gameLoop(t));
+      }
     }
   }
 
@@ -2389,14 +3584,14 @@
       this.slimeType = slimeType;
       this.gridX = gridX;
       this.gridY = gridY;
-      
+
       // Coordenadas em pixel
       this.x = gridX * TILE_SIZE;
       this.y = gridY * TILE_SIZE;
 
       this.speed = 0.14; // Pixels por ms
       this.dir = DIRECTIONS.RIGHT;
-      
+
       // Efeitos de distorção elástica
       this.squishX = 1;
       this.squishY = 1;
@@ -2419,7 +3614,7 @@
 
     checkEatPellet(game) {
       if (!game || !game.map) return;
-      
+
       const hasMagnet = game.activeRelics.some(r => r.id === 'relic_magnetic_pull');
       const searchRadius = hasMagnet ? 1 : 0;
 
@@ -2437,10 +3632,10 @@
                 game.addPoints(currentTile);
 
                 if (distance > 0) {
-                  const startX = checkX * TILE_SIZE + TILE_SIZE/2;
-                  const startY = checkY * TILE_SIZE + TILE_SIZE/2;
-                  const playerX = this.x + TILE_SIZE/2;
-                  const playerY = this.y + TILE_SIZE/2;
+                  const startX = checkX * TILE_SIZE + TILE_SIZE / 2;
+                  const startY = checkY * TILE_SIZE + TILE_SIZE / 2;
+                  const playerX = this.x + TILE_SIZE / 2;
+                  const playerY = this.y + TILE_SIZE / 2;
 
                   for (let i = 0; i < 3; i++) {
                     game.particles.push(new Particle(
@@ -2503,7 +3698,7 @@
       this.jumpTimeLeft = this.jumpDuration;
       this.jumpStart = { x: this.x, y: this.y };
       this.jumpTarget = { x: targetGridX * TILE_SIZE, y: targetGridY * TILE_SIZE };
-      
+
       this.gridX = targetGridX;
       this.gridY = targetGridY;
     }
@@ -2532,19 +3727,87 @@
         this.squishX = 1 + scaleEffect;
         this.squishY = 1 + scaleEffect;
 
+        // Mecânica "Close Call": passagem aérea direta sobre inimigos terrestres
+        if (game.ghosts) {
+          game.ghosts.forEach(ghost => {
+            if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning') return;
+            if (this.jumpCrossedEnemies && this.jumpCrossedEnemies.has(ghost)) return;
+
+            const dist = Math.hypot(
+              (this.x + TILE_SIZE / 2) - (ghost.x + TILE_SIZE / 2),
+              (this.y + TILE_SIZE / 2) - (ghost.y + TILE_SIZE / 2)
+            );
+
+            if (dist < TILE_SIZE * 0.75) {
+              if (!this.jumpCrossedEnemies) this.jumpCrossedEnemies = new Set();
+              this.jumpCrossedEnemies.add(ghost);
+              this.hasMadeCloseCallInCurrentJump = true;
+
+              // Bônus de pontuação Close Call
+              const closeCallChips = 250;
+              const closeCallMult = 2;
+              game.chips += closeCallChips;
+              game.mult += closeCallMult;
+              game.score = game.chips * game.mult;
+              game.scorePop(game.chipsBox);
+              game.scorePop(game.multBox);
+
+              game.triggerScreenShake(4);
+              game.addFloatingText(
+                this.x + TILE_SIZE / 2,
+                this.y - 25,
+                '+CLOSE CALL! +250 Fichas x2 Mult',
+                '#FFE600'
+              );
+            }
+          });
+        }
+
         if (this.jumpTimeLeft <= 0) {
           this.x = this.jumpTarget.x;
           this.y = this.jumpTarget.y;
           this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
           this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
           this.isJumping = false;
-          
+
           this.squishX = 1.25;
           this.squishY = 0.75;
-          
+
+          const hadCommonPellet = (game.map[this.gridY] && game.map[this.gridY][this.gridX] === 2);
+
           this.checkEatPellet(game);
           game.triggerScreenShake(3);
-          game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 6, '#ffffff');
+          game.spawnDust(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, 6, '#ffffff');
+
+          // Buffer de Aterrissagem (Landing Boost): +15% de velocidade por 1s ao tocar o solo se tecla pressionada
+          if (game.keysPressed && (game.keysPressed['ArrowUp'] || game.keysPressed['ArrowDown'] || game.keysPressed['ArrowLeft'] || game.keysPressed['ArrowRight'] || game.keysPressed['KeyW'] || game.keysPressed['KeyS'] || game.keysPressed['KeyA'] || game.keysPressed['KeyD'] || this.inputBufferDir !== DIRECTIONS.NONE)) {
+            game.landingBoostTimer = 1000;
+            game.addFloatingText(this.x + TILE_SIZE / 2, this.y - 15, 'BOOST! +15% VEL', '#00FF66');
+          }
+
+          // Meteoro de Gosma: onda de choque de raio 2.5 blocos atordoando inimigos por 2s
+          if (game.hasSlimeMeteor) {
+            game.triggerScreenShake(7);
+            if (game.ghosts) {
+              game.ghosts.forEach(g => {
+                if (!g || g.state === 'eaten' || g.state === 'respawning') return;
+                const d = Math.hypot((this.x + TILE_SIZE / 2) - (g.x + TILE_SIZE / 2), (this.y + TILE_SIZE / 2) - (g.y + TILE_SIZE / 2));
+                if (d <= 2.5 * TILE_SIZE) {
+                  g.stunTimer = 2000;
+                  g.state = 'stunned';
+                }
+              });
+            }
+            game.spawnDust(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, 16, '#00FF66');
+            game.addFloatingText(this.x + TILE_SIZE / 2, this.y - 28, 'METEORO! ATORDUADO!', '#00FF66');
+          }
+
+          // Salto Quântico: Close Call + pouso em pastilha comum reseta 50% da recarga
+          if (game.hasQuantumJump && this.hasMadeCloseCallInCurrentJump && hadCommonPellet) {
+            const maxCld = game.vaultMaxCooldown * (game.cooldownMultiplier || 1.0);
+            game.vaultCooldown = Math.max(0, game.vaultCooldown - maxCld * 0.5);
+            game.addFloatingText(this.x + TILE_SIZE / 2, this.y - 35, 'SALTO QUÂNTICO! -50% RECARGA', '#00E5FF');
+          }
         }
         return;
       }
@@ -2570,10 +3833,29 @@
         if (this.dir === DIRECTIONS.NONE) return;
       }
 
-      // Movimentação contínua
+      // Rastreamento de Dente de Sabre (linha reta contínua)
+      if (this.lastMovingDir === this.dir && this.dir !== DIRECTIONS.NONE) {
+        this.straightLineTimer = (this.straightLineTimer || 0) + dt;
+      } else {
+        this.straightLineTimer = 0;
+        this.lastMovingDir = this.dir;
+      }
+
+      // Rastreamento de Fita Métrica (+0.1 Mult por segundo de movimento contínuo sem bater em paredes)
+      if (game.hasTapeMeasure && this.dir !== DIRECTIONS.NONE) {
+        this.tapeMeasureTimer = (this.tapeMeasureTimer || 0) + dt;
+        if (this.tapeMeasureTimer >= 1000) {
+          this.tapeMeasureTimer = 0;
+          game.tapeMeasureBonus = Math.min(3.0, (game.tapeMeasureBonus || 0) + 0.1);
+        }
+      }
+
+      // Movimentação contínua com bônus de Landing Boost e penalidade de Botas Gravitacionais
       let currentSpeed = this.speed;
       if (game.baseSpeedMult) currentSpeed *= game.baseSpeedMult;
       if (game.adrenalineTimer > 0) currentSpeed *= 1.20;
+      if (game.landingBoostTimer > 0) currentSpeed *= 1.15;
+      if (game.hasGravityBoots && game.vaultCooldown > 0) currentSpeed *= 0.90;
 
       let step = currentSpeed * dt;
 
@@ -2616,8 +3898,8 @@
                   if (game.activeRelics.some(r => r.id === 'relic_sharp_drift')) {
                     game.mult += 2;
                     game.updateHUD();
-                    game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
-                    game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
+                    game.addFloatingText(this.x + TILE_SIZE / 2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
+                    game.spawnDust(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, 4, '#FF00FF');
                   }
                   continue;
                 }
@@ -2634,7 +3916,7 @@
           step -= distToTargetCenter;
           this.x = targetCenter.x;
           this.y = targetCenter.y;
-          
+
           this.gridX = Math.floor((this.x + TILE_SIZE / 2) / TILE_SIZE);
           this.gridY = Math.floor((this.y + TILE_SIZE / 2) / TILE_SIZE);
 
@@ -2643,7 +3925,7 @@
             if (this.straightLineTiles >= 5) {
               game.mult += 1;
               game.updateHUD();
-              game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+1 MULT', '#FFE600', 'COMBO RETA');
+              game.addFloatingText(this.x + TILE_SIZE / 2, this.y, '+1 MULT', '#FFE600', 'COMBO RETA');
               this.straightLineTiles = 0;
             }
           }
@@ -2668,13 +3950,13 @@
           this.checkEatPellet(game);
 
           // Tomada de decisão nas interseções
-          
+
           // Tenta mudar de direção se houver comando no buffer
           let directionChanged = false;
           if (this.inputBufferDir !== DIRECTIONS.NONE) {
             const bufGridX = this.gridX + this.inputBufferDir.x;
             const bufGridY = this.gridY + this.inputBufferDir.y;
-            
+
             if (game.isWalkable(bufGridX, bufGridY)) {
               this.dir = this.inputBufferDir;
               this.angle = this.dir.angle;
@@ -2685,8 +3967,8 @@
               if (game.activeRelics.some(r => r.id === 'relic_sharp_drift')) {
                 game.mult += 2;
                 game.updateHUD();
-                game.addFloatingText(this.x + TILE_SIZE/2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
-                game.spawnDust(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2, 4, '#FF00FF');
+                game.addFloatingText(this.x + TILE_SIZE / 2, this.y, '+2 MULT', '#FF00FF', 'DRIFT PERFEITO!');
+                game.spawnDust(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2, 4, '#FF00FF');
               }
             } else {
               // Se não conseguiu virar, continua na mesma direção se possível
@@ -2695,6 +3977,8 @@
               if (!game.isWalkable(nextGridX, nextGridY)) {
                 this.dir = DIRECTIONS.NONE;
                 this.straightLineTiles = 0; // Bateu na parede, perde o combo
+                game.tapeMeasureBonus = 0;
+                this.tapeMeasureTimer = 0;
               }
               // Ignora comando se for parede
               this.inputBufferDir = DIRECTIONS.NONE;
@@ -2711,13 +3995,15 @@
               // Para o slime no centro do tile
               this.x = this.gridX * TILE_SIZE;
               this.y = this.gridY * TILE_SIZE;
-              
+
               const tileVal = (nextGridY >= 0 && nextGridY < GRID_HEIGHT && nextGridX >= 0 && nextGridX < GRID_WIDTH) ? game.map[nextGridY][nextGridX] : 'FORA';
               this.lastStopReason = `Parede na frente (${nextGridX}, ${nextGridY}) [Tipo: ${tileVal}]`;
               console.log(`[MUNCH DEBUG] Slime colidiu com parede na grade (${this.gridX}, ${this.gridY}). ${this.lastStopReason}`);
-              
+
               this.dir = DIRECTIONS.NONE;
               this.straightLineTiles = 0; // Perde o combo
+              game.tapeMeasureBonus = 0;
+              this.tapeMeasureTimer = 0;
               step = 0;
             }
           }
@@ -2730,7 +4016,7 @@
       ctx.save();
       ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.beginPath();
-      ctx.ellipse(this.x + TILE_SIZE/2, this.y + TILE_SIZE/2 + 15, 14 * this.squishX, 5 * this.squishY, 0, 0, Math.PI * 2);
+      ctx.ellipse(this.x + TILE_SIZE / 2, this.y + TILE_SIZE / 2 + 15, 14 * this.squishX, 5 * this.squishY, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -2742,7 +4028,7 @@
 
       // Renderiza corpo 2.5D do jogador
       const size = TILE_SIZE - 4;
-      
+
       let topColor = '#b0b0b0';
       let faceColor = '#949494';
 
@@ -2763,29 +4049,29 @@
       // Topo do slime
       ctx.fillStyle = topColor;
       ctx.beginPath();
-      ctx.moveTo(-size/2, -size/2 + 6);
-      ctx.lineTo(-size/2 + 3, -size/2);
-      ctx.lineTo(size/2 - 3, -size/2);
-      ctx.lineTo(size/2, -size/2 + 6);
+      ctx.moveTo(-size / 2, -size / 2 + 6);
+      ctx.lineTo(-size / 2 + 3, -size / 2);
+      ctx.lineTo(size / 2 - 3, -size / 2);
+      ctx.lineTo(size / 2, -size / 2 + 6);
       ctx.closePath();
       ctx.fill();
 
       // Face frontal
       ctx.fillStyle = faceColor;
       ctx.beginPath();
-      ctx.roundRect(-size/2, -size/2 + 6, size, size - 6, [0, 0, 6, 6]);
+      ctx.roundRect(-size / 2, -size / 2 + 6, size, size - 6, [0, 0, 6, 6]);
       ctx.fill();
 
       // Contorno branco
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(-size/2 + 3, -size/2);
-      ctx.lineTo(size/2 - 3, -size/2);
-      ctx.lineTo(size/2, -size/2 + 6);
-      ctx.lineTo(size/2, size/2);
-      ctx.lineTo(-size/2, size/2);
-      ctx.lineTo(-size/2, -size/2 + 6);
+      ctx.moveTo(-size / 2 + 3, -size / 2);
+      ctx.lineTo(size / 2 - 3, -size / 2);
+      ctx.lineTo(size / 2, -size / 2 + 6);
+      ctx.lineTo(size / 2, size / 2);
+      ctx.lineTo(-size / 2, size / 2);
+      ctx.lineTo(-size / 2, -size / 2 + 6);
       ctx.closePath();
       ctx.stroke();
 
@@ -2793,8 +4079,8 @@
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(-size/2, -size/2 + 6);
-      ctx.lineTo(size/2, -size/2 + 6);
+      ctx.moveTo(-size / 2, -size / 2 + 6);
+      ctx.lineTo(size / 2, -size / 2 + 6);
       ctx.stroke();
 
       // Move os olhos dependendo da direção
@@ -2887,14 +4173,14 @@
           this.bounces--;
           this.x -= this.dir.x * step * 1.5; // recua para fora da parede
           this.y -= this.dir.y * step * 1.5;
-          
+
           const prevGridX = Math.floor(this.x / TILE_SIZE);
           const prevGridY = Math.floor(this.y / TILE_SIZE);
-          
+
           if (gridX !== prevGridX) this.dir.x *= -1;
           if (gridY !== prevGridY) this.dir.y *= -1;
           this.dir.angle = Math.atan2(this.dir.y, this.dir.x);
-          
+
           game.spawnDust(this.x, this.y, 4, '#00E5FF');
           return;
         } else {
@@ -2910,7 +4196,7 @@
         const ghost = game.ghosts[i];
         if (!ghost || ghost.state === 'eaten' || ghost.state === 'respawning') continue;
 
-        const dist = Math.hypot(this.x - (ghost.x + TILE_SIZE/2), this.y - (ghost.y + TILE_SIZE/2));
+        const dist = Math.hypot(this.x - (ghost.x + TILE_SIZE / 2), this.y - (ghost.y + TILE_SIZE / 2));
         if (dist < TILE_SIZE / 2) {
           ghost.die(game);
           if (!this.isRailgun) {
@@ -2926,7 +4212,7 @@
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.dir.angle);
-      
+
       if (this.isRailgun) {
         ctx.shadowColor = '#FF00FF';
         ctx.shadowBlur = 12;
@@ -2938,7 +4224,7 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(-10, -2.5, 20, 5);
       }
-      
+
       ctx.restore();
     }
   }
@@ -2950,19 +4236,19 @@
       this.gridY = gridY;
       this.x = gridX * TILE_SIZE;
       this.y = gridY * TILE_SIZE;
-      
+
       this.targetX = this.x;
       this.targetY = this.y;
       this.type = type; // 'SPADE' ou 'DIAMOND'
 
       this.speed = type === 'DIAMOND' ? 0.11 : 0.075;
       this.dir = DIRECTIONS.UP;
-      
+
       this.state = 'normal';
       this.stunTimer = 0;
       this.respawnTimer = 0;
       this.dashCooldown = 0;
-      
+
       this.toRemove = false;
     }
 
@@ -2991,12 +4277,16 @@
     die(game) {
       let totalKills = (parseInt(localStorage.getItem('munch_total_kills')) || 0) + 1;
       localStorage.setItem('munch_total_kills', totalKills);
+      game.runEnemiesKilled = (game.runEnemiesKilled || 0) + 1;
+      if (window.MetaProgression && window.MetaProgression.addKills(1)) {
+        game.addFloatingText(this.x + TILE_SIZE / 2, this.y - 35, '★ SLIME BALÍSTICO DESBLOQUEADO! ★', '#00FF66');
+      }
 
       this.state = 'respawning';
       this.respawnTimer = 2500; // Tempo para renascer
-      
-      const deathX = this.x + TILE_SIZE/2;
-      const deathY = this.y + TILE_SIZE/2;
+
+      const deathX = this.x + TILE_SIZE / 2;
+      const deathY = this.y + TILE_SIZE / 2;
 
       // Cria partículas de estilhaços
       const color = this.type === 'SPADE' ? '#32323e' : '#FB8500';
@@ -3008,7 +4298,11 @@
       game.chips += 200;
       const extraMult = 2 + (game.killMultBonus || 0);
       game.mult += extraMult;
-      
+      game.runMaxMult = Math.max(game.runMaxMult || 1, game.mult);
+      if (window.MetaProgression && window.MetaProgression.checkMult(game.mult)) {
+        game.addFloatingText(deathX, deathY - 45, '★ SLIME GAMBLER DESBLOQUEADO! ★', '#FFE600');
+      }
+
       const oldScore = game.score;
       game.score = game.chips * game.mult;
       const diff = game.score - oldScore;
@@ -3039,7 +4333,7 @@
     update(dt, game) {
       const baseX = Math.floor(GRID_WIDTH / 2) - 1;
       const baseY = Math.floor(GRID_HEIGHT / 2);
-      
+
       // Controle de respawn
       if (this.state === 'respawning') {
         this.respawnTimer -= dt;
@@ -3066,6 +4360,11 @@
 
       // Define a velocidade atual
       let currentSpeed = this.speed + (game.ante * 0.008);
+
+      // Incremento passivo na velocidade dos inimigos (+5% cumulativo por nível além do 8)
+      if (game.ante > 8) {
+        currentSpeed *= (1 + (game.ante - 8) * 0.05);
+      }
 
       // Bônus de velocidade para o Boss
       if (game.blind === 3 && game.ante % 2 === 1) {
@@ -3122,7 +4421,7 @@
           if (this.state === 'eaten' && this.gridX === baseX && this.gridY === baseY) {
             this.state = 'normal';
           }
-          
+
           if (this.state === 'dash') {
             // Para ao bater na parede
             const checkX = this.gridX + this.dir.x;
@@ -3275,6 +4574,23 @@
       const cy = this.y + TILE_SIZE / 2;
       ctx.translate(cx, cy);
 
+      // Boss Blind: Inimigo Fantasma (invisível, revelando apenas os olhos periodicamente)
+      if (this.isPhantom && this.state !== 'eaten') {
+        const pulse = Math.sin(performance.now() * 0.006);
+        if (pulse > 0.0) {
+          ctx.fillStyle = '#ff0055';
+          ctx.shadowColor = '#ff0055';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(-5, -2, 3, 0, Math.PI * 2);
+          ctx.arc(5, -2, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+        return;
+      }
+
       // Renderiza estados especiais
       if (this.state === 'eaten') {
         // Apenas os olhos
@@ -3337,7 +4653,7 @@
           ctx.bezierCurveTo(-7, 10, -14, 7, -14, 1);
           ctx.bezierCurveTo(-14, -5, -8, -14, 0, -14);
           ctx.closePath();
-          
+
           ctx.fillStyle = '#202124';
           ctx.fill();
           ctx.strokeStyle = this.state === 'dash' ? '#FF2E2E' : '#ffffff';
@@ -3430,7 +4746,7 @@
       ctx.rotate(this.angle);
       ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
       ctx.fillStyle = this.color;
-      
+
       // Desenha estilhaço
       ctx.beginPath();
       ctx.moveTo(0, -this.size);

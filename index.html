@@ -333,6 +333,10 @@
         window.removeEventListener('keydown', goToGame);
         window.removeEventListener('click', goToGame);
 
+        try {
+          sessionStorage.setItem('munch_user_interacted', 'true');
+        } catch (e) {}
+
         overlay.classList.add('exit-fade');
 
         setTimeout(function () {

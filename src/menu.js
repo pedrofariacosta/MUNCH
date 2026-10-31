@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
   faviconCanvas.width = 32;
   faviconCanvas.height = 32;
   const faviconCtx = faviconCanvas.getContext('2d');
-  
+
   let faviconLink = document.getElementById('dynamic-favicon');
   if (!faviconLink) {
     faviconLink = document.createElement('link');
@@ -18,12 +18,12 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconLink.type = 'image/png';
     document.head.appendChild(faviconLink);
   }
-  
+
   function drawStaticFavicon() {
     faviconCtx.clearRect(0, 0, 32, 32);
     faviconCtx.save();
     faviconCtx.translate(16, 16);
-    
+
     faviconCtx.beginPath();
     faviconCtx.roundRect(-9, -9, 18, 18, 3.5);
     faviconCtx.fillStyle = '#9e9e9e';
@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 2.5;
     faviconCtx.stroke();
-    
+
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 1.8;
     faviconCtx.lineCap = 'round';
@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.moveTo(7, -4.5);
     faviconCtx.lineTo(2, -2.5);
     faviconCtx.stroke();
-    
+
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.beginPath();
     faviconCtx.moveTo(-7, -1);
@@ -57,21 +57,21 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.lineTo(7, 2.5);
     faviconCtx.closePath();
     faviconCtx.fill();
-    
+
     faviconCtx.fillStyle = '#1a1a1a';
     faviconCtx.fillRect(-5, 0.2, 1.5, 1.5);
     faviconCtx.fillRect(3.5, 0.2, 1.5, 1.5);
-    
+
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.fillRect(-1.2, 3.5, 0.8, 0.8);
     faviconCtx.fillRect(0.8, 3.5, 0.8, 0.8);
-    
+
     faviconCtx.fillStyle = '#1a1a1a';
     faviconCtx.fillRect(-4, 5.5, 8, 2.5);
     faviconCtx.strokeStyle = '#ffffff';
     faviconCtx.lineWidth = 0.6;
     faviconCtx.strokeRect(-4, 5.5, 8, 2.5);
-    
+
     faviconCtx.fillStyle = '#ffffff';
     faviconCtx.beginPath();
     faviconCtx.moveTo(-2.5, 5.5);
@@ -79,11 +79,11 @@ window.addEventListener('DOMContentLoaded', () => {
     faviconCtx.lineTo(0.5, 5.5);
     faviconCtx.closePath();
     faviconCtx.fill();
-    
+
     faviconCtx.restore();
     faviconLink.href = faviconCanvas.toDataURL('image/png');
   }
-  
+
   drawStaticFavicon();
 
   // ==========================================================================
@@ -108,13 +108,27 @@ window.addEventListener('DOMContentLoaded', () => {
     { id: "relic_black_card", name: "CARTÃO BLACK", icon: "💳", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas." },
     { id: "relic_laser_ricochet", name: "RICOCHETE LASER", icon: "📐", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O disparo do Blaster rebate em até 2 paredes." },
     { id: "relic_infinite_battery", name: "BATERIA INFINITA", icon: "🔋", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Lendária", desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo." },
-    { id: "relic_straight_combo", name: "COMBO EM LINHA RETA", icon: "📏", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult." }
+    { id: "relic_straight_combo", name: "COMBO EM LINHA RETA", icon: "📏", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult." },
+    { id: "relic_slime_meteor", name: "METEORO DE GOSMA", icon: "☄️", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Ao aterrissar do pulo, gera choque de 2.5 blocos atordoando inimigos por 2s. Cooldown do pulo +25%." },
+    { id: "relic_quantum_jump", name: "SALTO QUÂNTICO", icon: "🌌", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular por cima de um perseguidor (Close Call) e aterrissar em pastilha comum restaura 50% da recarga do pulo." },
+    { id: "relic_gravity_boots", name: "BOTAS GRAVITACIONAIS", icon: "🥾", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Permite saltar por cima das paredes do labirinto. Enquanto o pulo recarrega, tem -10% de velocidade." },
+    { id: "relic_slam_dunk", name: "ENTERRADA TRIUNFAL", icon: "🏀", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Enquanto o Slime estiver no ar, qualquer pontuação gerada recebe um multiplicador temporário de x2.0 Mult." },
+    { id: "relic_loan_shark", name: "EMPRÉSTIMO TUBARÃO", icon: "🦈", category: "ECONOMIA & RISCO", rarity: "Incomum", desc: "Concede +15 moedas agora. As próximas 3 lojas cobram taxa de 5 moedas ou custam 1 vida." },
+    { id: "relic_piggy_bank", name: "COFRINHO DE CERÂMICA", icon: "🐷", category: "ECONOMIA & RISCO", rarity: "Comum", desc: "+1 moeda por fase concluída sem usar pulo. Ao sofrer dano, quebra, concede as moedas e é destruído." },
+    { id: "relic_leaky_bag", name: "BOLSA FURADA", icon: "👜", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Reduz o preço da loja em 50%. Perde 1 moeda a cada 8s de fase sem super-pastilha ativa." },
+    { id: "relic_saber_tooth", name: "DENTE DE SABRE", icon: "🦷", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "+10 fichas por pastilha devorada em movimento retilíneo contínuo por mais de 2 segundos." },
+    { id: "relic_tape_measure", name: "FITA MÉTRICA", icon: "📐", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "+0.1 Mult por segundo de movimento sem colidir em paredes (acumula até +3.0 Mult; zera se colidir)." },
+    { id: "relic_unstable_gunpowder", name: "PÓLVORA INSTÁVEL", icon: "🧨", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Eliminar inimigos vulneráveis explode e devora pastilhas normais em raio de 3 blocos. Super-pastilha dura 30% a menos." },
+    { id: "relic_wicked_shadow", name: "SOMBRA PERVERSA", icon: "👥", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Até x1.75 Mult por proximidade de inimigo perigoso pelas costas. Toque nas costas causa dano imediato sem imunidade." },
+    { id: "relic_faustian_bargain", name: "CONTRATO FAUSTO", icon: "📜", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Concede +100.000 pontos no início de cada estágio. A vida máxima fica travada em exatamente 1." },
+    { id: "relic_pure_adrenaline", name: "ADRENALINA PURA", icon: "💉", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Enquanto estiver com apenas 1 vida restante, todas as pastilhas devoradas aplicam x2.0 Mult." }
   ];
 
   // ==========================================================================
   // GERENCIAMENTO DE MODAIS E NAVEGAÇÃO
   // ==========================================================================
   const activeModalsStack = [];
+  const CURRENT_PATCH_VERSION = 'patch_2026_1';
 
   function openModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -137,6 +151,12 @@ window.addEventListener('DOMContentLoaded', () => {
     modal.classList.remove('visible');
     const idx = activeModalsStack.indexOf(modalId);
     if (idx !== -1) activeModalsStack.splice(idx, 1);
+
+    if (modalId === 'modalPatchNotes') {
+      try {
+        localStorage.setItem('munch_last_patch_seen', CURRENT_PATCH_VERSION);
+      } catch (e) { }
+    }
   }
 
   function closeTopModal() {
@@ -164,6 +184,14 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // Botão do Rodapé para Abertura Posterior do Patch Notes
+  const btnOpenPatchNotes = document.getElementById('btnOpenPatchNotes');
+  if (btnOpenPatchNotes) {
+    btnOpenPatchNotes.addEventListener('click', () => {
+      openModal('modalPatchNotes');
+    });
+  }
 
   // ==========================================================================
   // BOTÕES PRINCIPAIS DO MENU E TECLADO
@@ -243,7 +271,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const runData = JSON.parse(activeRunRaw);
         document.getElementById('activeRunAnte').innerText = `NÍVEL ${runData.ante} // ESTÁGIO ${runData.blind}`;
         document.getElementById('activeRunScore').innerText = Math.round(runData.score || 0).toLocaleString();
-        
+
         const relicsContainer = document.getElementById('activeRunRelics');
         relicsContainer.innerHTML = '';
         if (runData.activeRelics && runData.activeRelics.length > 0) {
@@ -256,7 +284,7 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
           relicsContainer.innerHTML = '<span style="font-size:10px; color:#666;">Sem relíquias</span>';
         }
-        
+
         activeRunCard.classList.remove('hidden');
       } catch (err) {
         activeRunCard.classList.add('hidden');
@@ -265,13 +293,46 @@ window.addEventListener('DOMContentLoaded', () => {
       activeRunCard.classList.add('hidden');
     }
 
-    // 2. Atualiza Stakes
+    // 2. Atualiza Stakes e bloqueios
+    const isRedUnlocked = window.MetaProgression ? window.MetaProgression.isStakeUnlocked('red') : (localStorage.getItem('munch_unlocked_red_stake') === 'true');
+    const isGoldUnlocked = window.MetaProgression ? window.MetaProgression.isStakeUnlocked('gold') : (localStorage.getItem('munch_unlocked_gold_stake') === 'true');
+
+    if (selectedStake === 'red' && !isRedUnlocked) {
+      selectedStake = 'white';
+      localStorage.setItem('munch_selected_stake', 'white');
+    }
+    if (selectedStake === 'gold' && !isGoldUnlocked) {
+      selectedStake = 'white';
+      localStorage.setItem('munch_selected_stake', 'white');
+    }
+
     document.querySelectorAll('.stake-card').forEach(card => {
       const stakeType = card.getAttribute('data-stake');
-      if (stakeType === selectedStake) {
-        card.classList.add('selected');
-      } else {
+      const tagEl = card.querySelector('.stake-tag');
+      if (tagEl && !tagEl.getAttribute('data-original-text')) {
+        tagEl.setAttribute('data-original-text', tagEl.innerText);
+      }
+
+      let isLocked = false;
+      if (stakeType === 'red' && !isRedUnlocked) isLocked = true;
+      if (stakeType === 'gold' && !isGoldUnlocked) isLocked = true;
+
+      if (isLocked) {
+        card.classList.add('locked');
         card.classList.remove('selected');
+        if (tagEl) tagEl.innerText = 'BLOQUEADO 🔒';
+        card.setAttribute('title', stakeType === 'red' ? 'Conclua o Nível 8 na Ficha Branca para desbloquear!' : 'Conclua a Ficha Vermelha para desbloquear!');
+      } else {
+        card.classList.remove('locked');
+        if (tagEl && tagEl.getAttribute('data-original-text')) {
+          tagEl.innerText = tagEl.getAttribute('data-original-text');
+        }
+        card.removeAttribute('title');
+        if (stakeType === selectedStake) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
       }
     });
 
@@ -279,15 +340,36 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('chkEndlessMode').checked = endlessMode;
   }
 
+  // Executa atualização inicial
+  refreshPlayModal();
+
   // Evento de Continuar Run
   document.getElementById('btnContinueRun').addEventListener('click', () => {
+    if (window.AudioManager) window.AudioManager.stopMenuMusic();
     window.location.href = 'game.html?resume=true';
   });
 
   // Seleção de Stakes
   document.querySelectorAll('.stake-card').forEach(card => {
     card.addEventListener('click', () => {
-      selectedStake = card.getAttribute('data-stake');
+      const stakeType = card.getAttribute('data-stake');
+      const isRedUnlocked = window.MetaProgression ? window.MetaProgression.isStakeUnlocked('red') : (localStorage.getItem('munch_unlocked_red_stake') === 'true');
+      const isGoldUnlocked = window.MetaProgression ? window.MetaProgression.isStakeUnlocked('gold') : (localStorage.getItem('munch_unlocked_gold_stake') === 'true');
+
+      if (stakeType === 'red' && !isRedUnlocked) {
+        card.classList.add('shake-locked');
+        playLockSound();
+        setTimeout(() => card.classList.remove('shake-locked'), 300);
+        return;
+      }
+      if (stakeType === 'gold' && !isGoldUnlocked) {
+        card.classList.add('shake-locked');
+        playLockSound();
+        setTimeout(() => card.classList.remove('shake-locked'), 300);
+        return;
+      }
+
+      selectedStake = stakeType;
       localStorage.setItem('munch_selected_stake', selectedStake);
       document.querySelectorAll('.stake-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
@@ -302,6 +384,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Botão Iniciar Run
   document.getElementById('btnStartNewRun').addEventListener('click', () => {
+    if (window.AudioManager) window.AudioManager.stopMenuMusic();
     localStorage.setItem('munch_run_setup', JSON.stringify({
       stake: selectedStake,
       endless: endlessMode
@@ -328,61 +411,243 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Efeitos Sonoros Arcade para Bloqueios e Desbloqueios
+  function playLockSound() {
+    try {
+      if (window.AudioManager && window.AudioManager.settings.isMuted) return;
+      const effectiveVol = window.AudioManager ? window.AudioManager.getEffectiveSFXVolume() : 1.0;
+      if (effectiveVol <= 0) return;
+
+      const ctx = window.AudioManager ? window.AudioManager.getAudioContext() : new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.2 * effectiveVol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+      osc.connect(gain);
+      gain.connect(window.AudioManager && window.AudioManager.sfxGainNode ? window.AudioManager.sfxGainNode : ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) { }
+  }
+
+  function playUnlockJingle() {
+    try {
+      if (window.AudioManager && window.AudioManager.settings.isMuted) return;
+      const effectiveVol = window.AudioManager ? window.AudioManager.getEffectiveSFXVolume() : 1.0;
+      if (effectiveVol <= 0) return;
+
+      const ctx = window.AudioManager ? window.AudioManager.getAudioContext() : new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C E G C E G
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08);
+        gain.gain.setValueAtTime(0.18 * effectiveVol, ctx.currentTime + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (i + 1) * 0.08 + 0.1);
+        osc.connect(gain);
+        gain.connect(window.AudioManager && window.AudioManager.sfxGainNode ? window.AudioManager.sfxGainNode : ctx.destination);
+        osc.start(ctx.currentTime + i * 0.08);
+        osc.stop(ctx.currentTime + (i + 1) * 0.08 + 0.12);
+      });
+    } catch (e) { }
+  }
+
+  // Notificações / Toasts de Novos Desbloqueios
+  function displayUnlockToast(unlock) {
+    const container = document.getElementById('unlockToastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'unlock-notification-toast';
+    toast.innerHTML = `
+      <span class="unlock-toast-icon">${unlock.icon || '🏆'}</span>
+      <div class="unlock-toast-content">
+        <span class="unlock-toast-tag">★ NOVO DESBLOQUEIO! ★</span>
+        <span class="unlock-toast-title">${unlock.title || unlock.name}</span>
+        <span class="unlock-toast-desc">${unlock.desc || 'Disponível para seleção no menu!'}</span>
+      </div>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-20px) scale(0.9)';
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 350);
+    }, 6000);
+  }
+
+  function checkPendingUnlocks() {
+    if (!window.MetaProgression) return;
+    const pending = window.MetaProgression.consumePendingUnlocks();
+    if (pending && pending.length > 0) {
+      playUnlockJingle();
+      pending.forEach((u, idx) => {
+        setTimeout(() => displayUnlockToast(u), idx * 450);
+      });
+    }
+  }
+
   function refreshDeckModal() {
+    const metaData = window.MetaProgression ? window.MetaProgression.getData() : null;
+
     // ABA 1: Slimes
+    // Se o slime atualmente selecionado estiver bloqueado, reseta para o clássico
+    if (window.MetaProgression && !window.MetaProgression.isSlimeUnlocked(selectedSlime)) {
+      selectedSlime = 'classic';
+      localStorage.setItem('munch_selected_slime', 'classic');
+      updateMainSlimeCard();
+    }
+
     document.querySelectorAll('.slime-select-card').forEach(card => {
       const slimeVariant = card.getAttribute('data-slime');
       const btn = card.querySelector('.btn-select-slime');
-      if (slimeVariant === selectedSlime) {
-        card.classList.add('selected');
-        if (btn) btn.innerText = 'SELECIONADO';
-      } else {
+      const lockInfo = card.querySelector('.slime-lock-info');
+      const reqText = card.querySelector('.lock-req-text');
+      const progressFill = card.querySelector('.lock-progress-fill');
+      const marksContainer = card.querySelector('.slime-completion-marks');
+
+      const isUnlocked = window.MetaProgression ? window.MetaProgression.isSlimeUnlocked(slimeVariant) : (slimeVariant === 'classic');
+
+      if (!isUnlocked) {
+        card.classList.add('locked');
         card.classList.remove('selected');
-        if (btn) btn.innerText = 'SELECIONAR';
+        if (btn) btn.innerText = 'BLOQUEADO 🔒';
+        if (lockInfo) lockInfo.style.display = 'flex';
+
+        // Atualiza texto do requisito e barra de progresso cumulativo
+        if (reqText && progressFill && metaData) {
+          if (slimeVariant === 'metallic') {
+            const spent = metaData.totalGoldSpent || 0;
+            const pct = Math.min(100, Math.round((spent / 500) * 100));
+            reqText.innerText = `🔒 Gastar 500 Ouros em Lojas (${spent}/500)`;
+            progressFill.style.width = `${pct}%`;
+          } else if (slimeVariant === 'ballistic') {
+            const kills = metaData.totalKills || 0;
+            const pct = Math.min(100, Math.round((kills / 500) * 100));
+            reqText.innerText = `🔒 Eliminar 500 Inimigos (${kills}/500)`;
+            progressFill.style.width = `${pct}%`;
+          } else if (slimeVariant === 'gambler') {
+            const maxMult = metaData.maxMultReached || 1;
+            const pct = Math.min(100, Math.round((maxMult / 30) * 100));
+            reqText.innerText = `🔒 Atingir Mult >= x30 em Jogo (Recorde: x${maxMult})`;
+            progressFill.style.width = `${pct}%`;
+          }
+        }
+      } else {
+        card.classList.remove('locked');
+        if (lockInfo) lockInfo.style.display = 'none';
+        if (slimeVariant === selectedSlime) {
+          card.classList.add('selected');
+          if (btn) btn.innerText = 'SELECIONADO';
+        } else {
+          card.classList.remove('selected');
+          if (btn) btn.innerText = 'SELECIONAR';
+        }
+      }
+
+      // Atualiza Matriz de Conclusão (Completion Marks)
+      if (marksContainer && window.MetaProgression) {
+        const marks = window.MetaProgression.getCompletionMarks(slimeVariant);
+        const whiteChip = marksContainer.querySelector('.mark-chip[data-stake="white"]');
+        const redChip = marksContainer.querySelector('.mark-chip[data-stake="red"]');
+        const goldChip = marksContainer.querySelector('.mark-chip[data-stake="gold"]');
+
+        if (whiteChip) {
+          whiteChip.classList.toggle('active', !!marks.white);
+          whiteChip.classList.toggle('inactive', !marks.white);
+        }
+        if (redChip) {
+          redChip.classList.toggle('active', !!marks.red);
+          redChip.classList.toggle('inactive', !marks.red);
+        }
+        if (goldChip) {
+          goldChip.classList.toggle('active', !!marks.gold);
+          goldChip.classList.toggle('inactive', !marks.gold);
+        }
       }
     });
 
-    // ABA 2: Compêndio
-    const discoveredRaw = localStorage.getItem('munch_discovered_relics') || '[]';
+    // ABA 2: Compêndio / Álbum de Relíquias
     let discoveredIds = [];
-    try { discoveredIds = JSON.parse(discoveredRaw); } catch(e) { discoveredIds = []; }
+    try {
+      const disc1 = JSON.parse(localStorage.getItem('munch_discovered_relics') || '[]');
+      const disc2 = JSON.parse(localStorage.getItem('unlockedRelics') || '[]');
+      discoveredIds = Array.from(new Set([...disc1, ...disc2]));
+    } catch (e) {
+      discoveredIds = [];
+    }
 
     const compendiumGrid = document.getElementById('compendiumGrid');
-    compendiumGrid.innerHTML = '';
+    if (compendiumGrid) {
+      compendiumGrid.innerHTML = '';
+      RELIC_CODEX.forEach(relic => {
+        const isDiscovered = discoveredIds.includes(relic.id);
+        const cardEl = document.createElement('div');
+        const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
 
-    RELIC_CODEX.forEach(relic => {
-      const isDiscovered = discoveredIds.includes(relic.id);
-      const cardEl = document.createElement('div');
-      
-      if (isDiscovered) {
-        cardEl.className = 'compendium-card';
-        cardEl.innerHTML = `
-          <div class="compendium-card-icon">${relic.icon}</div>
-          <div class="compendium-card-name">${relic.name}</div>
-          <div class="compendium-card-rarity ${relic.rarity.toLowerCase()}">${relic.rarity.toUpperCase()}</div>
-          <div class="compendium-card-desc">${relic.desc}</div>
-        `;
-      } else {
-        cardEl.className = 'compendium-card locked';
-        cardEl.innerHTML = `
-          <div class="compendium-card-icon">❓</div>
-          <div class="compendium-card-name">???</div>
-          <div class="compendium-card-rarity">BLOQUEADO</div>
-          <div class="compendium-card-desc">Relíquia ainda não descoberta nesta conta.</div>
-        `;
-      }
-      compendiumGrid.appendChild(cardEl);
-    });
+        if (isDiscovered) {
+          cardEl.className = `compendium-card discovered ${rarityClass}`;
+          cardEl.innerHTML = `
+            <div class="compendium-card-icon">${relic.icon}</div>
+            <div class="compendium-card-name">${relic.name}</div>
+            <div class="compendium-card-rarity ${rarityClass}">${relic.rarity.toUpperCase()}</div>
+            <div class="compendium-card-desc">${relic.desc}</div>
+          `;
+        } else {
+          cardEl.className = 'compendium-card locked';
+          cardEl.innerHTML = `
+            <div class="compendium-card-icon" style="font-size: 11px; font-weight: bold; font-family: 'Press Start 2P', monospace; color: #555;">? ? ?</div>
+            <div class="compendium-card-name" style="letter-spacing: 1px;">DESCONHECIDA</div>
+            <div class="compendium-card-rarity">BLOQUEADA</div>
+            <div class="compendium-card-desc" style="font-style: italic; color: #777;">Encontre esta relíquia em uma partida para registrar</div>
+          `;
+        }
+        compendiumGrid.appendChild(cardEl);
+      });
+    }
 
-    document.getElementById('discoveredRelicsCount').innerText = `${discoveredIds.length} / ${RELIC_CODEX.length}`;
+    const counterEl = document.getElementById('discoveredRelicsCount');
+    if (counterEl) {
+      counterEl.innerText = `${discoveredIds.length} / ${RELIC_CODEX.length}`;
+    }
 
     // ABA 3: Temas
+    if (window.MetaProgression && !window.MetaProgression.isThemeUnlocked(selectedTheme)) {
+      selectedTheme = 'default';
+      localStorage.setItem('munch_crt_theme', 'default');
+      applyTheme('default');
+    }
+
     document.querySelectorAll('.theme-card').forEach(card => {
       const themeName = card.getAttribute('data-theme');
-      if (themeName === selectedTheme) {
-        card.classList.add('selected');
-      } else {
+      const lockBadge = card.querySelector('.theme-lock-badge');
+      const isUnlocked = window.MetaProgression ? window.MetaProgression.isThemeUnlocked(themeName) : true;
+
+      if (!isUnlocked) {
+        card.classList.add('locked');
         card.classList.remove('selected');
+        if (lockBadge) {
+          lockBadge.style.display = 'block';
+          if (themeName === 'gameboy') {
+            lockBadge.innerText = '🔒 Vencer 1 Run (Qualquer Ficha)';
+          } else if (themeName === 'cyberpunk') {
+            lockBadge.innerText = '🔒 Vencer na Ficha Dourada';
+          }
+        }
+      } else {
+        card.classList.remove('locked');
+        if (lockBadge) lockBadge.style.display = 'none';
+        if (themeName === selectedTheme) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
       }
     });
   }
@@ -390,7 +655,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // Evento de Selecionar Slime
   document.querySelectorAll('.slime-select-card').forEach(card => {
     card.addEventListener('click', () => {
-      selectedSlime = card.getAttribute('data-slime');
+      const targetSlime = card.getAttribute('data-slime');
+      if (window.MetaProgression && !window.MetaProgression.isSlimeUnlocked(targetSlime)) {
+        card.classList.add('shake-locked');
+        playLockSound();
+        setTimeout(() => card.classList.remove('shake-locked'), 300);
+        return;
+      }
+      selectedSlime = targetSlime;
       localStorage.setItem('munch_selected_slime', selectedSlime);
       refreshDeckModal();
       updateMainSlimeCard();
@@ -400,7 +672,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // Evento de Selecionar Tema CRT
   document.querySelectorAll('.theme-card').forEach(card => {
     card.addEventListener('click', () => {
-      selectedTheme = card.getAttribute('data-theme');
+      const targetTheme = card.getAttribute('data-theme');
+      if (window.MetaProgression && !window.MetaProgression.isThemeUnlocked(targetTheme)) {
+        card.classList.add('shake-locked');
+        playLockSound();
+        setTimeout(() => card.classList.remove('shake-locked'), 300);
+        return;
+      }
+      selectedTheme = targetTheme;
       localStorage.setItem('munch_crt_theme', selectedTheme);
       applyTheme(selectedTheme);
       refreshDeckModal();
@@ -445,7 +724,7 @@ window.addEventListener('DOMContentLoaded', () => {
       cardBadge.innerHTML = '<span class="pill-value">Padrão</span>';
       cardDesc.innerText = 'Slime inicial balanceado sem habilidades extras.';
     }
-    
+
     // Atualiza cor visual do slime nos SVGs
     const slimeColors = {
       classic: '#a3a3c2',
@@ -453,7 +732,7 @@ window.addEventListener('DOMContentLoaded', () => {
       ballistic: '#ef4444',
       gambler: '#eab308'
     };
-    
+
     const currentColor = slimeColors[selectedSlime] || slimeColors.classic;
     const svgMain = document.querySelector('#mainSlimeSvg rect');
     const svgFooter = document.querySelector('.slime-character rect');
@@ -494,7 +773,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Tabela de Histórico Recente
     const historyRaw = localStorage.getItem('munch_run_history') || '[]';
     let history = [];
-    try { history = JSON.parse(historyRaw); } catch(e) { history = []; }
+    try { history = JSON.parse(historyRaw); } catch (e) { history = []; }
 
     const tbody = document.getElementById('recentRunsTableBody');
     tbody.innerHTML = '';
@@ -513,10 +792,12 @@ window.addEventListener('DOMContentLoaded', () => {
         if (run.stake === 'red') stakeBadge = '<span style="color:#f87171; font-weight:bold;">VERMELHA</span>';
         if (run.stake === 'gold') stakeBadge = '<span style="color:#FFE600; font-weight:bold;">DOURADA</span>';
 
+        const victoryBadge = run.cleared ? '<span class="history-cleared-badge" title="Vitória! Run Concluída">★ VENCEU</span>' : '';
+
         let relicsHtml = '<div class="history-relics-mini-list">';
         if (run.relics && run.relics.length > 0) {
           run.relics.forEach(r => {
-            relicsHtml += `<div class="history-relic-icon">${r.icon || '🃏'}</div>`;
+            relicsHtml += `<div class="history-relic-icon" title="${r.name || ''}">${r.icon || '🃏'}</div>`;
           });
         } else {
           relicsHtml += '<span style="color:#555; font-size:10px;">Sem relíquias</span>';
@@ -525,8 +806,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         tr.innerHTML = `
           <td>${run.date || 'Desconhecida'}</td>
-          <td>${stakeBadge}</td>
-          <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--cyan-primary);">NÍVEL ${run.ante || 1}</td>
+          <td>${stakeBadge}${victoryBadge}</td>
+          <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--cyan-primary);">NÍVEL ${run.ante || 1} ${run.cleared ? '<span style="color:#FFE600; font-size:8px;" title="Vitória Conquistada">★</span>' : ''}</td>
           <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--yellow-primary);">${Math.round(run.score || 0).toLocaleString()}</td>
           <td>${relicsHtml}</td>
         `;
@@ -561,9 +842,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (index === 1) medal = '🥈 #2';
       if (index === 2) medal = '🥉 #3';
 
+      const victoryStar = item.cleared ? '<span style="color:#FFE600; font-size:9px; margin-left:4px;" title="Vitória Conquistada!">★</span>' : '';
+
       tr.innerHTML = `
         <td style="font-family:'Press Start 2P', monospace; font-size:8px; color:var(--yellow-primary);">${medal}</td>
-        <td style="font-weight:bold; color:#fff;">${item.name || 'ANÔNIMO'}</td>
+        <td style="font-weight:bold; color:#fff;">${item.name || 'ANÔNIMO'}${victoryStar}</td>
         <td style="font-family:'Press Start 2P', monospace; font-size:8px; color:var(--cyan-primary);">NÍVEL ${item.ante || 1}</td>
         <td style="font-family:'Press Start 2P', monospace; font-size:9px; color:var(--yellow-primary);">${Math.round(item.score || 0).toLocaleString()}</td>
         <td style="color:#888; font-size:10px;">${item.date || '-'}</td>
@@ -594,18 +877,20 @@ window.addEventListener('DOMContentLoaded', () => {
   // FUNCIONALIDADE 4: MODAL DE CONFIGURAÇÕES & ACESSIBILIDADE
   // ==========================================================================
   function refreshOptionsModal() {
-    const musicVol = parseInt(localStorage.getItem('munch_audio_music')) ?? 80;
-    const sfxVol = parseInt(localStorage.getItem('munch_audio_sfx')) ?? 100;
+    const audio = window.AudioManager ? window.AudioManager.settings : { musicVolume: 10, sfxVolume: 100, isMuted: false };
     const scanlines = localStorage.getItem('munch_option_scanlines') !== 'false';
     const shake = localStorage.getItem('munch_option_shake') || '100';
     const reduceFlashes = localStorage.getItem('munch_option_reduce_flashes') === 'true';
     const controls = localStorage.getItem('munch_controls') || 'wasd';
 
-    document.getElementById('sliderMusicVol').value = musicVol;
-    document.getElementById('lblMusicVol').innerText = `${musicVol}%`;
+    const chkMasterMute = document.getElementById('chkMasterMute');
+    if (chkMasterMute) chkMasterMute.checked = audio.isMuted;
 
-    document.getElementById('sliderSfxVol').value = sfxVol;
-    document.getElementById('lblSfxVol').innerText = `${sfxVol}%`;
+    document.getElementById('sliderMusicVol').value = audio.musicVolume;
+    document.getElementById('lblMusicVol').innerText = `${audio.musicVolume}%`;
+
+    document.getElementById('sliderSfxVol').value = audio.sfxVolume;
+    document.getElementById('lblSfxVol').innerText = `${audio.sfxVolume}%`;
 
     document.getElementById('chkScanlines').checked = scanlines;
     document.getElementById('selScreenShake').value = shake;
@@ -618,20 +903,71 @@ window.addEventListener('DOMContentLoaded', () => {
         btn.classList.remove('active');
       }
     });
+
+    if (window.AudioManager) {
+      window.AudioManager.updateUI();
+    }
+  }
+
+  // Master Mute Toggle
+  const chkMasterMute = document.getElementById('chkMasterMute');
+  if (chkMasterMute) {
+    chkMasterMute.addEventListener('change', (e) => {
+      if (window.AudioManager) {
+        window.AudioManager.setMasterMute(e.target.checked, true);
+      }
+    });
   }
 
   // Audio Sliders
   document.getElementById('sliderMusicVol').addEventListener('input', (e) => {
-    const val = e.target.value;
+    const val = parseInt(e.target.value) || 0;
     document.getElementById('lblMusicVol').innerText = `${val}%`;
-    localStorage.setItem('munch_audio_music', val);
+    if (window.AudioManager) {
+      window.AudioManager.setMusicVolume(val);
+    }
   });
 
   document.getElementById('sliderSfxVol').addEventListener('input', (e) => {
-    const val = e.target.value;
+    const val = parseInt(e.target.value) || 0;
     document.getElementById('lblSfxVol').innerText = `${val}%`;
-    localStorage.setItem('munch_audio_sfx', val);
+    if (window.AudioManager) {
+      window.AudioManager.setSfxVolume(val);
+    }
   });
+
+  // Pré-visualização Sonora do SFX ao soltar ou alterar o slider
+  document.getElementById('sliderSfxVol').addEventListener('change', () => {
+    if (window.AudioManager) {
+      window.AudioManager.playSFXPreview();
+    }
+  });
+
+  // Botão Restaurar Padrões
+  const btnRestoreDefaults = document.getElementById('btnRestoreDefaults');
+  if (btnRestoreDefaults) {
+    btnRestoreDefaults.addEventListener('click', () => {
+      // 1. Áudio
+      if (window.AudioManager) {
+        window.AudioManager.setMasterMute(false, false);
+        window.AudioManager.setMusicVolume(10);
+        window.AudioManager.setSfxVolume(100);
+      }
+
+      // 2. Gráficos & Acessibilidade
+      localStorage.setItem('munch_option_scanlines', 'true');
+      localStorage.setItem('munch_option_shake', '100');
+      localStorage.setItem('munch_option_reduce_flashes', 'false');
+      localStorage.setItem('munch_controls', 'wasd');
+
+      refreshOptionsModal();
+
+      // Feedback sonoro da restauração
+      if (window.AudioManager) {
+        window.AudioManager.playSFXPreview();
+      }
+    });
+  }
 
   // Graphics & Access Toggles
   document.getElementById('chkScanlines').addEventListener('change', (e) => {
@@ -674,7 +1010,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     closeModal('modalConfirmReset');
     closeModal('modalOptions');
-    
+
     applyTheme('default');
     updateMainSlimeCard();
     refreshStatsModal();
@@ -833,5 +1169,21 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   setInterval(spawnDustBurst, 600);
+
+  // Inicialização da Meta-Progressão no Menu
+  refreshDeckModal();
+  checkPendingUnlocks();
+
+  // Verificação e exibição automática do Patch Notes (Primeira vez nesta versão)
+  try {
+    const lastSeenPatch = localStorage.getItem('munch_last_patch_seen');
+    if (lastSeenPatch !== CURRENT_PATCH_VERSION) {
+      setTimeout(() => {
+        if (activeModalsStack.length === 0) {
+          openModal('modalPatchNotes');
+        }
+      }, 400);
+    }
+  } catch (e) { }
 
 });

@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       }
       body = body || {};
 
-      const { name, score, ante, stake } = body;
+      const { name, score, ante, stake, cleared } = body;
 
       if (!name || typeof score !== 'number') {
         return res.status(400).json({ error: 'Dados inválidos' });
@@ -51,6 +51,7 @@ export default async function handler(req, res) {
         score: Math.round(score),
         ante: ante || 1,
         stake: cleanStake,
+        cleared: !!cleared,
         date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
         timestamp: Date.now()
       };
