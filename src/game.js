@@ -177,15 +177,9 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
       desc: "+1 Carga Máxima de Pulo. Permite saltar paredes e inimigos.",
-      icon: "🦘",
-      apply: (game) => {
-        game.vaultMaxCharges += 1;
-        game.vaultCharges = game.vaultMaxCharges;
-      },
-      revert: (game) => {
-        game.vaultMaxCharges = Math.max(0, game.vaultMaxCharges - 1);
-        game.vaultCharges = Math.min(game.vaultCharges, game.vaultMaxCharges);
-      }
+      icon: "assets/icons/relic_jump_module.svg",
+      apply: (game) => { game.vaultMaxCharges += 1; game.vaultCharges = game.vaultMaxCharges; },
+      revert: (game) => { game.vaultMaxCharges = Math.max(0, game.vaultMaxCharges - 1); game.vaultCharges = Math.min(game.vaultCharges, game.vaultMaxCharges); }
     },
     {
       id: "relic_blaster_core",
@@ -193,15 +187,9 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
       desc: "+1 Carga Máxima de Disparo. Atordoa inimigos em linha reta.",
-      icon: "🔫",
-      apply: (game) => {
-        game.blasterMaxCharges += 1;
-        game.blasterCharges = game.blasterMaxCharges;
-      },
-      revert: (game) => {
-        game.blasterMaxCharges = Math.max(0, game.blasterMaxCharges - 1);
-        game.blasterCharges = Math.min(game.blasterCharges, game.blasterMaxCharges);
-      }
+      icon: "assets/icons/relic_blaster_core.svg",
+      apply: (game) => { game.blasterMaxCharges += 1; game.blasterCharges = game.blasterMaxCharges; },
+      revert: (game) => { game.blasterMaxCharges = Math.max(0, game.blasterMaxCharges - 1); game.blasterCharges = Math.min(game.blasterCharges, game.blasterMaxCharges); }
     },
     {
       id: "relic_overclock",
@@ -209,13 +197,9 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Incomum",
       desc: "Reduz o tempo de recarga de todas as habilidades em 30%.",
-      icon: "⚡",
-      apply: (game) => {
-        game.cooldownMultiplier *= 0.7;
-      },
-      revert: (game) => {
-        game.cooldownMultiplier /= 0.7;
-      }
+      icon: "assets/icons/relic_overclock.svg",
+      apply: (game) => { game.cooldownMultiplier *= 0.7; },
+      revert: (game) => { game.cooldownMultiplier /= 0.7; }
     },
     {
       id: "relic_backup_battery",
@@ -223,15 +207,9 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Comum",
       desc: "+1 Vida Máxima e recupera todas as vidas perdidas.",
-      icon: "❤️",
-      apply: (game) => {
-        game.maxLives = (game.maxLives || 2) + 1;
-        game.lives = game.maxLives;
-      },
-      revert: (game) => {
-        game.maxLives = Math.max(1, game.maxLives - 1);
-        game.lives = Math.min(game.lives, game.maxLives);
-      }
+      icon: "assets/icons/relic_backup_battery.svg",
+      apply: (game) => { game.maxLives = (game.maxLives || 2) + 1; game.lives = game.maxLives; },
+      revert: (game) => { game.maxLives = Math.max(1, game.maxLives - 1); game.lives = Math.min(game.lives, game.maxLives); }
     },
     {
       id: "relic_steel_coating",
@@ -239,13 +217,9 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Comum",
       desc: "Pastilhas normais concedem +20 Fichas base.",
-      icon: "🛡️",
-      apply: (game) => {
-        game.pelletChipBonus += 20;
-      },
-      revert: (game) => {
-        game.pelletChipBonus -= 20;
-      }
+      icon: "assets/icons/relic_steel_coating.svg",
+      apply: (game) => { game.pelletChipBonus += 20; },
+      revert: (game) => { game.pelletChipBonus -= 20; }
     },
     {
       id: "relic_sharp_drift",
@@ -253,7 +227,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
       desc: "Mudar de direção na quina exata concede +2 Mult na rodada.",
-      icon: "🌀",
+      icon: "assets/icons/relic_sharp_drift.svg",
       apply: (game) => { },
       revert: (game) => { }
     },
@@ -263,13 +237,9 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
       desc: "Destruir um inimigo com Blaster concede +5 Mult permanente no round.",
-      icon: "🔥",
-      apply: (game) => {
-        game.killMultBonus += 5;
-      },
-      revert: (game) => {
-        game.killMultBonus -= 5;
-      }
+      icon: "assets/icons/relic_bounty_hunter.svg",
+      apply: (game) => { game.killMultBonus += 5; },
+      revert: (game) => { game.killMultBonus -= 5; }
     },
     {
       id: "relic_gold_alchemist",
@@ -277,13 +247,9 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Rara",
       desc: "Moedas especiais concedem x1.75 Mult ao serem consumidas.",
-      icon: "🪙",
-      apply: (game) => {
-        game.goldenMultFactor *= 1.75;
-      },
-      revert: (game) => {
-        game.goldenMultFactor /= 1.75;
-      }
+      icon: "assets/icons/relic_gold_alchemist.svg",
+      apply: (game) => { game.goldenMultFactor *= 1.75; },
+      revert: (game) => { game.goldenMultFactor /= 1.75; }
     },
     {
       id: "relic_slime_puddle",
@@ -291,13 +257,9 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Incomum",
       desc: "Pular deixa poças de lodo que reduzem velocidade inimiga em 50% por 4s.",
-      icon: "🦠",
-      apply: (game) => {
-        game.hasStickyJump = true;
-      },
-      revert: (game) => {
-        game.hasStickyJump = game.activeRelics.some(r => r.id === 'relic_slime_puddle');
-      }
+      icon: "assets/icons/relic_slime_puddle.svg",
+      apply: (game) => { game.hasStickyJump = true; },
+      revert: (game) => { game.hasStickyJump = game.activeRelics.some(r => r.id === 'relic_slime_puddle'); }
     },
     {
       id: "relic_railgun",
@@ -305,7 +267,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Rara",
       desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes.",
-      icon: "☄️",
+      icon: "assets/icons/relic_railgun.svg",
       apply: (game) => { },
       revert: (game) => { }
     },
@@ -315,7 +277,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Rara",
       desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime.",
-      icon: "🧲",
+      icon: "assets/icons/relic_magnetic_pull.svg",
       apply: (game) => { },
       revert: (game) => { }
     },
@@ -325,7 +287,7 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Incomum",
       desc: "Aumenta a velocidade base de movimento do Slime em +10%.",
-      icon: "🛼",
+      icon: "assets/icons/relic_mercury_skates.svg",
       apply: (game) => { game.baseSpeedMult = (game.baseSpeedMult || 1) + 0.10; },
       revert: (game) => { game.baseSpeedMult = Math.max(1, (game.baseSpeedMult || 1.10) - 0.10); }
     },
@@ -335,7 +297,7 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Rara",
       desc: "Concede +20% de velocidade por 3s após abater um inimigo ou saltar.",
-      icon: "💉",
+      icon: "assets/icons/relic_adrenaline.svg",
       apply: (game) => { game.hasAdrenaline = true; },
       revert: (game) => { game.hasAdrenaline = false; }
     },
@@ -345,7 +307,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Incomum",
       desc: "O Pulo passa a atravessar 3 blocos de distância e recarrega 2s mais rápido.",
-      icon: "🌌",
+      icon: "assets/icons/relic_quantum_leap.svg",
       apply: (game) => { game.hasQuantumLeap = true; game.vaultMaxCooldown -= 2000; },
       revert: (game) => { game.hasQuantumLeap = false; game.vaultMaxCooldown += 2000; }
     },
@@ -355,7 +317,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
       desc: "Ao saltar, converte a pastilha mais próxima em uma Moeda Dourada.",
-      icon: "✨",
+      icon: "assets/icons/relic_midas_touch.svg",
       apply: (game) => { game.hasMidasTouch = true; },
       revert: (game) => { game.hasMidasTouch = false; }
     },
@@ -365,7 +327,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Rara",
       desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas.",
-      icon: "💳",
+      icon: "assets/icons/relic_black_card.svg",
       apply: (game) => { game.blackCardActive = true; },
       revert: (game) => { game.blackCardActive = false; }
     },
@@ -375,7 +337,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Rara",
       desc: "O disparo do Blaster rebate em até 2 paredes.",
-      icon: "📐",
+      icon: "assets/icons/relic_laser_ricochet.svg",
       apply: (game) => { game.laserRicochet = true; },
       revert: (game) => { game.laserRicochet = false; }
     },
@@ -385,7 +347,7 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Lendária",
       desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo.",
-      icon: "🔋",
+      icon: "assets/icons/relic_infinite_battery.svg",
       apply: (game) => { game.infiniteBattery = true; },
       revert: (game) => { game.infiniteBattery = false; }
     },
@@ -395,7 +357,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Comum",
       desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult.",
-      icon: "📏",
+      icon: "assets/icons/relic_straight_combo.svg",
       apply: (game) => { game.straightLineCombo = true; },
       revert: (game) => { game.straightLineCombo = false; }
     },
@@ -405,7 +367,7 @@
       category: "AÇÃO & SOBREVIVÊNCIA",
       rarity: "Incomum",
       desc: "Ao aterrissar do pulo, gera choque de 2.5 blocos atordoando inimigos por 2s. Cooldown do pulo +25%.",
-      icon: "☄️",
+      icon: "assets/icons/relic_slime_meteor.svg",
       apply: (game) => { game.hasSlimeMeteor = true; game.vaultMaxCooldown *= 1.25; },
       revert: (game) => { game.hasSlimeMeteor = false; game.vaultMaxCooldown /= 1.25; }
     },
@@ -415,7 +377,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Incomum",
       desc: "Pular por cima de um perseguidor (Close Call) e aterrissar em pastilha comum restaura 50% da recarga do pulo.",
-      icon: "🌌",
+      icon: "assets/icons/relic_quantum_jump.svg",
       apply: (game) => { game.hasQuantumJump = true; },
       revert: (game) => { game.hasQuantumJump = false; }
     },
@@ -425,7 +387,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Rara",
       desc: "Permite saltar por cima das paredes do labirinto. Enquanto o pulo recarrega, tem -10% de velocidade.",
-      icon: "🥾",
+      icon: "assets/icons/relic_gravity_boots.svg",
       apply: (game) => { game.hasGravityBoots = true; },
       revert: (game) => { game.hasGravityBoots = false; }
     },
@@ -435,7 +397,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Comum",
       desc: "Enquanto o Slime estiver no ar, qualquer pontuação gerada recebe um multiplicador temporário de x2.0 Mult.",
-      icon: "🏀",
+      icon: "assets/icons/relic_slam_dunk.svg",
       apply: (game) => { game.hasSlamDunk = true; },
       revert: (game) => { game.hasSlamDunk = false; }
     },
@@ -445,7 +407,7 @@
       category: "ECONOMIA & RISCO",
       rarity: "Incomum",
       desc: "Concede +15 moedas agora. As próximas 3 lojas cobram taxa de 5 moedas ou custam 1 vida.",
-      icon: "🦈",
+      icon: "assets/icons/relic_loan_shark.svg",
       apply: (game) => {
         game.hasLoanShark = true;
         game.gold += 15;
@@ -460,7 +422,7 @@
       category: "ECONOMIA & RISCO",
       rarity: "Comum",
       desc: "+1 moeda por fase concluída sem usar pulo. Ao sofrer dano, quebra, concede as moedas e é destruído.",
-      icon: "🐷",
+      icon: "assets/icons/relic_piggy_bank.svg",
       apply: (game) => { game.hasPiggyBank = true; game.piggyBankCoins = 0; },
       revert: (game) => { game.hasPiggyBank = false; }
     },
@@ -470,7 +432,7 @@
       category: "ECONOMIA & RISCO",
       rarity: "Rara",
       desc: "Reduz o preço da loja em 50%. Perde 1 moeda a cada 8s de fase sem super-pastilha ativa.",
-      icon: "👜",
+      icon: "assets/icons/relic_leaky_bag.svg",
       apply: (game) => { game.hasLeakyBag = true; game.leakyBagTimer = 0; },
       revert: (game) => { game.hasLeakyBag = false; }
     },
@@ -480,7 +442,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Comum",
       desc: "+10 fichas por pastilha devorada em movimento retilíneo contínuo por mais de 2 segundos.",
-      icon: "🦷",
+      icon: "assets/icons/relic_saber_tooth.svg",
       apply: (game) => { game.hasSaberTooth = true; },
       revert: (game) => { game.hasSaberTooth = false; }
     },
@@ -490,7 +452,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
       desc: "+0.1 Mult por segundo de movimento sem colidir em paredes (acumula até +3.0 Mult; zera se colidir).",
-      icon: "📐",
+      icon: "assets/icons/relic_tape_measure.svg",
       apply: (game) => { game.hasTapeMeasure = true; game.tapeMeasureBonus = 0; game.tapeMeasureTimer = 0; },
       revert: (game) => { game.hasTapeMeasure = false; game.tapeMeasureBonus = 0; }
     },
@@ -500,7 +462,7 @@
       category: "QUEBRA DE REGRAS",
       rarity: "Incomum",
       desc: "Eliminar inimigos vulneráveis explode e devora pastilhas normais em raio de 3 blocos. Super-pastilha dura 30% a menos.",
-      icon: "🧨",
+      icon: "assets/icons/relic_unstable_gunpowder.svg",
       apply: (game) => { game.hasUnstableGunpowder = true; },
       revert: (game) => { game.hasUnstableGunpowder = false; }
     },
@@ -510,7 +472,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Incomum",
       desc: "Até x1.75 Mult por proximidade de inimigo perigoso pelas costas. Toque nas costas causa dano imediato sem imunidade.",
-      icon: "👥",
+      icon: "assets/icons/relic_wicked_shadow.svg",
       apply: (game) => { game.hasWickedShadow = true; },
       revert: (game) => { game.hasWickedShadow = false; }
     },
@@ -520,7 +482,7 @@
       category: "ECONOMIA & RISCO",
       rarity: "Rara",
       desc: "Concede +100.000 pontos no início de cada estágio. A vida máxima fica travada em exatamente 1.",
-      icon: "📜",
+      icon: "assets/icons/relic_faustian_bargain.svg",
       apply: (game) => {
         game.hasFaustianBargain = true;
         game.savedMaxLives = game.maxLives || 2;
@@ -538,7 +500,7 @@
       category: "MULTIPLICADORES & PONTUAÇÃO",
       rarity: "Rara",
       desc: "Enquanto estiver com apenas 1 vida restante, todas as pastilhas devoradas aplicam x2.0 Mult.",
-      icon: "💉",
+      icon: "assets/icons/relic_pure_adrenaline.svg",
       apply: (game) => { game.hasPureAdrenaline = true; },
       revert: (game) => { game.hasPureAdrenaline = false; }
     }
@@ -1696,7 +1658,7 @@
 
           slot.className = `relic-badge occupied ${rarityClass}${isSilenced ? ' silenced' : ''}`;
           slot.innerHTML = `
-            <span class="relic-icon-display">${card.icon}</span>
+            <span class="relic-icon-display">${this.renderIcon(card.icon, 'tray-size')}</span>
             <div class="relic-tooltip">
               <div class="tooltip-rarity ${rarityClass}">${card.rarity.toUpperCase()}${isSilenced ? ' [SILENCIADA]' : ''}</div>
               <div class="tooltip-name">${card.name}</div>
@@ -2175,36 +2137,46 @@
       }, 600);
     }
 
+    renderIcon(iconValue, className = '') {
+      if (!iconValue) return '';
+      if (typeof iconValue === 'string' && (iconValue.endsWith('.svg') || iconValue.includes('/'))) {
+        return `<img src="${iconValue}" class="relic-svg-icon ${className}" alt="" draggable="false" />`;
+      }
+      return `<span class="relic-emoji-icon ${className}">${iconValue}</span>`;
+    }
+
     createRelicCardHTML(card, isReplacementOption = false) {
       let rarityText = 'COMMON';
       if (card.rarity === 'Incomum') rarityText = 'UNCOMMON';
       else if (card.rarity === 'Rara') rarityText = 'RARE';
+      else if (card.rarity === 'Lendária') rarityText = 'LEGENDARY';
 
       let categoryText = 'ARSENAL';
       if (card.category === 'MULTIPLICADORES & PONTUAÇÃO') categoryText = 'MULTIPLIER';
       else if (card.category === 'QUEBRA DE REGRAS') categoryText = 'GAME BREAKER';
       else if (card.category === 'AÇÃO & SOBREVIVÊNCIA') categoryText = 'ARSENAL';
+      else if (card.category === 'ECONOMIA & RISCO') categoryText = 'ECONOMY';
       else if (card.category) categoryText = card.category;
 
       let statBadgeHtml = '';
       if (card.id === 'relic_jump_module') {
-        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+1</span> Carga de Pulo</div>`;
+        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">+1</span> Carga de Pulo</div>`;
       } else if (card.id === 'relic_blaster_core') {
-        statBadgeHtml = `<div class="card-stat-pill orange"><span class="pill-value">+1</span> Disparo</div>`;
+        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">+1</span> Disparo</div>`;
       } else if (card.id === 'relic_overclock') {
-        statBadgeHtml = `<div class="card-stat-pill cyan"><span class="pill-value">-30%</span> Cooldown</div>`;
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">-30%</span> Cooldown</div>`;
       } else if (card.id === 'relic_backup_battery') {
-        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+1</span> Vida Max</div>`;
+        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">+1</span> Vida Max</div>`;
       } else if (card.id === 'relic_steel_coating') {
-        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+20</span> Fichas Base</div>`;
+        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">+20</span> Fichas Base</div>`;
       } else if (card.id === 'relic_sharp_drift') {
-        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+2</span> Mult Drift</div>`;
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+2</span> Mult Drift</div>`;
       } else if (card.id === 'relic_bounty_hunter') {
-        statBadgeHtml = `<div class="card-stat-pill red"><span class="pill-value">+5</span> Mult Mult</div>`;
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">+5</span> Mult Mult</div>`;
       } else if (card.id === 'relic_gold_alchemist') {
         statBadgeHtml = `<div class="card-stat-pill gold"><span class="pill-value">x1.75</span> Mult Ouro</div>`;
       } else if (card.id === 'relic_slime_puddle') {
-        statBadgeHtml = `<div class="card-stat-pill teal"><span class="pill-value">-50%</span> Vel. Inimigo</div>`;
+        statBadgeHtml = `<div class="card-stat-pill blue"><span class="pill-value">-50%</span> Vel. Inimigo</div>`;
       } else if (card.id === 'relic_railgun') {
         statBadgeHtml = `<div class="card-stat-pill gold"><span class="pill-value">PERF</span> Laser Total</div>`;
       } else if (card.id === 'relic_magnetic_pull') {
@@ -2214,26 +2186,28 @@
       const formattedDesc = this.formatCardDesc(card.desc);
 
       return `
-        <div class="relic-card-header">
-          <div class="relic-card-pill">[ <span class="pill-rarity">${rarityText}</span> // <span class="pill-category">${categoryText}</span> ]</div>
+    <div class="relic-card-inner">
+      <div class="relic-card-header">
+        <div class="relic-card-pill">[ <span class="pill-rarity">${rarityText}</span> // <span class="pill-category">${categoryText}</span> ]</div>
+      </div>
+      <div class="relic-card-icon-container">
+        <div class="relic-card-icon-ring">
+          <div class="relic-card-icon">${this.renderIcon(card.icon, 'card-size')}</div>
         </div>
-        <div class="relic-card-icon-container">
-          <div class="relic-card-icon-ring">
-            <div class="relic-card-icon">${card.icon}</div>
-          </div>
-        </div>
-        <div class="relic-card-name">${card.name}</div>
-        <div class="relic-card-desc-box">
-          ${statBadgeHtml ? `<div class="card-stat-badge-wrapper">${statBadgeHtml}</div>` : ''}
-          <div class="relic-card-desc-text">${formattedDesc}</div>
-        </div>
-        ${!isReplacementOption ? (() => {
+      </div>
+      <div class="relic-card-name">${card.name}</div>
+      <div class="relic-card-desc-box">
+        ${statBadgeHtml ? `<div class="card-stat-badge-wrapper">${statBadgeHtml}</div>` : ''}
+        <div class="relic-card-desc-text">${formattedDesc}</div>
+      </div>
+      ${!isReplacementOption ? (() => {
           const price = this.getCardPrice(card);
           const canAfford = this.gold >= price;
           return `<div class="card-price-tag ${canAfford ? 'affordable' : 'unaffordable'}">🪙 $${price} OUROS</div>`;
         })() : ''}
-        ${isReplacementOption ? `<div class="btn-replace-action">SUBSTITUIR</div>` : ''}
-      `;
+      ${isReplacementOption ? `<div class="btn-replace-action">SUBSTITUIR</div>` : ''}
+    </div>
+  `;
     }
 
     getCardPrice(card) {
@@ -2593,7 +2567,7 @@
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 0.3);
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     showStageGoalAlert(text) {
@@ -2628,7 +2602,7 @@
       toast.style.borderColor = color;
       toast.style.boxShadow = `0 0 15px ${color}55`;
       toast.innerHTML = `
-        <span class="toast-icon">${icon}</span>
+        <span class="toast-icon">${this.renderIcon(icon, 'toast-size')}</span>
         <div class="toast-body">
           <div class="toast-title" style="color: ${color};">${title}</div>
           ${desc ? `<div class="toast-desc">${desc}</div>` : ''}
@@ -2858,7 +2832,7 @@
             const item = document.createElement('div');
             const rarity = (r.rarity || 'comum').toLowerCase();
             item.className = `victory-relic-item rarity-${rarity}`;
-            item.innerHTML = `<span class="relic-item-icon">${r.icon || '🃏'}</span> <span class="relic-item-name">${r.name}</span>`;
+            item.innerHTML = `<span class="relic-item-icon">${this.renderIcon(r.icon, 'mini-size')}</span> <span class="relic-item-name">${r.name}</span>`;
             relicsContainer.appendChild(item);
           });
         } else {
@@ -2994,7 +2968,7 @@
             const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
             rItem.className = `relic-mini-badge ${rarityClass}`;
             rItem.innerHTML = `
-              <span class="mini-icon">${relic.icon}</span>
+              <span class="mini-icon">${this.renderIcon(relic.icon, 'mini-size')}</span>
               <span class="mini-name">${relic.name}</span>
             `;
             relicsListEl.appendChild(rItem);

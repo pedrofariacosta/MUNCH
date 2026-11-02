@@ -90,38 +90,38 @@ window.addEventListener('DOMContentLoaded', () => {
   // BASE DE DADOS DO COMPÊNDIO DE RELÍQUIAS (MATCHING CARD_POOL)
   // ==========================================================================
   const RELIC_CODEX = [
-    { id: "relic_jump_module", name: "MOLA HIDRÁULICA", icon: "🦘", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Pulo. Permite saltar paredes e inimigos." },
-    { id: "relic_blaster_core", name: "CANHÃO DE PLASMA", icon: "🔫", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Disparo. Atordoa inimigos em linha reta." },
-    { id: "relic_overclock", name: "OVERCLOCK DE SISTEMA", icon: "⚡", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Reduz o tempo de recarga de todas as habilidades em 30%." },
-    { id: "relic_backup_battery", name: "BATERIA RESERVA", icon: "❤️", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Vida Máxima e recupera todas as vidas perdidas." },
-    { id: "relic_steel_coating", name: "REVESTIMENTO DE AÇO", icon: "🛡️", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Pastilhas normais concedem +20 Fichas base." },
-    { id: "relic_sharp_drift", name: "DRIFT PERFEITO", icon: "🌀", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Mudar de direção na quina exata concede +2 Mult na rodada." },
-    { id: "relic_bounty_hunter", name: "CAÇADOR DE NAIPES", icon: "🔥", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Destruir um inimigo com Blaster concede +5 Mult permanente no round." },
-    { id: "relic_gold_alchemist", name: "ALQUIMIA DOURADA", icon: "🪙", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas especiais concedem x1.75 Mult ao serem consumidas." },
-    { id: "relic_slime_puddle", name: "LODO VISCOSO", icon: "🦠", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular deixa poças de lodo que reduzem velocidade inimiga em 50% por 4s." },
-    { id: "relic_railgun", name: "TIRO PERFURANTE", icon: "☄️", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes." },
-    { id: "relic_magnetic_pull", name: "VÁCUO MAGNÉTICO", icon: "🧲", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime." },
-    { id: "relic_mercury_skates", name: "PATINS DE MERCÚRIO", icon: "🛼", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Aumenta a velocidade base de movimento do Slime em +10%." },
-    { id: "relic_adrenaline", name: "INJEÇÃO DE ADRENALINA", icon: "💉", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Rara", desc: "Concede +20% de velocidade por 3s após abater um inimigo ou saltar." },
-    { id: "relic_quantum_leap", name: "SALTO QUÂNTICO", icon: "🌌", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "O Pulo passa a atravessar 3 blocos de distância e recarrega 2s mais rápido." },
-    { id: "relic_midas_touch", name: "TOQUE DE MIDAS", icon: "✨", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Ao saltar, converte a pastilha mais próxima em uma Moeda Dourada." },
-    { id: "relic_black_card", name: "CARTÃO BLACK", icon: "💳", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas." },
-    { id: "relic_laser_ricochet", name: "RICOCHETE LASER", icon: "📐", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O disparo do Blaster rebate em até 2 paredes." },
-    { id: "relic_infinite_battery", name: "BATERIA INFINITA", icon: "🔋", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Lendária", desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo." },
-    { id: "relic_straight_combo", name: "COMBO EM LINHA RETA", icon: "📏", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult." },
-    { id: "relic_slime_meteor", name: "METEORO DE GOSMA", icon: "☄️", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Ao aterrissar do pulo, gera choque de 2.5 blocos atordoando inimigos por 2s. Cooldown do pulo +25%." },
-    { id: "relic_quantum_jump", name: "SALTO QUÂNTICO", icon: "🌌", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular por cima de um perseguidor (Close Call) e aterrissar em pastilha comum restaura 50% da recarga do pulo." },
-    { id: "relic_gravity_boots", name: "BOTAS GRAVITACIONAIS", icon: "🥾", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Permite saltar por cima das paredes do labirinto. Enquanto o pulo recarrega, tem -10% de velocidade." },
-    { id: "relic_slam_dunk", name: "ENTERRADA TRIUNFAL", icon: "🏀", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Enquanto o Slime estiver no ar, qualquer pontuação gerada recebe um multiplicador temporário de x2.0 Mult." },
-    { id: "relic_loan_shark", name: "EMPRÉSTIMO TUBARÃO", icon: "🦈", category: "ECONOMIA & RISCO", rarity: "Incomum", desc: "Concede +15 moedas agora. As próximas 3 lojas cobram taxa de 5 moedas ou custam 1 vida." },
-    { id: "relic_piggy_bank", name: "COFRINHO DE CERÂMICA", icon: "🐷", category: "ECONOMIA & RISCO", rarity: "Comum", desc: "+1 moeda por fase concluída sem usar pulo. Ao sofrer dano, quebra, concede as moedas e é destruído." },
-    { id: "relic_leaky_bag", name: "BOLSA FURADA", icon: "👜", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Reduz o preço da loja em 50%. Perde 1 moeda a cada 8s de fase sem super-pastilha ativa." },
-    { id: "relic_saber_tooth", name: "DENTE DE SABRE", icon: "🦷", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "+10 fichas por pastilha devorada em movimento retilíneo contínuo por mais de 2 segundos." },
-    { id: "relic_tape_measure", name: "FITA MÉTRICA", icon: "📐", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "+0.1 Mult por segundo de movimento sem colidir em paredes (acumula até +3.0 Mult; zera se colidir)." },
-    { id: "relic_unstable_gunpowder", name: "PÓLVORA INSTÁVEL", icon: "🧨", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Eliminar inimigos vulneráveis explode e devora pastilhas normais em raio de 3 blocos. Super-pastilha dura 30% a menos." },
-    { id: "relic_wicked_shadow", name: "SOMBRA PERVERSA", icon: "👥", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Até x1.75 Mult por proximidade de inimigo perigoso pelas costas. Toque nas costas causa dano imediato sem imunidade." },
-    { id: "relic_faustian_bargain", name: "CONTRATO FAUSTO", icon: "📜", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Concede +100.000 pontos no início de cada estágio. A vida máxima fica travada em exatamente 1." },
-    { id: "relic_pure_adrenaline", name: "ADRENALINA PURA", icon: "💉", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Enquanto estiver com apenas 1 vida restante, todas as pastilhas devoradas aplicam x2.0 Mult." }
+    { id: "relic_jump_module", name: "MOLA HIDRÁULICA", icon: "assets/icons/relic_jump_module.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Pulo. Permite saltar paredes e inimigos." },
+    { id: "relic_blaster_core", name: "CANHÃO DE PLASMA", icon: "assets/icons/relic_blaster_core.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Carga Máxima de Disparo. Atordoa inimigos em linha reta." },
+    { id: "relic_overclock", name: "OVERCLOCK DE SISTEMA", icon: "assets/icons/relic_overclock.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Reduz o tempo de recarga de todas as habilidades em 30%." },
+    { id: "relic_backup_battery", name: "BATERIA RESERVA", icon: "assets/icons/relic_backup_battery.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Comum", desc: "+1 Vida Máxima e recupera todas as vidas perdidas." },
+    { id: "relic_steel_coating", name: "REVESTIMENTO DE AÇO", icon: "assets/icons/relic_steel_coating.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Pastilhas normais concedem +20 Fichas base." },
+    { id: "relic_sharp_drift", name: "DRIFT PERFEITO", icon: "assets/icons/relic_sharp_drift.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Mudar de direção na quina exata concede +2 Mult na rodada." },
+    { id: "relic_bounty_hunter", name: "CAÇADOR DE NAIPES", icon: "assets/icons/relic_bounty_hunter.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Destruir um inimigo com Blaster concede +5 Mult permanente no round." },
+    { id: "relic_gold_alchemist", name: "ALQUIMIA DOURADA", icon: "assets/icons/relic_gold_alchemist.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas especiais concedem x1.75 Mult ao serem consumidas." },
+    { id: "relic_slime_puddle", name: "LODO VISCOSO", icon: "assets/icons/relic_slime_puddle.svg", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular deixa poças de lodo que reduzem velocidade inimiga em 50% por 4s." },
+    { id: "relic_railgun", name: "TIRO PERFURANTE", icon: "assets/icons/relic_railgun.svg", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O laser do Blaster perfura inimigos e limpa linhas até bater em paredes." },
+    { id: "relic_magnetic_pull", name: "VÁCUO MAGNÉTICO", icon: "assets/icons/relic_magnetic_pull.svg", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Atrai e devora pastilhas a até 1.5 blocos de distância do Slime." },
+    { id: "relic_mercury_skates", name: "PATINS DE MERCÚRIO", icon: "assets/icons/relic_mercury_skates.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Aumenta a velocidade base de movimento do Slime em +10%." },
+    { id: "relic_adrenaline", name: "INJEÇÃO DE ADRENALINA", icon: "assets/icons/relic_adrenaline.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Rara", desc: "Concede +20% de velocidade por 3s após abater um inimigo ou saltar." },
+    { id: "relic_quantum_leap", name: "SALTO QUÂNTICO", icon: "assets/icons/relic_quantum_leap.svg", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "O Pulo passa a atravessar 3 blocos de distância e recarrega 2s mais rápido." },
+    { id: "relic_midas_touch", name: "TOQUE DE MIDAS", icon: "assets/icons/relic_midas_touch.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Ao saltar, converte a pastilha mais próxima em uma Moeda Dourada." },
+    { id: "relic_black_card", name: "CARTÃO BLACK", icon: "assets/icons/relic_black_card.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Moedas Douradas concedem +5 Ouros extras e +100 Fichas." },
+    { id: "relic_laser_ricochet", name: "RICOCHETE LASER", icon: "assets/icons/relic_laser_ricochet.svg", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "O disparo do Blaster rebate em até 2 paredes." },
+    { id: "relic_infinite_battery", name: "BATERIA INFINITA", icon: "assets/icons/relic_infinite_battery.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Lendária", desc: "Eliminar 2 inimigos num curto intervalo recupera 1 carga de disparo." },
+    { id: "relic_straight_combo", name: "COMBO EM LINHA RETA", icon: "assets/icons/relic_straight_combo.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Andar 5 blocos sem fazer curvas adiciona +1 Mult." },
+    { id: "relic_slime_meteor", name: "METEORO DE GOSMA", icon: "assets/icons/relic_slime_meteor.svg", category: "AÇÃO & SOBREVIVÊNCIA", rarity: "Incomum", desc: "Ao aterrissar do pulo, gera choque de 2.5 blocos atordoando inimigos por 2s. Cooldown do pulo +25%." },
+    { id: "relic_quantum_jump", name: "SALTO QUÂNTICO", icon: "assets/icons/relic_quantum_jump.svg", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Pular por cima de um perseguidor (Close Call) e aterrissar em pastilha comum restaura 50% da recarga do pulo." },
+    { id: "relic_gravity_boots", name: "BOTAS GRAVITACIONAIS", icon: "assets/icons/relic_gravity_boots.svg", category: "QUEBRA DE REGRAS", rarity: "Rara", desc: "Permite saltar por cima das paredes do labirinto. Enquanto o pulo recarrega, tem -10% de velocidade." },
+    { id: "relic_slam_dunk", name: "ENTERRADA TRIUNFAL", icon: "assets/icons/relic_slam_dunk.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "Enquanto o Slime estiver no ar, qualquer pontuação gerada recebe um multiplicador temporário de x2.0 Mult." },
+    { id: "relic_loan_shark", name: "EMPRÉSTIMO TUBARÃO", icon: "assets/icons/relic_loan_shark.svg", category: "ECONOMIA & RISCO", rarity: "Incomum", desc: "Concede +15 moedas agora. As próximas 3 lojas cobram taxa de 5 moedas ou custam 1 vida." },
+    { id: "relic_piggy_bank", name: "COFRINHO DE CERÂMICA", icon: "assets/icons/relic_piggy_bank.svg", category: "ECONOMIA & RISCO", rarity: "Comum", desc: "+1 moeda por fase concluída sem usar pulo. Ao sofrer dano, quebra, concede as moedas e é destruído." },
+    { id: "relic_leaky_bag", name: "BOLSA FURADA", icon: "assets/icons/relic_leaky_bag.svg", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Reduz o preço da loja em 50%. Perde 1 moeda a cada 8s de fase sem super-pastilha ativa." },
+    { id: "relic_saber_tooth", name: "DENTE DE SABRE", icon: "assets/icons/relic_saber_tooth.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Comum", desc: "+10 fichas por pastilha devorada em movimento retilíneo contínuo por mais de 2 segundos." },
+    { id: "relic_tape_measure", name: "FITA MÉTRICA", icon: "assets/icons/relic_tape_measure.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "+0.1 Mult por segundo de movimento sem colidir em paredes (acumula até +3.0 Mult; zera se colidir)." },
+    { id: "relic_unstable_gunpowder", name: "PÓLVORA INSTÁVEL", icon: "assets/icons/relic_unstable_gunpowder.svg", category: "QUEBRA DE REGRAS", rarity: "Incomum", desc: "Eliminar inimigos vulneráveis explode e devora pastilhas normais em raio de 3 blocos. Super-pastilha dura 30% a menos." },
+    { id: "relic_wicked_shadow", name: "SOMBRA PERVERSA", icon: "assets/icons/relic_wicked_shadow.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Incomum", desc: "Até x1.75 Mult por proximidade de inimigo perigoso pelas costas. Toque nas costas causa dano imediato sem imunidade." },
+    { id: "relic_faustian_bargain", name: "CONTRATO FAUSTO", icon: "assets/icons/relic_faustian_bargain.svg", category: "ECONOMIA & RISCO", rarity: "Rara", desc: "Concede +100.000 pontos no início de cada estágio. A vida máxima fica travada em exatamente 1." },
+    { id: "relic_pure_adrenaline", name: "ADRENALINA PURA", icon: "assets/icons/relic_pure_adrenaline.svg", category: "MULTIPLICADORES & PONTUAÇÃO", rarity: "Rara", desc: "Enquanto estiver com apenas 1 vida restante, todas as pastilhas devoradas aplicam x2.0 Mult." }
   ];
 
   // ==========================================================================
@@ -286,7 +286,13 @@ window.addEventListener('DOMContentLoaded', () => {
           runData.activeRelics.forEach(r => {
             const mini = document.createElement('div');
             mini.className = 'active-run-relic-mini';
-            mini.innerText = r.icon || '🃏';
+            mini.title = r.name || '';
+            const isImg = r.icon && (r.icon.includes('/') || r.icon.includes('.'));
+            if (isImg) {
+              mini.innerHTML = `<img class="relic-svg-icon" src="${r.icon}" alt="${r.name || ''}">`;
+            } else {
+              mini.innerText = r.icon || '🃏';
+            }
             relicsContainer.appendChild(mini);
           });
         } else {
@@ -597,12 +603,21 @@ window.addEventListener('DOMContentLoaded', () => {
       RELIC_CODEX.forEach(relic => {
         const isDiscovered = discoveredIds.includes(relic.id);
         const cardEl = document.createElement('div');
-        const rarityClass = relic.rarity === 'Rara' ? 'rara' : relic.rarity.toLowerCase();
+        const rarityMap = {
+          'Comum': 'comum',
+          'Incomum': 'incomum',
+          'Rara': 'rara',
+          'Lendária': 'lendaria',
+          'Lendaria': 'lendaria'
+        };
+        const rarityClass = rarityMap[relic.rarity] || relic.rarity.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         if (isDiscovered) {
           cardEl.className = `compendium-card discovered ${rarityClass}`;
+          const isImg = relic.icon && (relic.icon.includes('/') || relic.icon.includes('.'));
+          const iconHtml = isImg ? `<img class="relic-svg-icon" src="${relic.icon}" alt="${relic.name}">` : relic.icon;
           cardEl.innerHTML = `
-            <div class="compendium-card-icon">${relic.icon}</div>
+            <div class="compendium-card-icon">${iconHtml}</div>
             <div class="compendium-card-name">${relic.name}</div>
             <div class="compendium-card-rarity ${rarityClass}">${relic.rarity.toUpperCase()}</div>
             <div class="compendium-card-desc">${relic.desc}</div>
@@ -705,43 +720,76 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Atualiza o Card Holográfico do Slime no Canto Superior Direito do Menu
   function updateMainSlimeCard() {
+    const cardEl = document.getElementById('mainSlimeCard');
     const cardName = document.getElementById('mainSlimeName');
     const cardBadge = document.getElementById('mainSlimeBadge');
     const cardDesc = document.getElementById('mainSlimeDesc');
+    const cardRarity = document.getElementById('mainSlimeRarity');
+    const cardCategory = cardEl ? cardEl.querySelector('.pill-category') : null;
 
     if (!cardName) return;
 
-    if (selectedSlime === 'metallic') {
-      cardName.innerText = 'SLIME MERCENÁRIO';
-      cardBadge.className = 'card-stat-pill cyan';
-      cardBadge.innerHTML = '<span class="pill-value">+30</span> Fichas / Pastilha';
-      cardDesc.innerText = '+30 fichas por pastilha, mas recarga de habilidades 20% mais lenta.';
-    } else if (selectedSlime === 'ballistic') {
-      cardName.innerText = 'SLIME BALÍSTICO';
-      cardBadge.className = 'card-stat-pill orange';
-      cardBadge.innerHTML = '<span class="pill-value">2</span> Cargas de Tiro';
-      cardDesc.innerText = 'Comece com 2 tiros desbloqueados, porém com 0 pulos iniciais.';
-    } else if (selectedSlime === 'gambler') {
-      cardName.innerText = 'SLIME GAMBLER';
-      cardBadge.className = 'card-stat-pill gold';
-      cardBadge.innerHTML = '<span class="pill-value">x0.5 - x3.0</span> Mult Caótico';
-      cardDesc.innerText = 'Seu multiplicador oscila aleatoriamente entre x0.5 e x3.0 por pastilha.';
-    } else {
-      cardName.innerText = 'SLIME CLÁSSICO';
-      cardBadge.className = 'card-stat-pill blue';
-      cardBadge.innerHTML = '<span class="pill-value">Padrão</span>';
-      cardDesc.innerText = 'Slime inicial balanceado sem habilidades extras.';
+    // Metadados dos Slimes com Raridades
+    const slimeData = {
+      classic: {
+        name: 'SLIME CLÁSSICO',
+        rarityClass: 'comum',
+        rarityText: 'COMUM',
+        categoryText: 'STARTER',
+        badgeClass: 'card-stat-pill blue',
+        badgeHtml: '<span class="pill-value">Padrão</span>',
+        desc: 'Slime inicial balanceado sem habilidades extras.',
+        color: '#a3a3c2'
+      },
+      metallic: {
+        name: 'SLIME MERCENÁRIO',
+        rarityClass: 'incomum',
+        rarityText: 'INCOMUM',
+        categoryText: 'ECONOMIA',
+        badgeClass: 'card-stat-pill cyan',
+        badgeHtml: '<span class="pill-value">+30</span> Fichas / Pastilha',
+        desc: '+30 fichas por pastilha, mas recarga de habilidades 20% mais lenta.',
+        color: '#22c55e'
+      },
+      ballistic: {
+        name: 'SLIME BALÍSTICO',
+        rarityClass: 'rara',
+        rarityText: 'RARA',
+        categoryText: 'COMBATE',
+        badgeClass: 'card-stat-pill orange',
+        badgeHtml: '<span class="pill-value">2</span> Cargas de Tiro',
+        desc: 'Comece com 2 tiros desbloqueados, porém com 0 pulos iniciais.',
+        color: '#ef4444'
+      },
+      gambler: {
+        name: 'SLIME GAMBLER',
+        rarityClass: 'lendaria',
+        rarityText: 'LENDÁRIA',
+        categoryText: 'CAOS',
+        badgeClass: 'card-stat-pill gold',
+        badgeHtml: '<span class="pill-value">x0.5 - x3.0</span> Mult Caótico',
+        desc: 'Seu multiplicador oscila aleatoriamente entre x0.5 e x3.0 por pastilha.',
+        color: '#eab308'
+      }
+    };
+
+    const currentSlime = slimeData[selectedSlime] || slimeData.classic;
+
+    cardName.innerText = currentSlime.name;
+    cardBadge.className = currentSlime.badgeClass;
+    cardBadge.innerHTML = currentSlime.badgeHtml;
+    cardDesc.innerText = currentSlime.desc;
+
+    if (cardRarity) cardRarity.innerText = currentSlime.rarityText;
+    if (cardCategory) cardCategory.innerText = currentSlime.categoryText;
+
+    if (cardEl) {
+      cardEl.classList.remove('comum', 'incomum', 'rara', 'lendaria');
+      cardEl.classList.add(currentSlime.rarityClass);
     }
 
     // Atualiza cor visual do slime nos SVGs
-    const slimeColors = {
-      classic: '#a3a3c2',
-      metallic: '#22c55e', // Verde Mercenário
-      ballistic: '#ef4444',
-      gambler: '#eab308'
-    };
-
-    const currentColor = slimeColors[selectedSlime] || slimeColors.classic;
+    const currentColor = currentSlime.color;
     const svgMain = document.querySelector('#mainSlimeSvg rect');
     const svgFooter = document.querySelector('.slime-character rect');
     if (svgMain) svgMain.setAttribute('fill', currentColor);
@@ -810,7 +858,9 @@ window.addEventListener('DOMContentLoaded', () => {
         let relicsHtml = '<div class="history-relics-mini-list">';
         if (run.relics && run.relics.length > 0) {
           run.relics.forEach(r => {
-            relicsHtml += `<div class="history-relic-icon" title="${r.name || ''}">${r.icon || '🃏'}</div>`;
+            const isImg = r.icon && (r.icon.includes('/') || r.icon.includes('.'));
+            const iconHtml = isImg ? `<img class="relic-svg-icon" src="${r.icon}" alt="${r.name || ''}">` : (r.icon || '🃏');
+            relicsHtml += `<div class="history-relic-icon" title="${r.name || ''}">${iconHtml}</div>`;
           });
         } else {
           relicsHtml += '<span style="color:#555; font-size:10px;">Sem relíquias</span>';

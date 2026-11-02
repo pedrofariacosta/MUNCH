@@ -1,5 +1,5 @@
 <div align="center">
-    
+
 # MUNCH
 
 ### Um arcade roguelike de labirinto com progressão por cartas.
@@ -249,3 +249,8 @@ Explore o labirinto, descubra novas combinações de cartas e tente superar sua 
 **[JOGAR MUNCH](https://www.munch.bytecodegroup.com.br/index.html)**
 
 </div>
+
+---
+
+## Créditos e Atribuições
+* **Ícones de Relíquias:** Criados por [Lorc](https://lorcblog.blogspot.com) e [Delapouite](https://delapouite.com), disponíveis em [Game-icons.net](https://game-icons.net) sob licença [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).

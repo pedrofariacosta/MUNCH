@@ -174,7 +174,9 @@ body::after {
   text-shadow: 0 0 10px var(--yellow-glow);
 }
 
-/* Card 3D holográfico */
+/* ==========================================================================
+   CARD HOLOGRÁFICO DO SLIME (DESIGN IDÊNTICO ÀS CARTAS DE RELÍQUIAS)
+   ========================================================================== */
 .holo-card-wrapper {
   perspective: 700px;
   width: 230px;
@@ -182,33 +184,127 @@ body::after {
 }
 
 .holo-card {
+  --card-border-color: #22c55e;
+  --card-border-alt: #4ade80;
+  --card-glow-color: rgba(34, 197, 94, 0.32);
+  --card-accent-pill: #4ade80;
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 16px;
-  background: radial-gradient(circle at 50% 25%, #1c2230 0%, #0d101a 65%, #06070c 100%);
-  border: 4px solid #8a96a8;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(180, 200, 220, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.03);
+  padding: 2px;
+  background: linear-gradient(135deg, var(--card-border-color) 0%, rgba(20, 20, 26, 0.9) 50%, var(--card-border-alt) 100%);
+  clip-path: polygon(14px 0,
+      calc(100% - 14px) 0,
+      100% 14px,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      14px 100%,
+      0 calc(100% - 14px),
+      0 14px);
   overflow: hidden;
-  transition: transform 0.15s ease-out, box-shadow 0.2s ease;
+  transition: transform 0.15s ease-out, filter 0.25s ease;
   transform-style: preserve-3d;
   cursor: default;
   display: flex;
   flex-direction: column;
+  filter: drop-shadow(0 0 10px var(--card-glow-color));
+}
+
+/* Variações de Raridade do Card de Slime (Reação de Cor por Slime) */
+.holo-card.comum {
+  --card-border-color: #22c55e;
+  --card-border-alt: #4ade80;
+  --card-glow-color: rgba(34, 197, 94, 0.32);
+  --card-accent-pill: #4ade80;
+  filter: drop-shadow(0 0 14px rgba(34, 197, 94, 0.4));
+}
+
+.holo-card.incomum {
+  --card-border-color: #00e5ff;
+  --card-border-alt: #00aaff;
+  --card-glow-color: rgba(0, 229, 255, 0.35);
+  --card-accent-pill: #00e5ff;
+  filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.45));
+}
+
+.holo-card.rara {
+  --card-border-color: #ff3344;
+  --card-border-alt: #ff7700;
+  --card-glow-color: rgba(255, 68, 68, 0.35);
+  --card-accent-pill: #ff5533;
+  filter: drop-shadow(0 0 16px rgba(255, 51, 68, 0.45)) drop-shadow(0 0 8px rgba(255, 119, 0, 0.3));
+}
+
+.holo-card.lendaria {
+  --card-border-color: #ff00ff;
+  --card-border-alt: #ffe600;
+  --card-glow-color: rgba(255, 0, 255, 0.4);
+  --card-accent-pill: #ffe600;
+  filter: drop-shadow(0 0 18px rgba(255, 0, 255, 0.5)) drop-shadow(0 0 10px rgba(255, 230, 0, 0.35));
+}
+
+/* Pinos PCB Dourados Superiores (conector retrô) */
+.holo-card::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 76px;
+  height: 4px;
+  background: repeating-linear-gradient(90deg,
+      #ffe600 0px,
+      #ffe600 5px,
+      transparent 5px,
+      transparent 9px);
+  opacity: 0.85;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Fundo Prismático Holográfico Interno (Distribuição Vertical Sem Vão Morto) */
+.holo-card-inner {
+  width: 100%;
+  height: 100%;
+  padding: 10px 10px 10px;
+  background-color: #0b0c13;
+  background-image:
+    radial-gradient(circle at 50% 20%, var(--card-glow-color) 0%, transparent 65%),
+    linear-gradient(125deg,
+      rgba(255, 0, 128, 0.08) 0%,
+      rgba(0, 229, 255, 0.08) 25%,
+      rgba(255, 230, 0, 0.08) 50%,
+      rgba(0, 255, 128, 0.08) 75%,
+      rgba(150, 0, 255, 0.08) 100%),
+    radial-gradient(circle at 50% 50%, #11131c 0%, #06070a 100%);
+  background-size: 100% 100%, 200% 200%, 100% 100%;
+  clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 13px, 100% calc(100% - 13px),
+      calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px), 0 13px);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 12px 14px 14px;
+  justify-content: space-between;
+  transition: background-position 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
-.holo-card:hover {
-  border-color: #ffffff;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
+.holo-card:hover .holo-card-inner {
+  background-position: center, 100% 100%, center;
 }
 
-/* Brilho reflexivo que segue o mouse */
+/* Reflexo de Sheen Foil que Acompanha o Cursor */
 .holo-glare {
   position: absolute;
   inset: 0;
-  border-radius: 16px;
+  clip-path: polygon(14px 0,
+      calc(100% - 14px) 0,
+      100% 14px,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      14px 100%,
+      0 calc(100% - 14px),
+      0 14px);
   background: radial-gradient(circle at 50% 50%,
       rgba(255, 255, 255, 0.22) 0%,
       rgba(255, 255, 255, 0.08) 35%,
@@ -224,35 +320,25 @@ body::after {
   opacity: 1;
 }
 
-/* Detalhe interno de acabamento */
-.holo-card::before {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  z-index: 7;
-}
-
-/* Estrutura interna do card */
+/* Header com pílula de categoria/raridade */
 .holo-card .relic-card-header {
   width: 100%;
   display: flex;
   justify-content: center;
   z-index: 6;
-  margin-bottom: 8px;
+  margin-top: 1px;
+  margin-bottom: 2px;
 }
 
 .holo-card .relic-card-pill {
   font-family: 'Space Grotesk', monospace;
   font-size: 8px;
   font-weight: 800;
-  letter-spacing: 1px;
-  padding: 3px 12px;
-  border-radius: 12px;
-  background: #06070a;
-  border: 1.5px solid #7a8698;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(6, 7, 10, 0.85);
+  border: 1px solid var(--card-border-color, #7a8698);
   color: #e2e8f0;
   text-transform: uppercase;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
@@ -262,16 +348,18 @@ body::after {
 }
 
 .holo-card .pill-rarity {
-  color: #cbd5e1;
+  color: var(--card-accent-pill, #cbd5e1);
+  font-weight: 900;
 }
 
 .holo-card .pill-category {
   color: #ffaa00;
 }
 
+/* Palco do Slime (Vitrine Ampliada com Halo Neon) */
 .holo-card .relic-card-icon-container {
   position: relative;
-  margin: 2px 0 10px 0;
+  margin: 0;
   z-index: 6;
   display: flex;
   justify-content: center;
@@ -279,57 +367,70 @@ body::after {
 }
 
 .holo-card .relic-card-icon-ring {
-  width: 95px;
-  height: 95px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, rgba(16, 18, 26, 0.9) 0%, rgba(5, 6, 9, 0.95) 100%),
-    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 2px, transparent 2px, transparent 4px);
-  border: 3px solid #7a8698;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.04);
+  width: 108px;
+  height: 108px;
+  background: radial-gradient(circle at center, var(--card-glow-color) 0%, rgba(8, 9, 14, 0.92) 65%, #050609 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 2px solid var(--card-border-color, #7a8698);
+  border-bottom: 2px solid var(--card-border-color, #7a8698);
+  box-shadow: inset 0 0 20px var(--card-glow-color), 0 4px 12px rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 8px;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .holo-card-slime {
-  width: 68px;
-  height: 68px;
-  filter: drop-shadow(0 0 8px rgba(158, 158, 158, 0.3));
+  width: 78px;
+  height: 78px;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 6px var(--card-accent-pill));
+  animation: slime-breathe-float 3s infinite ease-in-out;
+  transform-origin: center bottom;
 }
 
+@keyframes slime-breathe-float {
+  0%, 100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.04, 0.96);
+  }
+}
+
+/* Plaqueta de Nome do Slime em Destaque */
 .holo-card .relic-card-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 900;
-  font-size: 15px;
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 700;
+  font-size: 11px;
   color: #ffffff;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   z-index: 6;
-  line-height: 1.2;
-  margin-bottom: 8px;
+  line-height: 1.3;
+  margin: 0;
   width: 100%;
-  padding: 4px 6px;
-  background: rgba(15, 18, 26, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  padding: 5px 4px;
+  background: rgba(10, 12, 18, 0.75);
+  border-top: 1px solid var(--card-border-color, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--card-border-color, rgba(255, 255, 255, 0.08));
+  text-shadow: 0 0 8px var(--card-glow-color), 0 2px 4px rgba(0, 0, 0, 0.9);
   text-align: center;
 }
 
+/* Caixa de descrição chanfrada */
 .holo-card .relic-card-desc-box {
-  background: #0e111a;
-  border: 1.5px solid #232838;
-  border-radius: 10px;
-  padding: 10px 10px;
+  background: rgba(18, 20, 30, 0.92);
+  border-left: 2px solid var(--card-border-color, #7a8698);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 7px 8px;
   width: 100%;
-  margin-top: auto;
+  margin-top: 0;
   z-index: 6;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  gap: 5px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
 }
 
 .holo-card .card-stat-badge-wrapper {
@@ -345,13 +446,12 @@ body::after {
   gap: 6px;
   background: #141926;
   border: 1.5px solid #2b3346;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 3px 10px;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 10px;
   font-weight: 700;
   color: #e2e8f0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 .holo-card .card-stat-pill .pill-value {
@@ -359,7 +459,7 @@ body::after {
   font-weight: 900;
   font-size: 11px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 3px;
   color: #ffffff;
   background: #0077ff;
 }
@@ -369,7 +469,7 @@ body::after {
 }
 
 .holo-card .card-stat-pill.orange .pill-value {
-  background: #ff7700;
+  background: #ff5500;
 }
 
 .holo-card .card-stat-pill.gold .pill-value {
@@ -377,10 +477,11 @@ body::after {
 }
 
 .holo-card .relic-card-desc-text {
-  font-size: 10px;
-  color: #b0b8cc;
-  line-height: 1.45;
+  font-size: 11.5px;
+  color: #c0c8de;
+  line-height: 1.35;
   text-align: center;
+  width: 100%;
 }
 
 /* Grupo de botões de navegação */
@@ -701,6 +802,18 @@ body::after {
   z-index: 2;
 }
 
+.footer-credits-link {
+  color: #555866;
+  text-decoration: none;
+  font-size: 11px;
+  transition: color 0.15s ease;
+}
+
+.footer-credits-link:hover {
+  color: #888d9e;
+  text-decoration: underline;
+}
+
 /* ==========================================================================
    SISTEMA UNIVERSAL DE MODAIS RETRÔ ARCADE (MUNCH ENGINE UI)
    ========================================================================== */
@@ -899,6 +1012,12 @@ body::after {
   align-items: center;
   justify-content: center;
   font-size: 14px;
+}
+
+.active-run-relic-mini img.relic-svg-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .btn-continue-run {
@@ -1246,6 +1365,41 @@ input:checked+.toggle-slider::before {
   border: 2px solid #3a3a4e;
 }
 
+.slime-card-rarity-pill {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.slime-card-rarity-pill.comum {
+  background: rgba(123, 126, 148, 0.2);
+  color: #a0a4bb;
+  border: 1px solid rgba(123, 126, 148, 0.4);
+}
+
+.slime-card-rarity-pill.incomum {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.slime-card-rarity-pill.rara {
+  background: rgba(255, 230, 0, 0.15);
+  color: #ffe600;
+  border: 1px solid rgba(255, 230, 0, 0.4);
+}
+
+.slime-card-rarity-pill.lendaria {
+  background: rgba(255, 0, 255, 0.15);
+  color: #ff00ff;
+  border: 1px solid rgba(255, 0, 255, 0.4);
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.25);
+}
+
 .classic-bg {
   background: rgba(16, 185, 129, 0.15);
   border-color: var(--green-primary);
@@ -1359,32 +1513,74 @@ input:checked+.toggle-slider::before {
   background: radial-gradient(circle at 50% 25%, #181c2b 0%, #0c0e17 65%, #05060b 100%);
   border: 2px solid #333948;
   border-radius: 10px;
-  padding: 10px;
+  padding: 12px 10px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: 6px;
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
 }
 
+/* Pinos Dourados de Conexão no Topo (Cartucho Arcade / Chip PCB) */
+.compendium-card.discovered::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 3px;
+  background: repeating-linear-gradient(90deg,
+      #ffe600 0px,
+      #ffe600 4px,
+      transparent 4px,
+      transparent 7px);
+  opacity: 0.85;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Variáveis e Bordas por Raridade */
 .compendium-card.discovered.comum {
-  border-color: #555566;
+  --comp-border: #4ade80;
+  --comp-glow: rgba(74, 222, 128, 0.25);
+  --comp-accent: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
 }
 
 .compendium-card.discovered.incomum {
-  border-color: var(--cyan-primary);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+  --comp-border: #00e5ff;
+  --comp-glow: rgba(0, 229, 255, 0.35);
+  --comp-accent: #00e5ff;
+  border-color: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
 }
 
 .compendium-card.discovered.rara {
-  border-color: var(--yellow-primary);
-  box-shadow: 0 0 12px rgba(255, 230, 0, 0.3);
+  --comp-border: #ffe600;
+  --comp-glow: rgba(255, 230, 0, 0.35);
+  --comp-accent: #ffe600;
+  border-color: rgba(255, 230, 0, 0.65);
+  box-shadow: 0 0 14px rgba(255, 230, 0, 0.3);
+}
+
+.compendium-card.discovered.lendaria,
+.compendium-card.discovered.lendária {
+  --comp-border: #ff00ff;
+  --comp-glow: rgba(255, 0, 255, 0.45);
+  --comp-accent: #ff00ff;
+  border-color: rgba(255, 0, 255, 0.7);
+  box-shadow: 0 0 16px rgba(255, 0, 255, 0.35);
 }
 
 .compendium-card.discovered:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  border-color: var(--comp-border, #555566);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 16px var(--comp-glow, transparent);
 }
 
 .compendium-card.locked {
@@ -1393,22 +1589,59 @@ input:checked+.toggle-slider::before {
   opacity: 0.55;
 }
 
+/* Slot Rebaixado Iluminado com Halo Interno e Bordas na Cor da Carta */
 .compendium-card-icon {
   font-size: 26px;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #3a3a4e;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: radial-gradient(circle at center, var(--comp-glow, rgba(255, 255, 255, 0.04)) 0%, rgba(8, 9, 14, 0.95) 75%, #050609 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 2px solid var(--comp-border, #3a3a4e);
+  border-bottom: 2px solid var(--comp-border, #3a3a4e);
+  box-shadow: inset 0 0 12px var(--comp-glow, rgba(0, 0, 0, 0.6)), 0 2px 6px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.compendium-card-icon .relic-svg-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.compendium-card.discovered:hover .relic-svg-icon {
+  transform: scale(1.1);
+}
+
+/* Ícones Coloridos + Glow Neon por Raridade */
+.compendium-card.discovered.comum .relic-svg-icon {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(21%) saturate(540%) hue-rotate(85deg) brightness(98%) contrast(92%) drop-shadow(0 0 6px rgba(74, 222, 128, 0.7));
+}
+
+.compendium-card.discovered.incomum .relic-svg-icon {
+  filter: brightness(0) saturate(100%) invert(67%) sepia(87%) saturate(3020%) hue-rotate(151deg) brightness(105%) contrast(102%) drop-shadow(0 0 7px rgba(0, 229, 255, 0.85));
+}
+
+.compendium-card.discovered.rara .relic-svg-icon {
+  filter: brightness(0) saturate(100%) invert(86%) sepia(76%) saturate(1915%) hue-rotate(358deg) brightness(104%) contrast(106%) drop-shadow(0 0 7px rgba(255, 230, 0, 0.9));
+}
+
+.compendium-card.discovered.lendaria .relic-svg-icon,
+.compendium-card.discovered.lendária .relic-svg-icon {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(98%) saturate(7463%) hue-rotate(300deg) brightness(102%) contrast(105%) drop-shadow(0 0 9px rgba(255, 0, 255, 0.95));
 }
 
 .compendium-card.locked .compendium-card-icon {
-  background: #15151f;
+  background: #111218;
   color: #444;
-  border-color: #252535;
+  border: 1px dashed #252535;
+  box-shadow: none;
+  border-radius: 8px;
 }
 
 .compendium-card-name {
@@ -1425,28 +1658,43 @@ input:checked+.toggle-slider::before {
 .compendium-card-rarity {
   font-family: 'Press Start 2P', monospace;
   font-size: 6px;
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 3px;
+  text-transform: uppercase;
 }
 
 .compendium-card-rarity.comum {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
 }
 
 .compendium-card-rarity.incomum {
   background: rgba(0, 229, 255, 0.15);
   color: var(--cyan-primary);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.6);
 }
 
 .compendium-card-rarity.rara {
   background: rgba(255, 230, 0, 0.15);
   color: var(--yellow-primary);
+  border: 1px solid rgba(255, 230, 0, 0.35);
+  text-shadow: 0 0 5px rgba(255, 230, 0, 0.6);
+}
+
+.compendium-card-rarity.lendaria,
+.compendium-card-rarity.lendária {
+  background: rgba(255, 0, 255, 0.18);
+  color: #ff00ff;
+  border: 1px solid rgba(255, 0, 255, 0.4);
+  text-shadow: 0 0 6px rgba(255, 0, 255, 0.8);
 }
 
 .compendium-card.locked .compendium-card-rarity {
   background: #1a1a24;
   color: #555;
+  border: 1px solid #2a2a38;
 }
 
 .compendium-card-desc {
@@ -1677,6 +1925,12 @@ input:checked+.toggle-slider::before {
   align-items: center;
   justify-content: center;
   font-size: 12px;
+}
+
+.history-relic-icon img.relic-svg-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 /* MODAL CONFIGURAÇÕES & ACESSIBILIDADE */

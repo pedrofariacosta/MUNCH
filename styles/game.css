@@ -48,7 +48,6 @@ body.theme-cyberpunk {
   --red-primary: #ff0044;
 }
 
-
 * {
   margin: 0;
   padding: 0;
@@ -166,14 +165,7 @@ body::after {
   letter-spacing: 0.5px;
 }
 
-.hud-target-value {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 11px;
-  color: var(--yellow-primary);
-  text-shadow: 0 0 6px var(--yellow-glow);
-  letter-spacing: 1px;
-}
-
+.hud-target-value,
 .hud-blind-target {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
@@ -242,8 +234,13 @@ body::after {
 }
 
 @keyframes glitchBar {
-  0% { filter: hue-rotate(0deg) brightness(1.2); }
-  100% { filter: hue-rotate(30deg) brightness(1.6); }
+  0% {
+    filter: hue-rotate(0deg) brightness(1.2);
+  }
+
+  100% {
+    filter: hue-rotate(30deg) brightness(1.6);
+  }
 }
 
 /* Slots de relíquias no centro */
@@ -393,7 +390,7 @@ body::after {
   padding-top: 6px;
 }
 
-/* Painel de cálculo de pontuação no canto superior direito */
+/* Painel de cálculo de pontuação */
 .balatro-scoring {
   display: flex;
   align-items: center;
@@ -502,7 +499,6 @@ body::after {
   height: 100%;
 }
 
-/* Efeito de tremor de tela ao receber dano/pontuar alto */
 .arcade-bezel.shake {
   animation: bezel-shake 0.15s ease-out;
 }
@@ -539,7 +535,6 @@ body::after {
   }
 }
 
-/* Leve oscilação de brilho de monitor CRT */
 .crt-flicker {
   animation: monitor-flicker 0.15s infinite;
 }
@@ -572,7 +567,6 @@ body::after {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
-/* Indicador de fase e ante */
 .footer-stats {
   display: flex;
   align-items: center;
@@ -603,7 +597,6 @@ body::after {
   white-space: nowrap;
 }
 
-/* Vidas e moedas acumuladas */
 .footer-resources {
   display: flex;
   align-items: center;
@@ -954,30 +947,75 @@ body::after {
   gap: 24px;
   width: 100%;
   margin-top: 15px;
+  perspective: 1000px;
 }
 
-/* Estilo do card de relíquia */
+/* ==========================================================================
+   PALETA POR RARIDADE DAS RELÍQUIAS
+   ========================================================================== */
+.relic-card.comum {
+  --card-border-color: #4f5263;
+  --card-border-alt: #7b7e94;
+  --card-glow-color: rgba(255, 255, 255, 0.06);
+  --card-accent-pill: #a0a4bb;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
+}
+
+.relic-card.incomum {
+  --card-border-color: #00e5ff;
+  --card-border-alt: #0088cc;
+  --card-glow-color: rgba(0, 229, 255, 0.22);
+  --card-accent-pill: #00e5ff;
+  filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.35));
+}
+
+.relic-card.rara {
+  --card-border-color: #ffe600;
+  --card-border-alt: #ff9900;
+  --card-glow-color: rgba(255, 230, 0, 0.26);
+  --card-accent-pill: #ffe600;
+  filter: drop-shadow(0 0 14px rgba(255, 230, 0, 0.45));
+}
+
+.relic-card.lendaria {
+  --card-border-color: #ff00ff;
+  --card-border-alt: #9d00ff;
+  --card-glow-color: rgba(255, 0, 255, 0.30);
+  --card-accent-pill: #ff00ff;
+  filter: drop-shadow(0 0 18px rgba(255, 0, 255, 0.55));
+}
+
+/* ==========================================================================
+   CHASSI CHANFRADO (CARTUCHO DE FLIPERAMA - CLIP-PATH)
+   ========================================================================== */
 .relic-card {
+  --sheen-x: 50%;
+  --sheen-y: 50%;
   flex: 0 0 auto;
-  width: 230px;
-  height: 345px;
-  background: radial-gradient(circle at 50% 25%, #181c2b 0%, #0c0e17 65%, #05060b 100%);
-  border: 4px solid #333948;
-  border-radius: 16px;
-  padding: 12px 14px 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.25s ease;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  width: 224px;
+  min-height: 332px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--card-border-color) 0%, rgba(20, 20, 26, 0.9) 50%, var(--card-border-alt) 100%);
+  clip-path: polygon(14px 0,
+      calc(100% - 14px) 0,
+      100% 14px,
+      100% calc(100% - 14px),
+      calc(100% - 14px) 100%,
+      14px 100%,
+      0 calc(100% - 14px),
+      0 14px);
+  cursor: pointer;
+  user-select: none;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, filter 0.25s ease;
   animation: card-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 .relic-card:nth-child(2) {
@@ -996,293 +1034,258 @@ body::after {
   }
 }
 
-/* Brilho reflexivo da carta sob o cursor */
+/* Pinos Dourados de Conexão no Topo (Cartucho / Chip PCB) */
 .relic-card::before {
-  content: "";
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 76px;
+  height: 4px;
+  background: repeating-linear-gradient(90deg,
+      #ffe600 0px,
+      #ffe600 5px,
+      transparent 5px,
+      transparent 9px);
+  opacity: 0.85;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Camada de Sheen / Reflexo Holográfico Dinâmico */
+.relic-card::after {
+  content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--sheen-x, 50%) var(--sheen-y, 50%),
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.08) 35%,
-      transparent 65%);
   pointer-events: none;
+  background: radial-gradient(circle at var(--sheen-x) var(--sheen-y),
+      rgba(255, 255, 255, 0.22) 0%,
+      transparent 65%);
+  mix-blend-mode: overlay;
   z-index: 8;
-  mix-blend-mode: color-dodge;
-  opacity: 0;
+  opacity: 0.7;
   transition: opacity 0.2s ease;
 }
 
-.relic-card:hover::before,
-.relic-card.keyboard-focus::before {
+.relic-card:hover::after,
+.relic-card.keyboard-focus::after {
   opacity: 1;
 }
 
-.relic-card::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 11px;
-  pointer-events: none;
-  z-index: 7;
-}
-
-/* Diferenciação visual por raridade */
-.relic-card.comum {
-  background: radial-gradient(circle at 50% 25%, #1c2230 0%, #0d101a 65%, #06070c 100%);
-  border-color: #8a96a8;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 18px rgba(180, 200, 220, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.03);
-}
-
-.relic-card.comum:hover,
-.relic-card.comum.keyboard-focus {
-  border-color: #ffffff;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 255, 255, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.08);
-}
-
-.relic-card.incomum {
-  background: radial-gradient(circle at 50% 25%, #0a202d 0%, #08141e 65%, #040910 100%);
-  border-color: #00e5ff;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 22px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.05);
-}
-
-.relic-card.incomum:hover,
-.relic-card.incomum.keyboard-focus {
-  border-color: #00f5d4;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 245, 212, 0.4), inset 0 0 25px rgba(0, 229, 255, 0.12);
-}
-
-.relic-card.rara {
-  background: radial-gradient(circle at 50% 25%, #2a220b 0%, #161206 65%, #080602 100%);
-  border-color: #ffd700;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 28px rgba(255, 215, 0, 0.35), inset 0 0 20px rgba(255, 215, 0, 0.08);
-}
-
-.relic-card.rara:hover,
-.relic-card.rara.keyboard-focus {
-  border-color: #fff066;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 215, 0, 0.55), inset 0 0 30px rgba(255, 230, 0, 0.18);
-}
-
-/* Indicador de categoria e raridade no topo da carta */
-.relic-card-header {
+/* ==========================================================================
+   INTERIOR DA CARTA (FUNDO PRISMÁTICO HOLOGRÁFICO - OPÇÃO 1)
+   ========================================================================== */
+.relic-card-inner {
   width: 100%;
+  height: 100%;
+  padding: 14px 12px;
+  background-color: #0b0c13;
+  background-image:
+    radial-gradient(circle at 50% 20%, var(--card-glow-color) 0%, transparent 65%),
+    linear-gradient(125deg,
+      rgba(255, 0, 128, 0.08) 0%,
+      rgba(0, 229, 255, 0.08) 25%,
+      rgba(255, 230, 0, 0.08) 50%,
+      rgba(0, 255, 128, 0.08) 75%,
+      rgba(150, 0, 255, 0.08) 100%),
+    radial-gradient(circle at 50% 50%, #11131c 0%, #06070a 100%);
+  background-size: 100% 100%, 200% 200%, 100% 100%;
+  clip-path: polygon(13px 0, calc(100% - 13px) 0, 100% 13px, 100% calc(100% - 13px),
+      calc(100% - 13px) 100%, 13px 100%, 0 calc(100% - 13px), 0 13px);
   display: flex;
-  justify-content: center;
-  z-index: 6;
-  margin-bottom: 8px;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background-position 0.3s ease;
+}
+
+.relic-card:hover .relic-card-inner {
+  background-position: center, 100% 100%, center;
+}
+
+/* Header e Rótulo da Relíquia */
+.relic-card-header {
+  text-align: center;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  width: 100%;
 }
 
 .relic-card-pill {
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #606375;
+}
+
+.pill-rarity {
+  color: var(--card-accent-pill);
+}
+
+.pill-category {
+  color: #9295aa;
+}
+
+/* ==========================================================================
+   SLOT REBAIXADO DO ÍCONE (OPÇÃO 3)
+   ========================================================================== */
+.relic-card-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0 4px 0;
+}
+
+.relic-card-icon-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: #08090e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--card-border-color);
+  border-bottom: 1px solid var(--card-border-color);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.relic-card-icon-ring::before,
+.relic-card-icon-ring::after {
+  display: none !important;
+}
+
+.relic-card-icon {
+  font-size: 34px;
+  line-height: 1;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   DIMENSIONAMENTO DOS VETORES SVG & EMOJIS
+   ========================================================================== */
+.relic-svg-icon {
+  display: block;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+.relic-svg-icon.card-size {
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.9));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.relic-card:hover .relic-svg-icon.card-size {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 8px var(--card-border-color));
+}
+
+.relic-svg-icon.tray-size {
+  width: 22px;
+  height: 22px;
+}
+
+.relic-svg-icon.mini-size {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.relic-svg-icon.toast-size {
+  width: 24px;
+  height: 24px;
+}
+
+/* Nome da carta */
+.relic-card-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  text-align: center;
+  color: #ffffff;
+  margin: 6px 0 8px 0;
+  line-height: 1.4;
+  letter-spacing: 0.5px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Caixa inferior de atributos e descrição */
+.relic-card-desc-box {
+  background: rgba(18, 20, 30, 0.92);
+  border-left: 2px solid var(--card-border-color);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 8px;
+  margin-bottom: 8px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-stat-badge-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.card-stat-pill {
   font-family: 'Space Grotesk', monospace;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 3px 12px;
-  border-radius: 12px;
-  background: #06070a;
-  border: 1.5px solid #333948;
-  color: #a0aab8;
-  text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.relic-card.comum .relic-card-pill {
-  border-color: #7a8698;
-  color: #e2e8f0;
+.card-stat-pill.teal {
+  background: rgba(20, 241, 149, 0.15);
+  color: #14f195;
+  border: 1px solid rgba(20, 241, 149, 0.4);
 }
 
-.relic-card.comum .pill-rarity {
-  color: #cbd5e1;
-}
-
-.relic-card.comum .pill-category {
-  color: #ffaa00;
-}
-
-.relic-card.incomum .relic-card-pill {
-  border-color: #00e5ff;
+.card-stat-pill.blue {
+  background: rgba(0, 229, 255, 0.15);
   color: #00e5ff;
+  border: 1px solid rgba(0, 229, 255, 0.4);
 }
 
-.relic-card.incomum .pill-rarity {
-  color: #00e5ff;
+.card-stat-pill.gold {
+  background: rgba(255, 230, 0, 0.15);
+  color: #ffe600;
+  border: 1px solid rgba(255, 230, 0, 0.4);
 }
 
-.relic-card.incomum .pill-category {
-  color: #ffaa00;
-}
-
-.relic-card.rara .relic-card-pill {
-  border-color: #ffd700;
-  color: #ffd700;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
-}
-
-.relic-card.rara .pill-rarity {
-  color: #ffd700;
-}
-
-.relic-card.rara .pill-category {
-  color: #ffaa00;
-}
-
-/* Moldura para o ícone ilustrativo */
-.relic-card-icon-container {
-  position: relative;
-  margin: 2px 0 10px 0;
-  z-index: 6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.relic-card-icon-ring {
-  width: 95px;
-  height: 95px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, rgba(16, 18, 26, 0.9) 0%, rgba(5, 6, 9, 0.95) 100%),
-    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 2px, transparent 2px, transparent 4px);
-  border: 3px solid #2a3040;
-  box-shadow:
-    0 4px 15px rgba(0, 0, 0, 0.6),
-    inset 0 0 15px rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.relic-card.comum .relic-card-icon-ring {
-  border-color: #7a8698;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.04);
-}
-
-.relic-card.incomum .relic-card-icon-ring {
-  border-color: #00e5ff;
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.1);
-}
-
-.relic-card.rara .relic-card-icon-ring {
-  border-color: #ffd700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.15);
-}
-
-.relic-card-icon {
-  font-size: 42px;
-  line-height: 1;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-  transition: transform 0.2s ease;
-}
-
-.relic-card:hover .relic-card-icon,
-.relic-card.keyboard-focus .relic-card-icon {
-  transform: scale(1.1);
-}
-
-/* Nome da carta */
-.relic-card-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 900;
-  font-size: 15px;
-  color: #ffffff;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  z-index: 6;
-  line-height: 1.2;
-  margin-bottom: 8px;
-  width: 100%;
-  padding: 4px 6px;
-  background: rgba(15, 18, 26, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-/* Caixa inferior de atributos e descrição */
-.relic-card-desc-box {
-  background: #0e111a;
-  border: 1.5px solid #232838;
-  border-radius: 10px;
-  padding: 10px 10px;
-  width: 100%;
-  margin-top: auto;
-  z-index: 6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
-}
-
-.card-stat-badge-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.card-stat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #141926;
-  border: 1.5px solid #2b3346;
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  color: #e2e8f0;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+.card-stat-pill.magenta {
+  background: rgba(255, 0, 255, 0.15);
+  color: #ff00ff;
+  border: 1px solid rgba(255, 0, 255, 0.4);
 }
 
 .card-stat-pill .pill-value {
-  font-family: 'Space Grotesk', sans-serif;
   font-weight: 900;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #ffffff;
-  background: #0077ff;
-}
-
-.card-stat-pill.blue .pill-value {
-  background: #0077ff;
-}
-
-.card-stat-pill.orange .pill-value {
-  background: #ff7700;
-}
-
-.card-stat-pill.red .pill-value {
-  background: #dc2626;
-}
-
-.card-stat-pill.cyan .pill-value {
-  background: #00b4d8;
-}
-
-.card-stat-pill.teal .pill-value {
-  background: #00b493;
-}
-
-.card-stat-pill.gold .pill-value {
-  background: #d97706;
 }
 
 .relic-card-desc-text {
   font-size: 10px;
-  color: #b0b8cc;
-  line-height: 1.45;
-  text-align: center;
+  line-height: 1.4;
+  color: #c2c5d6;
+  text-align: left;
 }
 
-/* Cores de destaque para termos nas descrições */
+/* Cores de destaque nas descrições */
 .highlight-chips {
   color: #38bdf8;
   font-weight: bold;
@@ -1311,7 +1314,33 @@ body::after {
   font-weight: bold;
 }
 
-/* Substituição de relíquias quando o inventário está cheio */
+/* Etiqueta de Preço Chanfrada */
+.card-price-tag {
+  display: block;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8.5px;
+  padding: 8px 4px;
+  background: #141722;
+  border: 1px solid #ffe600;
+  color: #ffe600;
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.card-price-tag.affordable:hover {
+  background: #ffe600;
+  color: #0c0d13;
+}
+
+.card-price-tag.unaffordable {
+  border-color: #494c5e;
+  color: #6b6f84;
+  background: #0e1017;
+}
+
+/* Modo de Substituição de Relíquias (Inventário Cheio) */
 .draft-cards-container:has(.active-relic-option) {
   flex-wrap: nowrap;
   gap: 12px;
@@ -1333,36 +1362,46 @@ body::after {
 .relic-card.active-relic-option {
   width: 140px;
   min-width: 140px;
-  height: 225px;
-  padding: 8px 6px;
+  height: 230px;
+  min-height: 230px;
+  padding: 2px;
   flex: 0 0 auto;
+}
+
+.relic-card.active-relic-option .relic-card-inner {
+  padding: 8px 6px;
 }
 
 .relic-card.active-relic-option .relic-card-pill {
   font-size: 6px;
-  padding: 2px 6px;
+  padding: 2px 4px;
 }
 
 .relic-card.active-relic-option .relic-card-icon-ring {
-  width: 55px;
-  height: 55px;
-  border-width: 2px;
+  width: 48px;
+  height: 48px;
+}
+
+.relic-card.active-relic-option .relic-svg-icon.card-size {
+  width: 28px;
+  height: 28px;
 }
 
 .relic-card.active-relic-option .relic-card-icon {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .relic-card.active-relic-option .relic-card-name {
-  font-size: 10px;
+  font-size: 8px;
   line-height: 1.2;
-  margin-bottom: 4px;
-  padding: 2px;
+  margin: 4px 0;
+  min-height: auto;
 }
 
 .relic-card.active-relic-option .relic-card-desc-box {
   padding: 4px;
   gap: 2px;
+  margin-bottom: 4px;
 }
 
 .relic-card.active-relic-option .relic-card-desc-text {
@@ -1370,48 +1409,27 @@ body::after {
 }
 
 .relic-card.active-relic-option .card-stat-pill {
-  font-size: 8px;
-  padding: 2px 4px;
-}
-
-.relic-card.active-relic-option .card-stat-pill .pill-value {
-  font-size: 9px;
+  font-size: 7px;
   padding: 1px 3px;
-}
-
-.relic-card.active-relic-option .relic-card-desc {
-  display: none;
 }
 
 .relic-card.active-relic-option:hover,
 .relic-card.active-relic-option.keyboard-focus {
-  border-color: var(--red-primary) !important;
-  box-shadow: 0 0 20px rgba(255, 46, 46, 0.3) !important;
+  filter: drop-shadow(0 0 14px rgba(255, 46, 46, 0.6)) !important;
 }
 
 .btn-replace-action {
+  display: block;
+  text-align: center;
   font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
-  color: #fff;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 5px 8px;
-  border-radius: 4px;
-  margin-top: auto;
-  z-index: 6;
-  transition: all 0.15s ease;
-  line-height: 1.4;
-}
-
-.relic-card.active-relic-option:hover .btn-replace-action,
-.relic-card.active-relic-option.keyboard-focus .btn-replace-action {
+  font-size: 7px;
+  padding: 6px 4px;
   background: var(--red-primary);
-  color: #fff;
-  border-color: var(--red-primary);
-  box-shadow: 0 0 10px var(--red-glow);
+  color: #ffffff;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  letter-spacing: 0.5px;
 }
 
-/* Divisor visual entre as opções de substituição */
 .replacement-divider {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -1421,7 +1439,6 @@ body::after {
   letter-spacing: 2px;
 }
 
-/* Botão de recusar/descartar nova relíquia */
 .btn-discard-new {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -1451,10 +1468,7 @@ body::after {
   background: rgba(255, 46, 46, 0.02);
 }
 
-.skill-indicator.blocked .skill-key {
-  color: var(--red-primary);
-}
-
+.skill-indicator.blocked .skill-key,
 .skill-indicator.blocked .skill-charges {
   color: var(--red-primary);
 }
@@ -1731,35 +1745,6 @@ body::after {
 /* ==========================================================================
    FASE 3: ECONOMIA, LOJA, BOSS BLINDS & REFINAMENTOS VISUAIS
    ========================================================================== */
-
-.card-price-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  margin-top: 6px;
-  width: calc(100% - 20px);
-  box-sizing: border-box;
-}
-
-.card-price-tag.affordable {
-  background: rgba(255, 230, 0, 0.15);
-  color: var(--yellow-primary);
-  border: 1.5px solid var(--yellow-primary);
-  box-shadow: 0 0 8px rgba(255, 230, 0, 0.3);
-}
-
-.card-price-tag.unaffordable {
-  background: rgba(255, 50, 50, 0.15);
-  color: #ff6666;
-  border: 1.5px solid #ff4444;
-  opacity: 0.85;
-}
-
 .shop-actions {
   display: flex;
   justify-content: center;
@@ -1834,6 +1819,7 @@ body::after {
     opacity: 0;
     transform: translate(-50%, -40px) scale(0.85);
   }
+
   to {
     opacity: 1;
     transform: translate(-50%, 0) scale(1);
@@ -1887,8 +1873,16 @@ body::after {
 }
 
 @keyframes pulseBossBadge {
-  0% { transform: scale(0.98); opacity: 0.85; }
-  100% { transform: scale(1.04); opacity: 1; box-shadow: 0 0 14px rgba(255, 51, 102, 0.7); }
+  0% {
+    transform: scale(0.98);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: scale(1.04);
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(255, 51, 102, 0.7);
+  }
 }
 
 /* Alerta Central de Meta Atingida */
@@ -1912,9 +1906,20 @@ body::after {
 }
 
 @keyframes goalAlertPulse {
-  0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
-  60% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.0);
+    opacity: 1;
+  }
 }
 
 /* Notificações Flutuantes (Toasts) In-Game */
@@ -1929,7 +1934,6 @@ body::after {
   pointer-events: none;
 }
 
-/* Toast de Conquistas In-Game (Sala de Troféus) */
 .achievement-toast-container {
   position: fixed;
   top: 18px;
@@ -2003,10 +2007,25 @@ body::after {
   border-radius: 2px;
 }
 
-.ach-toast-badge.bronze { background: #cd7f32; color: #000; }
-.ach-toast-badge.silver { background: #d1d5db; color: #000; }
-.ach-toast-badge.gold { background: #FFE600; color: #000; }
-.ach-toast-badge.platinum { background: #00E5FF; color: #000; }
+.ach-toast-badge.bronze {
+  background: #cd7f32;
+  color: #000;
+}
+
+.ach-toast-badge.silver {
+  background: #d1d5db;
+  color: #000;
+}
+
+.ach-toast-badge.gold {
+  background: #FFE600;
+  color: #000;
+}
+
+.ach-toast-badge.platinum {
+  background: #00E5FF;
+  color: #000;
+}
 
 .ach-toast-sub {
   font-family: 'Press Start 2P', monospace;
@@ -2070,8 +2089,15 @@ body::after {
 }
 
 @keyframes toastSlideIn {
-  from { transform: translateX(60px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Estilos da Tela de Game Over Expandida */
@@ -2110,8 +2136,16 @@ body::after {
 }
 
 @keyframes pulseNewRecord {
-  from { transform: scale(0.96); opacity: 0.8; }
-  to { transform: scale(1.05); opacity: 1; text-shadow: 0 0 15px #FFE600, 0 0 25px #00E5FF; }
+  from {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+
+  to {
+    transform: scale(1.05);
+    opacity: 1;
+    text-shadow: 0 0 15px #FFE600, 0 0 25px #00E5FF;
+  }
 }
 
 .relic-mini-badge {
@@ -2154,8 +2188,6 @@ body::after {
 /* ==========================================================================
    CONTROLES GLOBAIS DE ÁUDIO
    ========================================================================== */
-
-/* Botão Fixo de Mudo Rápido */
 .global-mute-btn {
   position: fixed;
   top: 14px;
@@ -2208,7 +2240,6 @@ body::after {
   box-shadow: 0 0 6px #ff3366;
 }
 
-/* Toast de Áudio Mutado / Ativado */
 .audio-toast {
   position: fixed;
   top: 60px;
@@ -2234,7 +2265,13 @@ body::after {
 }
 
 @keyframes audioToastIn {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
 
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

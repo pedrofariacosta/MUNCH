@@ -72,43 +72,45 @@
         <div class="holo-card comum" id="mainSlimeCard">
           <div class="holo-glare"></div>
 
-          <div class="relic-card-header">
-            <div class="relic-card-pill">[ <span class="pill-rarity" id="mainSlimeRarity">COMMON</span> // <span
-                class="pill-category">STARTER</span> ]</div>
-          </div>
-
-          <div class="relic-card-icon-container">
-            <div class="relic-card-icon-ring">
-              <!-- Desenho do slime -->
-              <svg class="holo-card-slime" id="mainSlimeSvg" viewBox="0 0 160 160" fill="none">
-                <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff"
-                  stroke-width="6" />
-                <g>
-                  <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-                  <path d="M 138 46 L 92 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-                  <polygon points="26,66 66,78 26,84" fill="#ffffff" />
-                  <circle cx="52" cy="77" r="5.5" fill="#1a1a1a" />
-                  <polygon points="134,66 94,78 134,84" fill="#ffffff" />
-                  <circle cx="108" cy="77" r="5.5" fill="#1a1a1a" />
-                </g>
-                <circle cx="75" cy="92" r="2.5" fill="#ffffff" />
-                <circle cx="85" cy="92" r="2.5" fill="#ffffff" />
-                <rect x="48" y="105" width="64" height="17" rx="3" fill="#1a1a1a" stroke="#ffffff" stroke-width="3" />
-                <polygon points="56,105 63,114 70,105" fill="#ffffff" />
-                <polygon points="73,105 80,114 87,105" fill="#ffffff" />
-                <polygon points="90,105 97,114 104,105" fill="#ffffff" />
-              </svg>
+          <div class="holo-card-inner">
+            <div class="relic-card-header">
+              <div class="relic-card-pill">[ <span class="pill-rarity" id="mainSlimeRarity">COMUM</span> // <span
+                  class="pill-category">STARTER</span> ]</div>
             </div>
-          </div>
 
-          <div class="relic-card-name" id="mainSlimeName">SLIME CLÁSSICO</div>
-
-          <!-- Descrição da carta -->
-          <div class="relic-card-desc-box">
-            <div class="card-stat-badge-wrapper">
-              <div class="card-stat-pill blue" id="mainSlimeBadge"><span class="pill-value">Padrão</span></div>
+            <div class="relic-card-icon-container">
+              <div class="relic-card-icon-ring">
+                <!-- Desenho do slime -->
+                <svg class="holo-card-slime" id="mainSlimeSvg" viewBox="0 0 160 160" fill="none">
+                  <rect x="5" y="5" width="150" height="150" rx="20" ry="20" fill="#9e9e9e" stroke="#ffffff"
+                    stroke-width="6" />
+                  <g>
+                    <path d="M 22 46 L 68 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+                    <path d="M 138 46 L 92 64" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
+                    <polygon points="26,66 66,78 26,84" fill="#ffffff" />
+                    <circle cx="52" cy="77" r="5.5" fill="#1a1a1a" />
+                    <polygon points="134,66 94,78 134,84" fill="#ffffff" />
+                    <circle cx="108" cy="77" r="5.5" fill="#1a1a1a" />
+                  </g>
+                  <circle cx="75" cy="92" r="2.5" fill="#ffffff" />
+                  <circle cx="85" cy="92" r="2.5" fill="#ffffff" />
+                  <rect x="48" y="105" width="64" height="17" rx="3" fill="#1a1a1a" stroke="#ffffff" stroke-width="3" />
+                  <polygon points="56,105 63,114 70,105" fill="#ffffff" />
+                  <polygon points="73,105 80,114 87,105" fill="#ffffff" />
+                  <polygon points="90,105 97,114 104,105" fill="#ffffff" />
+                </svg>
+              </div>
             </div>
-            <div class="relic-card-desc-text" id="mainSlimeDesc">Slime inicial balanceado sem habilidades extras.</div>
+
+            <div class="relic-card-name" id="mainSlimeName">SLIME CLÁSSICO</div>
+
+            <!-- Descrição da carta -->
+            <div class="relic-card-desc-box">
+              <div class="card-stat-badge-wrapper">
+                <div class="card-stat-pill blue" id="mainSlimeBadge"><span class="pill-value">Padrão</span></div>
+              </div>
+              <div class="relic-card-desc-text" id="mainSlimeDesc">Slime inicial balanceado sem habilidades extras.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -146,10 +148,11 @@
     </div>
   </section>
 
-  <!-- Rodapé de informações -->
+  <!-- Rodapé de informações com atribuição legal -->
   <footer class="footer-info">
     <span>BUILD 2026.1 // DESKTOP EDITION &bull; <button type="button" class="footer-patch-link"
-        id="btnOpenPatchNotes">[ NOTAS DE ATUALIZAÇÃO ]</button></span>
+        id="btnOpenPatchNotes">[ NOTAS DE ATUALIZAÇÃO ]</button> &bull; <a href="https://game-icons.net"
+        target="_blank" rel="noopener noreferrer" class="footer-credits-link">Ícones: game-icons.net (CC BY 3.0)</a></span>
     <span>[↑↓] NAVEGAR &nbsp;&nbsp; [ENTER] CONFIRMAR</span>
   </footer>
 
@@ -257,6 +260,7 @@
               <div class="slime-card-icon-wrapper classic-bg">
                 <span class="slime-card-emoji">🟩</span>
               </div>
+              <div class="slime-card-rarity-pill comum">COMUM</div>
               <div class="slime-card-title">SLIME CLÁSSICO</div>
               <div class="slime-card-badge blue">Padrão</div>
               <div class="slime-card-desc">Slime inicial balanceado sem habilidades extras. Excelente para partidas
@@ -281,6 +285,7 @@
               <div class="slime-card-icon-wrapper metallic-bg">
                 <span class="slime-card-emoji">💰</span>
               </div>
+              <div class="slime-card-rarity-pill incomum">INCOMUM</div>
               <div class="slime-card-title">SLIME MERCENÁRIO</div>
               <div class="slime-card-badge cyan">+30 Fichas / Pastilha</div>
               <div class="slime-card-desc">Ganhe mais fichas por pastilha. Recarga de habilidades 20% mais lenta.</div>
@@ -304,6 +309,7 @@
               <div class="slime-card-icon-wrapper ballistic-bg">
                 <span class="slime-card-emoji">🎯</span>
               </div>
+              <div class="slime-card-rarity-pill rara">RARA</div>
               <div class="slime-card-title">SLIME BALÍSTICO</div>
               <div class="slime-card-badge orange">2 Tiros // 0 Pulos</div>
               <div class="slime-card-desc">Comece com 2 cargas de disparo desbloqueadas, mas sem a habilidade de pulo
@@ -328,6 +334,7 @@
               <div class="slime-card-icon-wrapper gambler-bg">
                 <span class="slime-card-emoji">🎲</span>
               </div>
+              <div class="slime-card-rarity-pill lendaria">LENDÁRIA</div>
               <div class="slime-card-title">SLIME GAMBLER</div>
               <div class="slime-card-badge gold">Mult Caótico (x0.5 - x3.0)</div>
               <div class="slime-card-desc">Seu multiplicador oscila aleatoriamente entre x0.5 e x3.0 a cada pastilha
@@ -352,7 +359,7 @@
         <!-- Aba 2: Compêndio de Relíquias (Codex) -->
         <div class="tab-content" id="tabCompendium">
           <div class="compendium-header-info">
-            <span>RELÍQUIAS DESCOBERTAS: <strong id="discoveredRelicsCount">0 / 11</strong></span>
+            <span>RELÍQUIAS DESCOBERTAS: <strong id="discoveredRelicsCount">0 / 32</strong></span>
             <span class="compendium-hint">Jogue partidas para desbloquear novas cartas no seu álbum.</span>
           </div>
           <div class="compendium-grid" id="compendiumGrid">
@@ -587,8 +594,21 @@
           </div>
         </div>
 
+        <!-- Seção 4: Créditos de Assets & Ícones -->
+        <div class="options-group">
+          <div class="options-group-title">📜 CRÉDITOS & ATRIBUIÇÕES</div>
+          <div class="option-row">
+            <p style="font-size: 11px; color: #8890a6; line-height: 1.5;">
+              Ícones vetoriais de relíquias criados por Lorc e Delapouite, disponíveis em
+              <a href="https://game-icons.net" target="_blank" rel="noopener noreferrer"
+                style="color: #b0b8cc; text-decoration: underline;">Game-icons.net</a>
+              sob licença <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank"
+                rel="noopener noreferrer" style="color: #b0b8cc; text-decoration: underline;">CC BY 3.0</a>.
+            </p>
+          </div>
+        </div>
 
-        <!-- Seção 4: Gerenciamento de Save -->
+        <!-- Seção 5: Gerenciamento de Save -->
         <div class="options-group danger-zone">
           <div class="options-group-title danger">⚠️ ZONA DE PERIGO</div>
           <button class="btn-reset-save" id="btnOpenResetConfirm">RESETAR TODOS OS DADOS SALVOS</button>
@@ -633,7 +653,8 @@
             <div class="patch-note-icon">💎</div>
             <div class="patch-note-content">
               <div class="patch-note-title">Sala de Troféus & Platina</div>
-              <div class="patch-note-desc">Adicionadas <strong>39 conquistas retrô</strong>! Colete troféus comendo pastilhas, derrotando monstros e completando desafios até conquistar a Platina.</div>
+              <div class="patch-note-desc">Adicionadas <strong>39 conquistas retrô</strong>! Colete troféus comendo
+                pastilhas, derrotando monstros e completando desafios até conquistar a Platina.</div>
             </div>
           </div>
 
@@ -641,7 +662,8 @@
             <div class="patch-note-icon">🛠️</div>
             <div class="patch-note-content">
               <div class="patch-note-title">Correções de Bugs</div>
-              <div class="patch-note-desc">Corrigido o erro visual no topo que mostrava 1 vida a mais do que o real, e resolvido o bug em que o jogador atravessava paredes ao virar rápido.</div>
+              <div class="patch-note-desc">Corrigido o erro visual no topo que mostrava 1 vida a mais do que o real, e
+                resolvido o bug em que o jogador atravessava paredes ao virar rápido.</div>
             </div>
           </div>
 
