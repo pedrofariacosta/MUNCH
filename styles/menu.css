@@ -25,18 +25,60 @@
 body {
   width: 100vw;
   height: 100vh;
-  background-color: var(--bg-color);
+  background-color: #020204;
   font-family: 'Space Grotesk', sans-serif;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 70px 90px 40px 90px;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background-image: 
+    /* Brilho ultra-sutil atrás dos botões (ciano/gelo a 2%) */
+    radial-gradient(circle at 16% 45%, rgba(0, 229, 255, 0.025) 0%, transparent 45%),
+    /* Brilho ultra-sutil atrás da carta (índigo a 3%) */
+    radial-gradient(circle at 84% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+    /* Vinheta central suave */
+    radial-gradient(circle at 50% 50%, #07080d 0%, #010103 100%);
+  background-size: 100% 100%;
   position: relative;
+}
+
+/* Poeira de fundo cósmica flutuante e viva */
+.cosmic-dust {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.floating-dust-mote {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: cosmicFloat linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes cosmicFloat {
+  0% {
+    transform: translateY(105vh) translateX(0) scale(0.7);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--max-op, 0.6);
+  }
+  50% {
+    transform: translateY(50vh) translateX(var(--drift-x, 30px)) scale(1.1);
+    opacity: var(--max-op, 0.75);
+  }
+  85% {
+    opacity: var(--max-op, 0.5);
+  }
+  100% {
+    transform: translateY(-10vh) translateX(calc(var(--drift-x, 30px) * -0.5)) scale(0.8);
+    opacity: 0;
+  }
 }
 
 /* Efeito de scanlines de monitor antigo */
@@ -556,17 +598,43 @@ body::after {
 
 /* Botões do menu secundário */
 .btn-secondary {
-  background-color: var(--card-bg);
+  position: relative;
+  background-color: #0b0c13;
   color: var(--text-muted);
-  border-color: var(--border-inactive);
+  border: 1px solid #1e2230;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  padding: 16px 20px 16px 28px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Barra lateral esquerda que acende */
+.btn-secondary::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cyan-primary);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 0 10px var(--cyan-glow);
 }
 
 .btn-secondary:hover,
 .btn-secondary.kb-focus {
-  background-color: var(--card-bg-hover);
-  color: var(--text-pure);
-  border-color: var(--border-hover);
-  transform: translateX(5px);
+  background-color: #121522;
+  color: #ffffff;
+  border-color: #3b4560;
+  transform: translateX(6px);
+}
+
+.btn-secondary:hover::after,
+.btn-secondary.kb-focus::after {
+  opacity: 1;
+  transform: scaleY(1);
 }
 
 .btn-secondary:hover::before,
@@ -608,12 +676,14 @@ body::after {
   }
 }
 
-/* Trilho decorativo inferior */
+/* Trilho decorativo inferior (apenas linha contínua embaixo, sem retângulo ou brilho em volta) */
 .runner-track {
   position: relative;
   width: 100%;
   height: 90px;
-  border-bottom: 2px dashed rgba(255, 255, 255, 0.25);
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: none;
   overflow: hidden;
   margin-bottom: 8px;
 }
@@ -644,6 +714,17 @@ body::after {
 }
 
 /* Personagem e carta em movimento */
+.dots-trail {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Personagem e carta em movimento (Camada superior para a poeira ficar atrás) */
 .chase-group {
   position: absolute;
   bottom: 0px;
@@ -652,12 +733,14 @@ body::after {
   align-items: flex-end;
   gap: 120px;
   animation: run-across 12s linear infinite;
+  z-index: 5;
 }
 
 .slime-wrapper {
   position: relative;
   animation: slime-surge 1.8s infinite ease-in-out;
   transform-origin: bottom center;
+  z-index: 5;
 }
 
 .slime-character {
@@ -666,33 +749,34 @@ body::after {
   display: block;
   transform-origin: bottom center;
   animation: slime-jump 0.5s infinite ease-in-out;
+  z-index: 5;
 }
 
-/* Partículas de poeira do movimento */
+/* Partículas de poeira do movimento (Camada inferior: fica atrás do slime) */
 .dust-particle-track {
   position: absolute;
   width: 6px;
   height: 6px;
-  background: #ffffff;
-  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 .dust-particle-track.burst {
-  animation: dust-burst 0.35s ease-out forwards;
+  animation: dust-burst 0.4s ease-out forwards;
 }
 
 @keyframes dust-burst {
   0% {
-    opacity: 0.9;
-    transform: translate(var(--dx), 0) scale(1);
+    opacity: 0.8;
+    transform: translate(0, 0) scale(0.6);
   }
 
   100% {
     opacity: 0;
-    transform: translate(calc(var(--dx) * 3), var(--dy)) scale(0);
+    transform: translate(var(--dx), var(--dy)) scale(1.6);
   }
 }
 
@@ -3104,3 +3188,47 @@ input:checked+.toggle-slider::before {
   color: #b0b8d2;
 }
 
+
+/* Foco via Teclado nos Modais do Menu */
+.stake-card.kb-focus {
+  border-color: var(--yellow-primary) !important;
+  box-shadow: 0 0 18px rgba(255, 230, 0, 0.5), inset 0 0 12px rgba(255, 230, 0, 0.15) !important;
+  transform: translateY(-4px) scale(1.02);
+}
+
+.btn-start-run.kb-focus {
+  border-color: #ffffff !important;
+  box-shadow: 0 0 25px rgba(255, 230, 0, 0.7) !important;
+  transform: scale(1.03);
+}
+
+.btn-continue-run.kb-focus {
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.6) !important;
+  transform: scale(1.03);
+}
+
+.toggle-switch:has(input.kb-focus) .toggle-slider,
+input[type="checkbox"].kb-focus + .toggle-slider {
+  box-shadow: 0 0 14px var(--cyan-primary) !important;
+  outline: 2px solid var(--cyan-primary);
+}
+
+.arcade-tab-btn.kb-focus {
+  border-color: var(--cyan-primary) !important;
+  box-shadow: 0 0 14px var(--cyan-glow) !important;
+  color: #ffffff !important;
+}
+
+.slime-select-card.kb-focus,
+.theme-card.kb-focus {
+  border-color: var(--yellow-primary) !important;
+  box-shadow: 0 0 18px rgba(255, 230, 0, 0.5) !important;
+  transform: translateY(-4px) scale(1.02);
+}
+
+.ach-filter-btn.kb-focus {
+  border-color: var(--yellow-primary) !important;
+  box-shadow: 0 0 12px rgba(255, 230, 0, 0.4) !important;
+  color: #ffffff !important;
+}

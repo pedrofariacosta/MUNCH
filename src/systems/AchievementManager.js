@@ -164,9 +164,9 @@
       tier: 'silver',
       icon: '🎲',
       category: 'slimes',
-      desc: 'Desbloqueie o Slime Gambler (Atingir Mult >= x30).',
-      max: 30,
-      getProgress: (s) => Math.min(30, s.maxMult || 1),
+      desc: 'Desbloqueie o Slime Gambler (Atingir Mult >= x100).',
+      max: 100,
+      getProgress: (s) => Math.min(100, s.maxMult || 1),
       isUnlocked: (s) => s.slimesUnlocked && s.slimesUnlocked.includes('gambler')
     },
     {

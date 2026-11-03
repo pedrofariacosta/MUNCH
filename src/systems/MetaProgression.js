@@ -223,13 +223,13 @@
         state.stats.highestMultAchieved = rounded;
       }
 
-      if (rounded >= 30 && !state.unlocked.slimes.includes('gambler')) {
+      if (rounded >= 100 && !state.unlocked.slimes.includes('gambler')) {
         state.unlocked.slimes.push('gambler');
         this.queueUnlock(
           'slime_gambler',
           'Slime',
           'SLIME GAMBLER',
-          'Atingiu um multiplicador de x30 ou mais!',
+          'Atingiu um multiplicador de x100 ou mais!',
           '🎲'
         );
         this.save();

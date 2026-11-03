@@ -741,7 +741,7 @@
         document.body.classList.add(`theme-${theme}`);
       }
 
-      // Escuta do teclado
+      // Escuta do teclado com suporte prioritário aos modais (Loja, Vitória e Derrota)
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
           return;
@@ -749,6 +749,170 @@
         if (this.isVictoryPaused || this.gameState === GAME_STATES.RUN_CLEARED) {
           return;
         }
+
+        // ===================================================================
+        // 1. ATALHOS PARA A LOJA ARCADE (DRAFT SHOP & SUBSTITUIÇÃO)
+        // ===================================================================
+        const modalDraft = document.getElementById('modalDraftShop');
+        if (modalDraft && modalDraft.classList.contains('visible')) {
+          const interactables = this.getShopInteractables();
+          if (interactables.length > 0) {
+            const isLeft = e.code === 'ArrowLeft' || e.code === 'KeyA' || e.key === 'a' || e.key === 'A';
+            const isRight = e.code === 'ArrowRight' || e.code === 'KeyD' || e.key === 'd' || e.key === 'D';
+            const isUp = e.code === 'ArrowUp' || e.code === 'KeyW' || e.key === 'w' || e.key === 'W';
+            const isDown = e.code === 'ArrowDown' || e.code === 'KeyS' || e.key === 's' || e.key === 'S';
+
+            if (isLeft) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.draftSelectedIndex = (this.draftSelectedIndex - 1 + interactables.length) % interactables.length;
+              this.updateDraftFocus();
+              return;
+            }
+
+            if (isRight) {
+              e.preventDefault();
+              e.stopPropagation();
+              this.draftSelectedIndex = (this.draftSelectedIndex + 1) % interactables.length;
+              this.updateDraftFocus();
+              return;
+            }
+
+            if (isUp || isDown) {
+              e.preventDefault();
+              e.stopPropagation();
+              const cards = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card'));
+              const vouchers = Array.from(document.querySelectorAll('#vouchersContainer .voucher-card:not(.purchased)'));
+              const skipBtn = document.getElementById('btnSkipShop');
+
+              const isNormalShop = cards.length > 0 && (vouchers.length > 0 || skipBtn);
+
+              if (isNormalShop) {
+                const numCards = cards.length;
+                const numVouchers = vouchers.length;
+                const curIdx = this.draftSelectedIndex;
+
+                if (isDown) {
+                  if (curIdx < numCards) {
+                    if (numVouchers > 0) {
+                      this.draftSelectedIndex = numCards + Math.min(curIdx, numVouchers - 1);
+                    } else if (skipBtn) {
+                      this.draftSelectedIndex = numCards;
+                    }
+                  } else if (curIdx < numCards + numVouchers) {
+                    if (skipBtn) {
+                      this.draftSelectedIndex = numCards + numVouchers;
+                    } else {
+                      this.draftSelectedIndex = 0;
+                    }
+                  } else {
+                    this.draftSelectedIndex = 0;
+                  }
+                } else if (isUp) {
+                  if (curIdx >= numCards + numVouchers) {
+                    if (numVouchers > 0) {
+                      this.draftSelectedIndex = numCards + Math.min(1, numVouchers - 1);
+                    } else {
+                      this.draftSelectedIndex = 0;
+                    }
+                  } else if (curIdx >= numCards) {
+                    const vCol = curIdx - numCards;
+                    this.draftSelectedIndex = Math.min(vCol, numCards - 1);
+                  } else {
+                    if (skipBtn) {
+                      this.draftSelectedIndex = interactables.length - 1;
+                    } else if (numVouchers > 0) {
+                      this.draftSelectedIndex = numCards;
+                    }
+                  }
+                }
+              } else {
+                if (isUp) {
+                  this.draftSelectedIndex = (this.draftSelectedIndex - 1 + interactables.length) % interactables.length;
+                } else {
+                  this.draftSelectedIndex = (this.draftSelectedIndex + 1) % interactables.length;
+                }
+              }
+
+              this.updateDraftFocus();
+              return;
+            }
+
+            if (e.code === 'Enter' || e.code === 'Space') {
+              e.preventDefault();
+              e.stopPropagation();
+              const selectedItem = interactables[this.draftSelectedIndex];
+              if (selectedItem) {
+                selectedItem.click();
+              }
+              return;
+            }
+          }
+
+          const cards = document.querySelectorAll('#draftCardsContainer .relic-card');
+          if (e.code === 'Digit1' || e.code === 'Numpad1') { if (cards.length > 0) { e.preventDefault(); e.stopPropagation(); cards[0].click(); return; } }
+          if (e.code === 'Digit2' || e.code === 'Numpad2') { if (cards.length > 1) { e.preventDefault(); e.stopPropagation(); cards[1].click(); return; } }
+          if (e.code === 'Digit3' || e.code === 'Numpad3') { if (cards.length > 2) { e.preventDefault(); e.stopPropagation(); cards[2].click(); return; } }
+          if (e.code === 'Digit4' || e.code === 'Numpad4') { if (cards.length > 3) { e.preventDefault(); e.stopPropagation(); cards[3].click(); return; } }
+          if (e.code === 'Digit5' || e.code === 'Numpad5') { if (cards.length > 4) { e.preventDefault(); e.stopPropagation(); cards[4].click(); return; } }
+
+          if (e.code === 'Escape' || e.code === 'Backspace' || e.code === 'Delete') {
+            const skipBtn = document.getElementById('btnSkipShop') || document.querySelector('.btn-discard-new');
+            if (skipBtn) { e.preventDefault(); e.stopPropagation(); skipBtn.click(); return; }
+          }
+          return; // Não executa comandos de gameplay enquanto a loja estiver aberta!
+        }
+
+        // ===================================================================
+        // 2. ATALHO NA TELA DE VITÓRIA (MODAL WIN / PRÓXIMO ESTÁGIO)
+        // ===================================================================
+        if (this.modalWin && this.modalWin.classList.contains('visible')) {
+          if (e.code === 'Enter' || e.code === 'Space') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (this.btnNextBlind) this.btnNextBlind.click();
+            return;
+          }
+        }
+
+        // ===================================================================
+        // 3. ATALHOS NO MODAL DE GAME OVER
+        // ===================================================================
+        if (this.modalGameOver && this.modalGameOver.classList.contains('visible')) {
+          const txtName = document.getElementById('txtPlayerName');
+          if (document.activeElement !== txtName) {
+            const btnRestart = document.getElementById('btnRestart');
+            const btnReturnMenu = document.getElementById('btnReturnMenu');
+            if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
+              e.preventDefault();
+              e.stopPropagation();
+              this.gameOverFocusedBtn = 'restart';
+              if (btnRestart) btnRestart.focus();
+              return;
+            }
+            if (e.code === 'ArrowRight' || e.code === 'ArrowDown') {
+              e.preventDefault();
+              e.stopPropagation();
+              this.gameOverFocusedBtn = 'menu';
+              if (btnReturnMenu) btnReturnMenu.focus();
+              return;
+            }
+            if (e.code === 'Enter') {
+              e.preventDefault();
+              e.stopPropagation();
+              if (this.gameOverFocusedBtn === 'menu' && btnReturnMenu) {
+                btnReturnMenu.click();
+              } else if (btnRestart) {
+                btnRestart.click();
+              }
+              return;
+            }
+          }
+        }
+
+        // ===================================================================
+        // 4. CONTROLES DE GAMEPLAY EM TEMPO REAL
+        // ===================================================================
         if (!this.player) return;
 
         // Abre/fecha depurador com F3
@@ -759,7 +923,6 @@
         }
 
         if (this.gameState !== GAME_STATES.PLAYING) {
-          // Atalho para reiniciar
           if (this.gameState === GAME_STATES.GAME_OVER && e.code === 'KeyR') {
             this.restartGame();
           }
@@ -781,58 +944,6 @@
         // Aciona disparo
         if (e.code === 'KeyF') {
           this.triggerBlaster();
-        }
-
-        // Atalho para reiniciar
-        if (this.gameState === GAME_STATES.GAME_OVER && e.code === 'KeyR') {
-          this.restartGame();
-        }
-
-        // Atalho de Enter para avançar na tela de vitória
-        if (e.code === 'Enter' && this.gameState === GAME_STATES.WIN_MODAL && this.modalWin.classList.contains('visible')) {
-          e.preventDefault();
-          this.btnNextBlind.click();
-          return;
-        }
-
-        // Atalhos para Loja de Relíquias (Draft Shop e Modo Substituição)
-        const modalDraft = document.getElementById('modalDraftShop');
-        if (modalDraft && modalDraft.classList.contains('visible')) {
-          const cards = document.querySelectorAll('#draftCardsContainer .relic-card');
-          const interactables = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card, #draftCardsContainer .btn-discard-new'));
-
-          if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') {
-            e.preventDefault();
-            this.draftSelectedIndex = (this.draftSelectedIndex - 1 + interactables.length) % interactables.length;
-            this.updateDraftFocus();
-            return;
-          }
-
-          if (e.code === 'ArrowRight' || e.code === 'ArrowDown') {
-            e.preventDefault();
-            this.draftSelectedIndex = (this.draftSelectedIndex + 1) % interactables.length;
-            this.updateDraftFocus();
-            return;
-          }
-
-          if (e.code === 'Enter') {
-            e.preventDefault();
-            if (interactables[this.draftSelectedIndex]) {
-              interactables[this.draftSelectedIndex].click();
-            }
-            return;
-          }
-
-          if (e.code === 'Digit1' || e.code === 'Numpad1') { if (cards.length > 0) { e.preventDefault(); cards[0].click(); return; } }
-          if (e.code === 'Digit2' || e.code === 'Numpad2') { if (cards.length > 1) { e.preventDefault(); cards[1].click(); return; } }
-          if (e.code === 'Digit3' || e.code === 'Numpad3') { if (cards.length > 2) { e.preventDefault(); cards[2].click(); return; } }
-          if (e.code === 'Digit4' || e.code === 'Numpad4') { if (cards.length > 3) { e.preventDefault(); cards[3].click(); return; } }
-          if (e.code === 'Digit5' || e.code === 'Numpad5') { if (cards.length > 4) { e.preventDefault(); cards[4].click(); return; } }
-
-          if (e.code === 'Escape' || e.code === 'Backspace' || e.code === 'Delete') {
-            const skipBtn = document.querySelector('.btn-discard-new');
-            if (skipBtn) { e.preventDefault(); skipBtn.click(); return; }
-          }
         }
       });
 
@@ -993,6 +1104,12 @@
 
       if (btnSubmitScore && txtPlayerName) {
         txtPlayerName.value = localStorage.getItem('munch_last_player_name') || '';
+        txtPlayerName.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            btnSubmitScore.click();
+          }
+        });
         btnSubmitScore.addEventListener('click', async () => {
           const name = txtPlayerName.value.trim();
           if (!name) {
@@ -1353,34 +1470,130 @@
       );
     }
 
-    // Cria os inimigos nos cantos do labirinto para não nascerem em cima do jogador
+    // Cria os inimigos em posições dinâmicas e bem distribuídas pelo labirinto
     spawnEnemiesForPhase(phase) {
       const speedMultiplier = this.getEnemySpeedMultiplier(phase);
-      if (phase === 1) {
-        const spade = new SpikeEnemy(2, 2, 'SPADE');
-        spade.speed *= speedMultiplier;
-        return [spade];
-      } else if (phase === 2) {
-        const spade = new SpikeEnemy(2, 2, 'SPADE');
-        const diamond = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
-        spade.speed *= speedMultiplier;
-        diamond.speed *= speedMultiplier;
-        return [spade, diamond];
-      } else if (phase === 3) {
-        const e1 = new SpikeEnemy(2, 2, 'SPADE');
-        const e2 = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
-        const e3 = new SpikeEnemy(2, GRID_HEIGHT - 3, 'SPADE');
-        [e1, e2, e3].forEach(e => e.speed *= speedMultiplier);
-        return [e1, e2, e3];
-      } else {
-        // 4 inimigos
-        const e1 = new SpikeEnemy(2, 2, 'SPADE');
-        const e2 = new SpikeEnemy(GRID_WIDTH - 3, 2, 'DIAMOND');
-        const e3 = new SpikeEnemy(2, GRID_HEIGHT - 3, 'SPADE');
-        const e4 = new SpikeEnemy(GRID_WIDTH - 3, GRID_HEIGHT - 3, 'DIAMOND');
-        [e1, e2, e3, e4].forEach(e => e.speed *= speedMultiplier);
-        return [e1, e2, e3, e4];
+      let count = 1;
+      if (phase === 1) count = 1;
+      else if (phase === 2) count = 2;
+      else if (phase === 3) count = 3;
+      else count = 4;
+
+      const spawns = this.getDynamicEnemySpawns(count, 5.5);
+      const enemies = [];
+
+      for (let i = 0; i < count; i++) {
+        const spawn = spawns[i] || { x: 2, y: 2 };
+        const type = (i % 2 === 0) ? 'SPADE' : 'DIAMOND';
+        const enemy = new SpikeEnemy(spawn.x, spawn.y, type, i);
+        enemy.speed *= speedMultiplier;
+
+        // Atribui direção inicial aleatória válida a partir daquele ponto
+        const validDirs = enemy.getInitialValidDirs(this);
+        if (validDirs.length > 0) {
+          enemy.dir = validDirs[Math.floor(Math.random() * validDirs.length)];
+          enemy.targetX = (enemy.gridX + enemy.dir.x) * TILE_SIZE;
+          enemy.targetY = (enemy.gridY + enemy.dir.y) * TILE_SIZE;
+        }
+
+        enemies.push(enemy);
       }
+
+      return enemies;
+    }
+
+    // Calcula pontos de spawn válidos, dinâmicos e bem distribuídos espacialmente
+    getDynamicEnemySpawns(count, minDistance = 5) {
+      const pX = (this.player && typeof this.player.gridX === 'number') 
+        ? this.player.gridX 
+        : Math.floor(GRID_WIDTH / 2) - 1;
+      const pY = (this.player && typeof this.player.gridY === 'number') 
+        ? this.player.gridY 
+        : Math.floor(GRID_HEIGHT / 2) + 1;
+
+      const allWalkable = [];
+      const midX = Math.floor(GRID_WIDTH / 2);
+      const midY = Math.floor(GRID_HEIGHT / 2);
+
+      // Divide em 4 quadrantes para garantir que os inimigos não nasçam agrupados
+      const sectors = [[], [], [], []]; // 0: Top-Left, 1: Top-Right, 2: Bottom-Left, 3: Bottom-Right
+
+      for (let r = 1; r < GRID_HEIGHT - 1; r++) {
+        for (let c = 1; c < GRID_WIDTH - 1; c++) {
+          if (!this.isWalkable(c, r)) continue;
+
+          // Evita tiles diretamente na linha dos portais laterais de teleporte
+          if ((r === 7 || r === midY) && (c <= 1 || c >= GRID_WIDTH - 2)) continue;
+
+          const distToPlayer = Math.hypot(c - pX, r - pY);
+          if (distToPlayer >= minDistance) {
+            const tile = { x: c, y: r, dist: distToPlayer };
+            allWalkable.push(tile);
+
+            let sectorIdx = 0;
+            if (c >= midX && r < midY) sectorIdx = 1;
+            else if (c < midX && r >= midY) sectorIdx = 2;
+            else if (c >= midX && r >= midY) sectorIdx = 3;
+            sectors[sectorIdx].push(tile);
+          }
+        }
+      }
+
+      const shuffle = (arr) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      };
+
+      sectors.forEach(s => shuffle(s));
+      shuffle(allWalkable);
+
+      const chosen = [];
+      const sectorOrder = shuffle([0, 1, 2, 3]);
+
+      for (let i = 0; i < count; i++) {
+        let picked = null;
+        const targetSector = sectorOrder[i % 4];
+
+        if (sectors[targetSector] && sectors[targetSector].length > 0) {
+          for (const cand of sectors[targetSector]) {
+            const isFarFromChosen = chosen.every(other => Math.hypot(cand.x - other.x, cand.y - other.y) >= 3.5);
+            if (isFarFromChosen) {
+              picked = cand;
+              break;
+            }
+          }
+          if (!picked && sectors[targetSector].length > 0) {
+            picked = sectors[targetSector][0];
+          }
+        }
+
+        if (!picked && allWalkable.length > 0) {
+          for (const cand of allWalkable) {
+            const isFarFromChosen = chosen.every(other => Math.hypot(cand.x - other.x, cand.y - other.y) >= 3.0);
+            if (isFarFromChosen) {
+              picked = cand;
+              break;
+            }
+          }
+          if (!picked) picked = allWalkable[Math.floor(Math.random() * allWalkable.length)];
+        }
+
+        if (!picked) {
+          picked = { x: (i % 2 === 0 ? 2 : GRID_WIDTH - 3), y: (i < 2 ? 2 : GRID_HEIGHT - 3) };
+        }
+
+        chosen.push(picked);
+      }
+
+      return chosen;
+    }
+
+    getRandomSafeSpawn(minDistance = 6) {
+      const spawns = this.getDynamicEnemySpawns(1, minDistance);
+      return spawns[0] || { x: 2, y: 2 };
     }
 
     // Define a velocidade dos inimigos a cada fase
@@ -2028,18 +2241,77 @@
       }
     }
 
+    // Valida se uma carta pode aparecer no sorteio com base no estado e pré-requisitos da build
+    isRelicEligible(card, excludeList = []) {
+      if (excludeList.some(c => c.id === card.id)) return false;
+
+      // Não oferece relíquia que o jogador já possui
+      if (this.activeRelics.some(r => r.id === card.id)) return false;
+
+      const hasBlaster = (this.blasterMaxCharges > 0) || this.activeRelics.some(r => r.id === 'relic_blaster_core');
+      const hasJump = (this.vaultMaxCharges > 0) || this.activeRelics.some(r => r.id === 'relic_jump_module');
+
+      // 1. Relíquias que dependem estritamente do TIRO (Blaster)
+      // Não faz sentido aparecer upgrade de disparo se o jogador ainda não possui disparo!
+      const blasterDependent = [
+        'relic_bounty_hunter',
+        'relic_railgun',
+        'relic_laser_ricochet',
+        'relic_infinite_battery'
+      ];
+      if (blasterDependent.includes(card.id) && !hasBlaster) return false;
+
+      // 2. Relíquias que dependem estritamente do PULO
+      // Não faz sentido aparecer upgrade de pulo se o jogador ainda não possui pulo!
+      const jumpDependent = [
+        'relic_slime_puddle',
+        'relic_quantum_leap',
+        'relic_midas_touch',
+        'relic_slime_meteor',
+        'relic_quantum_jump',
+        'relic_gravity_boots',
+        'relic_slam_dunk'
+      ];
+      if (jumpDependent.includes(card.id) && !hasJump) return false;
+
+      // 3. Overclock só faz sentido se tiver pelo menos uma habilidade ativa (Tiro ou Pulo)
+      if (card.id === 'relic_overclock' && !hasBlaster && !hasJump) return false;
+
+      // 4. Lógica de Início de Jogo:
+      // Quando o jogador possui menos de 2 relíquias equipadas,
+      // as opções oferecidas devem ser estritamente: TIRO, PULO, ou BOOST DE PASTILHA / MOEDA.
+      if (this.activeRelics.length < 2) {
+        const foundationalIds = [
+          'relic_blaster_core',
+          'relic_jump_module',
+          'relic_steel_coating',
+          'relic_saber_tooth',
+          'relic_straight_combo',
+          'relic_magnetic_pull',
+          'relic_gold_alchemist',
+          'relic_black_card',
+          'relic_piggy_bank',
+          'relic_backup_battery'
+        ];
+        if (!foundationalIds.includes(card.id)) return false;
+      }
+
+      return true;
+    }
+
     getWeightedRandomCard(excludeList = []) {
-      const candidates = CARD_POOL.filter(card => {
-        if (excludeList.some(c => c.id === card.id)) return false;
+      const candidates = CARD_POOL.filter(card => this.isRelicEligible(card, excludeList));
 
-        // Exclui relíquias de efeito único já ativas
-        const isUnique = ['relic_overclock', 'relic_slime_puddle', 'relic_railgun', 'relic_magnetic_pull', 'relic_gold_alchemist'].includes(card.id);
-        if (isUnique && this.activeRelics.some(r => r.id === card.id)) return false;
-
-        return true;
-      });
-
-      if (candidates.length === 0) return null;
+      // Fallback de segurança se nenhum candidato restrito passar
+      if (candidates.length === 0) {
+        const fallback = CARD_POOL.filter(card => {
+          if (excludeList.some(c => c.id === card.id)) return false;
+          if (this.activeRelics.some(r => r.id === card.id)) return false;
+          return true;
+        });
+        if (fallback.length === 0) return null;
+        return fallback[Math.floor(Math.random() * fallback.length)];
+      }
 
       const comuns = candidates.filter(c => c.rarity === 'Comum');
       const incomuns = candidates.filter(c => c.rarity === 'Incomum');
@@ -2356,8 +2628,31 @@
         if (goldDisplay) goldDisplay.innerText = this.gold.toString();
       }
 
-      // Sorteia 2 opções de relíquias
-      const card1 = this.getWeightedRandomCard([]);
+      // Remove o foco do botão "Próximo Estágio" para não disparar re-roll fantasma com o Enter
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+
+      // Sorteia 2 opções de relíquias com lógica de progressão
+      const hasBlaster = (this.blasterMaxCharges > 0) || this.activeRelics.some(r => r.id === 'relic_blaster_core');
+      const hasJump = (this.vaultMaxCharges > 0) || this.activeRelics.some(r => r.id === 'relic_jump_module');
+
+      let card1 = null;
+      // Na primeiríssima loja (0 relíquias), se não possui nem pulo nem tiro, garante que uma das cartas seja Pulo ou Tiro
+      if (this.activeRelics.length === 0 && (!hasBlaster || !hasJump)) {
+        if (!hasJump && !hasBlaster) {
+          const corePick = Math.random() < 0.5 ? 'relic_jump_module' : 'relic_blaster_core';
+          card1 = CARD_POOL.find(c => c.id === corePick);
+        } else if (!hasJump) {
+          card1 = CARD_POOL.find(c => c.id === 'relic_jump_module');
+        } else if (!hasBlaster) {
+          card1 = CARD_POOL.find(c => c.id === 'relic_blaster_core');
+        }
+      }
+
+      if (!card1) {
+        card1 = this.getWeightedRandomCard([]);
+      }
       const card2 = this.getWeightedRandomCard(card1 ? [card1] : []);
 
       const selectedCards = [];
@@ -2400,6 +2695,15 @@
           cardEl.style.setProperty('--sheen-y', '50%');
         });
 
+        cardEl.__relicData = card;
+        cardEl.addEventListener('mouseenter', () => {
+          const list = this.getShopInteractables();
+          const idx = list.indexOf(cardEl);
+          if (idx !== -1) {
+            this.draftSelectedIndex = idx;
+            this.updateDraftFocus();
+          }
+        });
         cardEl.addEventListener('click', () => {
           this.selectDraftCard(card, cardEl);
         });
@@ -2421,7 +2725,9 @@
       document.getElementById('modalDraftShop').classList.add('visible');
 
       this.draftSelectedIndex = 0;
-      this.updateDraftFocus();
+      setTimeout(() => {
+        this.updateDraftFocus();
+      }, 40);
     }
 
     renderVouchers() {
@@ -2442,7 +2748,9 @@
 
       vouchers.forEach((v) => {
         const vEl = document.createElement('div');
-        vEl.className = 'voucher-card';
+        vEl.__voucherData = v;
+        const canAfford = this.gold >= v.price;
+        vEl.className = `voucher-card ${canAfford ? 'affordable' : 'unaffordable'}`;
         if (this.purchasedVouchers && this.purchasedVouchers.includes(v.id) && v.oneTime) {
           vEl.classList.add('purchased');
         }
@@ -2450,10 +2758,19 @@
         vEl.innerHTML = `
           <div class="voucher-header">
             <span class="voucher-name">${v.name}</span>
-            <span class="voucher-price">$${v.price} Ouros</span>
+            <span class="voucher-price ${canAfford ? 'affordable' : 'unaffordable'}">$${v.price} Ouros</span>
           </div>
           <div class="voucher-desc">${v.desc}</div>
         `;
+
+        vEl.addEventListener('mouseenter', () => {
+          const list = this.getShopInteractables();
+          const idx = list.indexOf(vEl);
+          if (idx !== -1) {
+            this.draftSelectedIndex = idx;
+            this.updateDraftFocus();
+          }
+        });
 
         vEl.addEventListener('click', () => {
           if (vEl.classList.contains('purchased')) return;
@@ -2463,6 +2780,7 @@
             if (window.AchievementManager) window.AchievementManager.recordGoldSpent(v.price);
             const goldDisplay = document.getElementById('shopGoldAmount');
             if (goldDisplay) goldDisplay.innerText = this.gold.toString();
+            this.refreshShopAffordability();
 
             this.buyVoucher(v.id);
             if (v.oneTime) {
@@ -2674,13 +2992,52 @@
       }, 3000);
     }
 
+    getShopInteractables() {
+      const replacementCards = Array.from(document.querySelectorAll('#draftCardsContainer .active-relic-option, #draftCardsContainer .btn-discard-new'));
+      if (replacementCards.length > 0) return replacementCards;
+
+      const cards = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card'));
+      const vouchers = Array.from(document.querySelectorAll('#vouchersContainer .voucher-card:not(.purchased)'));
+      const skipBtn = document.getElementById('btnSkipShop');
+      const list = [...cards, ...vouchers];
+      if (skipBtn) list.push(skipBtn);
+      return list;
+    }
+
     updateDraftFocus() {
-      const interactables = Array.from(document.querySelectorAll('#draftCardsContainer .relic-card, #draftCardsContainer .btn-discard-new'));
+      const interactables = this.getShopInteractables();
+      if (interactables.length === 0) return;
+      this.draftSelectedIndex = (this.draftSelectedIndex + interactables.length) % interactables.length;
       interactables.forEach((el, index) => {
         if (index === this.draftSelectedIndex) {
           el.classList.add('keyboard-focus');
+          if (typeof el.scrollIntoView === 'function') {
+            el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
         } else {
           el.classList.remove('keyboard-focus');
+        }
+      });
+    }
+
+    refreshShopAffordability() {
+      const cards = document.querySelectorAll('#draftCardsContainer .relic-card');
+      cards.forEach(cardEl => {
+        const tag = cardEl.querySelector('.card-price-tag');
+        if (tag && cardEl.__relicData) {
+          const price = this.getCardPrice(cardEl.__relicData);
+          const canAfford = this.gold >= price;
+          tag.className = `card-price-tag ${canAfford ? 'affordable' : 'unaffordable'}`;
+        }
+      });
+
+      const vouchers = document.querySelectorAll('#vouchersContainer .voucher-card');
+      vouchers.forEach(vEl => {
+        if (vEl.__voucherData && !vEl.classList.contains('purchased')) {
+          const canAfford = this.gold >= vEl.__voucherData.price;
+          vEl.classList.toggle('unaffordable', !canAfford);
+          const priceEl = vEl.querySelector('.voucher-price');
+          if (priceEl) priceEl.className = `voucher-price ${canAfford ? 'affordable' : 'unaffordable'}`;
         }
       });
     }
@@ -2981,25 +3338,34 @@
       const submitBox = document.querySelector('.leaderboard-submit-box');
       const btnSubmitScore = document.getElementById('btnSubmitScore');
       const lblSubmitStatus = document.getElementById('lblSubmitStatus');
+      const txtPlayerName = document.getElementById('txtPlayerName');
+
+      if (txtPlayerName) {
+        txtPlayerName.value = localStorage.getItem('munch_last_player_name') || '';
+      }
 
       // Verifica se a pontuação entra no Top 5 de Todos os Tempos na categoria atual
       const lb = window.MunchLeaderboard || (typeof MunchLeaderboard !== 'undefined' ? MunchLeaderboard : null);
       const isTop5 = lb ? await lb.isTop5(this.stake || 'white', finalScore) : false;
 
       if (submitBox) {
-        if (isTop5) {
-          let stakeLabel = 'FICHA BRANCA';
-          if (this.stake === 'red') stakeLabel = 'FICHA VERMELHA';
-          if (this.stake === 'gold') stakeLabel = 'FICHA DOURADA';
-
-          submitBox.style.display = 'block';
-          if (btnSubmitScore) btnSubmitScore.disabled = false;
-          if (lblSubmitStatus) {
-            lblSubmitStatus.innerText = `🎉 NOVO TOP 5 GLOBAL NA ${stakeLabel}!`;
+        // Caixa SEMPRE visível para o jogador registrar seu apelido e recorde
+        submitBox.style.display = 'flex';
+        if (btnSubmitScore) btnSubmitScore.disabled = false;
+        if (lblSubmitStatus) {
+          if (isTop5) {
+            let stakeLabel = 'FICHA BRANCA';
+            if (this.stake === 'red') stakeLabel = 'FICHA VERMELHA';
+            if (this.stake === 'gold') stakeLabel = 'FICHA DOURADA';
+            lblSubmitStatus.innerText = `🎉 NOVO TOP 5 NA ${stakeLabel}! REGISTRE SEU NOME:`;
             lblSubmitStatus.style.color = '#FFE600';
+          } else if (isNewRecord) {
+            lblSubmitStatus.innerText = `★ NOVO RECORDE PESSOAL! REGISTRE SEU NOME:`;
+            lblSubmitStatus.style.color = '#00E5FF';
+          } else {
+            lblSubmitStatus.innerText = `REGISTRE SEU RECORDE NO RANKING:`;
+            lblSubmitStatus.style.color = '#8c97a8';
           }
-        } else {
-          submitBox.style.display = 'none';
         }
       }
 
@@ -3039,17 +3405,14 @@
         const startY = Math.floor(GRID_HEIGHT / 2) + 1;
         this.player.resetPosition(startX, startY);
 
-        // Reseta inimigos nos cantos
-        const spawnCoords = [
-          { x: 2, y: 2 },
-          { x: GRID_WIDTH - 3, y: 2 },
-          { x: 2, y: GRID_HEIGHT - 3 },
-          { x: GRID_WIDTH - 3, y: GRID_HEIGHT - 3 }
-        ];
+        // Reseta inimigos nos novos spawns dinâmicos e seguros
+        const dynamicSpawns = this.getDynamicEnemySpawns(this.ghosts.length, 6);
         this.ghosts.forEach((g, i) => {
           if (g) {
-            const coord = spawnCoords[i % spawnCoords.length];
-            g.resetPosition(coord.x, coord.y);
+            const spawn = dynamicSpawns[i] || { x: 2, y: 2 };
+            const validDirs = g.getInitialValidDirs ? g.getInitialValidDirs(this) : [];
+            const dir = validDirs.length > 0 ? validDirs[Math.floor(Math.random() * validDirs.length)] : DIRECTIONS.UP;
+            g.resetPosition(spawn.x, spawn.y, dir);
           }
         });
 
@@ -4416,9 +4779,9 @@
     }
   }
 
-  // Classe dos inimigos geométricos
+  // Classe dos inimigos geométricos (com IA dinâmica, patrulha variada e comportamentos imprevisíveis)
   class SpikeEnemy {
-    constructor(gridX, gridY, type) {
+    constructor(gridX, gridY, type, personality = 0) {
       this.gridX = gridX;
       this.gridY = gridY;
       this.x = gridX * TILE_SIZE;
@@ -4427,6 +4790,7 @@
       this.targetX = this.x;
       this.targetY = this.y;
       this.type = type; // 'SPADE' ou 'DIAMOND'
+      this.personality = personality; // Variação de comportamento para cada inimigo
 
       this.speed = type === 'DIAMOND' ? 0.11 : 0.075;
       this.dir = DIRECTIONS.UP;
@@ -4437,9 +4801,15 @@
       this.dashCooldown = 0;
 
       this.toRemove = false;
+
+      // Variáveis do Rework de Movimentação Dinâmica
+      this.aiTimer = Math.random() * 2500 + 2500;
+      this.aiMode = type === 'DIAMOND' ? (personality === 1 ? 'intercept' : 'hunt') : 'patrol';
+      this.patrolTarget = { x: gridX, y: gridY };
+      this.recentTiles = []; // Histórico circular anti-looping/ping-pong
     }
 
-    resetPosition(gridX, gridY) {
+    resetPosition(gridX, gridY, initialDir = null) {
       this.gridX = gridX;
       this.gridY = gridY;
       this.x = gridX * TILE_SIZE;
@@ -4447,9 +4817,41 @@
       this.targetX = this.x;
       this.targetY = this.y;
       this.state = 'normal';
-      this.dir = DIRECTIONS.UP;
+      this.dir = initialDir || DIRECTIONS.UP;
       this.respawnTimer = 0;
       this.dashCooldown = 0;
+      this.recentTiles = [];
+      this.patrolTarget = { x: gridX, y: gridY };
+      this.aiTimer = Math.random() * 2500 + 2500;
+    }
+
+    getInitialValidDirs(game) {
+      const valid = [];
+      for (const d of [DIRECTIONS.UP, DIRECTIONS.DOWN, DIRECTIONS.LEFT, DIRECTIONS.RIGHT]) {
+        if (game.isWalkable(this.gridX + d.x, this.gridY + d.y)) {
+          valid.push(d);
+        }
+      }
+      return valid;
+    }
+
+    pickNewPatrolTarget(game) {
+      const randX = Math.floor(Math.random() * (GRID_WIDTH - 2)) + 1;
+      const randY = Math.floor(Math.random() * (GRID_HEIGHT - 2)) + 1;
+      if (game.isWalkable(randX, randY)) {
+        this.patrolTarget = { x: randX, y: randY };
+      } else {
+        for (let r = 1; r < 5; r++) {
+          for (const d of [DIRECTIONS.UP, DIRECTIONS.DOWN, DIRECTIONS.LEFT, DIRECTIONS.RIGHT]) {
+            const nx = randX + d.x * r;
+            const ny = randY + d.y * r;
+            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && game.isWalkable(nx, ny)) {
+              this.patrolTarget = { x: nx, y: ny };
+              return;
+            }
+          }
+        }
+      }
     }
 
     isMoving() {
@@ -4503,15 +4905,17 @@
         `+200 Fichas +${extraMult} Mult`
       );
 
-      // Manda de volta para a base
-      const baseX = Math.floor(GRID_WIDTH / 2) - 1;
-      const baseY = Math.floor(GRID_HEIGHT / 2);
-      this.x = baseX * TILE_SIZE;
-      this.y = baseY * TILE_SIZE;
+      // Ponto de respawn seguro distante do jogador
+      const safeSpawn = (game && typeof game.getRandomSafeSpawn === 'function')
+        ? game.getRandomSafeSpawn(6)
+        : { x: Math.floor(GRID_WIDTH / 2) - 1, y: Math.floor(GRID_HEIGHT / 2) };
+
+      this.x = safeSpawn.x * TILE_SIZE;
+      this.y = safeSpawn.y * TILE_SIZE;
       this.targetX = this.x;
       this.targetY = this.y;
-      this.gridX = baseX;
-      this.gridY = baseY;
+      this.gridX = safeSpawn.x;
+      this.gridY = safeSpawn.y;
 
       game.triggerScreenShake(6);
       game.updateHUD();
@@ -4519,15 +4923,17 @@
     }
 
     update(dt, game) {
-      const baseX = Math.floor(GRID_WIDTH / 2) - 1;
-      const baseY = Math.floor(GRID_HEIGHT / 2);
-
       // Controle de respawn
       if (this.state === 'respawning') {
         this.respawnTimer -= dt;
         if (this.respawnTimer <= 0) {
           this.state = 'normal';
-          this.resetPosition(baseX, baseY);
+          const safeSpawn = (game && typeof game.getRandomSafeSpawn === 'function')
+            ? game.getRandomSafeSpawn(6)
+            : { x: Math.floor(GRID_WIDTH / 2) - 1, y: Math.floor(GRID_HEIGHT / 2) };
+          const valid = this.getInitialValidDirs(game);
+          const dir = valid.length > 0 ? valid[Math.floor(Math.random() * valid.length)] : DIRECTIONS.UP;
+          this.resetPosition(safeSpawn.x, safeSpawn.y, dir);
         }
         return;
       }
@@ -4544,6 +4950,20 @@
           this.state = game.frightenedTimer > 0 ? 'frightened' : 'normal';
         }
         return;
+      }
+
+      // Temporizador de alternância de modo dinâmico de IA
+      this.aiTimer -= dt;
+      if (this.aiTimer <= 0) {
+        this.aiTimer = Math.random() * 3000 + 3000;
+        if (this.type === 'DIAMOND') {
+          const roll = Math.random();
+          if (roll < 0.55) this.aiMode = 'hunt';
+          else if (roll < 0.85) this.aiMode = 'intercept';
+          else this.aiMode = 'wander';
+        } else {
+          this.pickNewPatrolTarget(game);
+        }
       }
 
       // Define a velocidade atual
@@ -4581,6 +5001,9 @@
         currentSpeed = this.speed * 2.5; // Retornando à base
       }
 
+      const baseX = Math.floor(GRID_WIDTH / 2) - 1;
+      const baseY = Math.floor(GRID_HEIGHT / 2);
+
       if (this.isMoving()) {
         const dx = this.targetX - this.x;
         const dy = this.targetY - this.y;
@@ -4593,8 +5016,13 @@
           this.gridX = Math.round(this.x / TILE_SIZE);
           this.gridY = Math.round(this.y / TILE_SIZE);
 
-          // Teleporte
-          if (this.gridY === 7) {
+          // Registra histórico circular para anti-looping
+          this.recentTiles.push(`${this.gridX},${this.gridY}`);
+          if (this.recentTiles.length > 5) this.recentTiles.shift();
+
+          // Teleporte de Warps (linha 7 ou linha central)
+          const isWarpRow = this.gridY === 7 || this.gridY === baseY || (game.map[this.gridY] && game.map[this.gridY][0] === 0);
+          if (isWarpRow) {
             if (this.gridX < 0) {
               this.gridX = GRID_WIDTH - 1;
               this.x = this.gridX * TILE_SIZE;
@@ -4616,9 +5044,8 @@
             const checkY = this.gridY + this.dir.y;
             if (!game.isWalkable(checkX, checkY)) {
               this.state = 'normal';
-              // Cooldown menor no boss
               const baseCooldown = (game.blind === 3 && game.ante % 2 === 0) ? 750 : 1500;
-              this.dashCooldown = baseCooldown; // Impede outra investida imediatamente
+              this.dashCooldown = baseCooldown;
             }
           }
         } else {
@@ -4641,7 +5068,7 @@
           return;
         }
 
-        // Investida do Espada
+        // Investida do Espada (Linha de Visão)
         if (this.type === 'SPADE' && this.state === 'normal' && this.dashCooldown <= 0) {
           const seenDir = this.checkLineOfSight(game.player, game);
           if (seenDir && game.isWalkable(this.gridX + seenDir.x, this.gridY + seenDir.y)) {
@@ -4654,11 +5081,11 @@
           }
         }
 
-        // Escolha de caminho nas interseções
+        // Escolha de caminho nas interseções (REWORK DE MOVIMENTAÇÃO)
         const validDirs = [];
         for (const [key, d] of Object.entries(DIRECTIONS)) {
           if (d === DIRECTIONS.NONE) continue;
-          if (d.x === -this.dir.x && d.y === -this.dir.y) continue; // Não volta imediatamente para trás
+          if (d.x === -this.dir.x && d.y === -this.dir.y) continue; // Não dá meia-volta imediata
 
           if (game.isWalkable(this.gridX + d.x, this.gridY + d.y)) {
             validDirs.push(d);
@@ -4666,6 +5093,7 @@
         }
 
         if (validDirs.length === 0) {
+          // Beco sem saída: única opção é retornar
           const oppositeDir = { x: -this.dir.x, y: -this.dir.y };
           if (game.isWalkable(this.gridX + oppositeDir.x, this.gridY + oppositeDir.y)) {
             this.dir = Object.values(DIRECTIONS).find(d => d.x === oppositeDir.x && d.y === oppositeDir.y) || this.dir;
@@ -4673,21 +5101,89 @@
         } else {
           let chosenDir = null;
 
-          // Perseguição do Ouro
-          if (this.type === 'DIAMOND' && this.state === 'normal' && game.player) {
-            let minDistance = Infinity;
-            validDirs.forEach(d => {
-              const nextC = this.gridX + d.x;
-              const nextR = this.gridY + d.y;
-              const dist = Math.hypot(nextC - game.player.gridX, nextR - game.player.gridY);
-              if (dist < minDistance) {
-                minDistance = dist;
-                chosenDir = d;
-              }
+          // 1. ESTADO DE PÂNICO (FRIGHTENED): Foge ativamente do jogador!
+          if (this.state === 'frightened' && game.player) {
+            const scoredDirs = validDirs.map(d => {
+              const nx = this.gridX + d.x;
+              const ny = this.gridY + d.y;
+              const dist = Math.hypot(nx - game.player.gridX, ny - game.player.gridY);
+              return { d, dist };
             });
+            scoredDirs.sort((a, b) => b.dist - a.dist);
+            chosenDir = (Math.random() < 0.8 || scoredDirs.length === 1) 
+              ? scoredDirs[0].d 
+              : scoredDirs[Math.floor(Math.random() * scoredDirs.length)].d;
+          }
+          // 2. INIMIGO OURO (DIAMOND): Perseguição inteligente + Interceptação na frente do jogador + Fintas
+          else if (this.type === 'DIAMOND' && this.state === 'normal' && game.player) {
+            let targetC = game.player.gridX;
+            let targetR = game.player.gridY;
+
+            // Se estiver em modo de interceptação, mira 2 tiles à frente de onde o jogador está indo
+            if (this.aiMode === 'intercept' && game.player.dir && (game.player.dir.x !== 0 || game.player.dir.y !== 0)) {
+              targetC += game.player.dir.x * 2;
+              targetR += game.player.dir.y * 2;
+            } else if (this.aiMode === 'wander') {
+              // Modo caótico breve
+              targetC = Math.floor(Math.random() * GRID_WIDTH);
+              targetR = Math.floor(Math.random() * GRID_HEIGHT);
+            }
+
+            const scored = validDirs.map(d => {
+              const nx = this.gridX + d.x;
+              const ny = this.gridY + d.y;
+              let score = Math.hypot(nx - targetC, ny - targetR);
+              // Penalidade leve se visitou esse tile recentemente (evita ping-pong)
+              if (this.recentTiles.includes(`${nx},${ny}`)) {
+                score += 1.5;
+              }
+              // Bônus de inércia para manter fluxo contínuo
+              if (d.x === this.dir.x && d.y === this.dir.y) {
+                score -= 0.4;
+              }
+              return { d, score };
+            });
+
+            scored.sort((a, b) => a.score - b.score);
+
+            // 72% de chance de pegar a melhor rota; 28% de finta/rota alternativa
+            if (Math.random() < 0.72 || scored.length === 1) {
+              chosenDir = scored[0].d;
+            } else {
+              chosenDir = scored[Math.floor(Math.random() * scored.length)].d;
+            }
+          }
+          // 3. INIMIGO ESPADA (SPADE): Patrulha de longo alcance pelos setores + Momentum
+          else if (this.type === 'SPADE' && this.state === 'normal') {
+            const distToTarget = Math.hypot(this.gridX - this.patrolTarget.x, this.gridY - this.patrolTarget.y);
+            if (distToTarget < 2.0) {
+              this.pickNewPatrolTarget(game);
+            }
+
+            const scored = validDirs.map(d => {
+              const nx = this.gridX + d.x;
+              const ny = this.gridY + d.y;
+              let score = Math.hypot(nx - this.patrolTarget.x, ny - this.patrolTarget.y);
+              if (this.recentTiles.includes(`${nx},${ny}`)) {
+                score += 1.8;
+              }
+              if (d.x === this.dir.x && d.y === this.dir.y) {
+                score -= 0.6; // Favorece seguir em frente em corredores
+              }
+              return { d, score };
+            });
+
+            scored.sort((a, b) => a.score - b.score);
+
+            // 68% de chance de rota ótima para a patrulha, 32% de desvio aleatório
+            if (Math.random() < 0.68 || scored.length === 1) {
+              chosenDir = scored[0].d;
+            } else {
+              chosenDir = scored[Math.floor(Math.random() * scored.length)].d;
+            }
           }
 
-          // Escolha aleatória
+          // Fallback aleatório seguro
           if (!chosenDir) {
             chosenDir = validDirs[Math.floor(Math.random() * validDirs.length)];
           }

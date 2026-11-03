@@ -245,58 +245,78 @@
   <div class="in-game-toast-container" id="inGameToastContainer"></div>
   <div class="achievement-toast-container" id="achievementToastContainer"></div>
 
-  <!-- Modal de derrota -->
+  <!-- Modal de derrota (Game Over Arcade Redesign) -->
   <div class="overlay-modal" id="modalGameOver">
     <div class="modal-content game-over-modal-content">
-      <div class="game-over-header-badge" id="gameOverHeaderBadge" style="display: none;"></div>
-      <h2 class="modal-title lose" id="gameOverTitle">Fim de Jogo</h2>
-      <p class="modal-subtitle" id="gameOverSubtitle">Seu slime sucumbiu aos corredores do labirinto. Tente novamente!</p>
+      <div class="game-over-header-badge" id="gameOverHeaderBadge">
+        <span class="badge-pulse-dot"></span> [ TRANSMISSÃO INTERROMPIDA // GAME OVER ]
+      </div>
+      <h2 class="modal-title game-over-title" id="gameOverTitle">FIM DE JOGO</h2>
+      <p class="modal-subtitle game-over-subtitle" id="gameOverSubtitle">Seu slime sucumbiu aos corredores do labirinto.</p>
 
       <!-- Relatório Completo da Partida (Run Recap) -->
       <div class="modal-stats-box game-over-stats-box">
-        <div class="modal-stat-row">
-          <span class="modal-stat-label">🏆 Pontuação Final:</span>
-          <span class="modal-stat-value highlight-gold" id="loseModalScore">0</span>
+        <!-- Hero Score Box -->
+        <div class="game-over-hero-score">
+          <span class="hero-score-label">🏆 PONTUAÇÃO FINAL</span>
+          <span class="hero-score-value" id="loseModalScore">0</span>
+          <div class="game-over-record-badge" id="rowPersonalBest" style="display: none;">
+            ★ NOVO RECORDE PESSOAL! ★
+          </div>
         </div>
-        <div class="modal-stat-row" id="rowPersonalBest" style="display: none;">
-          <span class="modal-stat-label">⭐ RECORDE:</span>
-          <span class="modal-stat-value highlight-cyan new-record-pulse">★ NOVO RECORDE PESSOAL! ★</span>
+
+        <!-- Metric Grid -->
+        <div class="game-over-metrics-grid">
+          <div class="go-metric-card">
+            <span class="go-metric-icon">📍</span>
+            <div class="go-metric-info">
+              <span class="go-metric-label">PONTO CRÍTICO</span>
+              <span class="go-metric-val cyan" id="loseModalStage">NÍVEL 1 // ESTÁGIO 1</span>
+            </div>
+          </div>
+          <div class="go-metric-card">
+            <span class="go-metric-icon">🪙</span>
+            <div class="go-metric-info">
+              <span class="go-metric-label">OURO TOTAL</span>
+              <span class="go-metric-val gold" id="loseModalGold">0</span>
+            </div>
+          </div>
+          <div class="go-metric-card">
+            <span class="go-metric-icon">⚔️</span>
+            <div class="go-metric-info">
+              <span class="go-metric-label">ABATES / PASTILHAS</span>
+              <span class="go-metric-val white" id="loseModalKillsPellets">0 / 0</span>
+            </div>
+          </div>
         </div>
-        <div class="modal-stat-row">
-          <span class="modal-stat-label">📍 Ponto da Derrota:</span>
-          <span class="modal-stat-value highlight-cyan" id="loseModalStage">NÍVEL 1 // ESTÁGIO 1</span>
-        </div>
-        <div class="modal-stat-row">
-          <span class="modal-stat-label">🪙 Moedas Coletadas:</span>
-          <span class="modal-stat-value highlight-gold" id="loseModalGold">0</span>
-        </div>
-        <div class="modal-stat-row">
-          <span class="modal-stat-label">⚔️ Inimigos / Pastilhas:</span>
-          <span class="modal-stat-value" id="loseModalKillsPellets">0 / 0</span>
-        </div>
-        <div class="victory-relics-container" style="margin-top: 6px;">
-          <span class="modal-stat-label">🃏 Relíquias da Build:</span>
-          <div class="victory-relics-list" id="loseModalRelicsList"></div>
+
+        <!-- Relíquias da Build -->
+        <div class="game-over-relics-box">
+          <span class="go-relics-label">🃏 RELÍQUIAS EQUIPADAS NA RUN</span>
+          <div class="victory-relics-list game-over-relics-list" id="loseModalRelicsList"></div>
         </div>
       </div>
 
-      <!-- Formulário de Envio para o Ranking Global -->
-      <div class="leaderboard-submit-box" id="gameOverLeaderboardBox"
-        style="margin-top:12px; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; border:1px solid #333;">
-        <label style="font-size:9px; color:#FFE600; font-weight:bold; font-family:'Press Start 2P', monospace;">🏆
-          REGISTRAR NO RANKING GLOBAL</label>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="text" id="txtPlayerName" placeholder="SEU APELIDO" maxlength="12"
-            style="font-family:'Press Start 2P', monospace; font-size:9px; padding:8px; background:#08080d; color:#fff; border:1.5px solid #FFE600; border-radius:4px; flex-grow:1; text-transform:uppercase; outline:none;">
-          <button id="btnSubmitScore"
-            style="font-family:'Press Start 2P', monospace; font-size:8px; padding:8px 12px; background:#FFE600; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">ENVIAR</button>
+      <!-- Formulário de Envio para o Ranking Global / Salvar Recorde (SEMPRE VISÍVEL) -->
+      <div class="leaderboard-submit-box game-over-submit-box" id="gameOverLeaderboardBox">
+        <div class="go-lb-header">
+          <span class="go-lb-title">🏆 REGISTRAR RECORDE NO RANKING</span>
+          <span class="go-lb-status" id="lblSubmitStatus"></span>
         </div>
-        <span id="lblSubmitStatus" style="font-size:9px; color:#10B981; margin-top:6px; display:block;"></span>
+        <div class="go-lb-input-group">
+          <input type="text" id="txtPlayerName" placeholder="SEU APELIDO" maxlength="12" class="go-input-name" autocomplete="off">
+          <button id="btnSubmitScore" class="go-btn-submit">[ SALVAR RECORDE ]</button>
+        </div>
       </div>
 
-      <div style="display:flex; gap:10px; width:100%; margin-top:14px;">
-        <button class="btn-arcade-modal" id="btnRestart" style="flex:1;">[ RECOMEÇAR ]</button>
-        <button class="btn-arcade-modal" id="btnReturnMenu" style="flex:1; background:#2a2a3a;">[ VOLTAR AO MENU ]</button>
+      <!-- Ações do Modal -->
+      <div class="game-over-actions-grid">
+        <button class="btn-arcade-modal go-btn-restart" id="btnRestart">
+          [ TENTAR NOVAMENTE ]
+        </button>
+        <button class="btn-arcade-modal go-btn-menu" id="btnReturnMenu">
+          [ VOLTAR AO MENU ]
+        </button>
       </div>
     </div>
   </div>

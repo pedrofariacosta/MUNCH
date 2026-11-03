@@ -5,7 +5,7 @@
 
   const DEFAULT_SETTINGS = {
     musicVolume: 10,
-    sfxVolume: 100,
+    sfxVolume: 10,
     isMuted: false
   };
 
@@ -43,6 +43,9 @@
         }
         if (settings && (settings.musicVolume === 25 || settings.musicVolume === 80)) {
           settings.musicVolume = DEFAULT_SETTINGS.musicVolume;
+        }
+        if (settings && (settings.sfxVolume === 100 || settings.sfxVolume === 80)) {
+          settings.sfxVolume = DEFAULT_SETTINGS.sfxVolume;
         }
         return Object.assign({}, DEFAULT_SETTINGS, settings);
       } catch (e) {

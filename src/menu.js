@@ -143,6 +143,19 @@ window.addEventListener('DOMContentLoaded', () => {
     if (modalId === 'modalStats') refreshStatsModal();
     if (modalId === 'modalAchievements') refreshAchievementsModal();
     if (modalId === 'modalOptions') refreshOptionsModal();
+
+    modalFocusIndex = 0;
+    setTimeout(() => {
+      const interactables = getModalInteractables(modalId);
+      if (modalId === 'modalPlay') {
+        const activeRunCard = document.getElementById('activeRunCard');
+        if (!activeRunCard || activeRunCard.classList.contains('hidden')) {
+          const selectedIdx = interactables.findIndex(el => el.classList && el.classList.contains('selected'));
+          if (selectedIdx !== -1) modalFocusIndex = selectedIdx;
+        }
+      }
+      updateModalFocus(interactables);
+    }, 50);
   }
 
   function closeModal(modalId) {
@@ -215,12 +228,119 @@ window.addEventListener('DOMContentLoaded', () => {
     btn.click();
   }
 
-  // Navegação por teclado (Enter, W/S/Setas e ESC)
+  // ==========================================================================
+  // NAVEGAÇÃO COMPLETA POR TECLADO (MENU PRINCIPAL E MODAIS)
+  // ==========================================================================
+  let modalFocusIndex = 0;
+
+  function getModalInteractables(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return [];
+
+    if (modalId === 'modalPlay') {
+      const items = [];
+      const activeRunCard = document.getElementById('activeRunCard');
+      const btnContinue = document.getElementById('btnContinueRun');
+      if (activeRunCard && !activeRunCard.classList.contains('hidden') && btnContinue) {
+        items.push(btnContinue);
+      }
+      const stakes = Array.from(modal.querySelectorAll('.stake-card'));
+      items.push(...stakes);
+
+      const chkEndless = document.getElementById('chkEndlessMode');
+      if (chkEndless) items.push(chkEndless);
+
+      const btnStart = document.getElementById('btnStartNewRun');
+      if (btnStart) items.push(btnStart);
+
+      return items;
+    }
+
+    if (modalId === 'modalDeck') {
+      const items = [];
+      const tabs = Array.from(modal.querySelectorAll('.arcade-tab-btn'));
+      items.push(...tabs);
+
+      const activeContent = modal.querySelector('.arcade-tab-content.active');
+      if (activeContent) {
+        const selectables = Array.from(activeContent.querySelectorAll('.slime-select-card, .theme-card, .compendium-card'));
+        items.push(...selectables);
+      }
+      return items;
+    }
+
+    if (modalId === 'modalAchievements') {
+      return Array.from(modal.querySelectorAll('.ach-filter-btn'));
+    }
+
+    if (modalId === 'modalOptions') {
+      return Array.from(modal.querySelectorAll('input, button:not(.arcade-modal-close)'));
+    }
+
+    return Array.from(modal.querySelectorAll('button:not(.arcade-modal-close), input, .stake-card, .slime-select-card'));
+  }
+
+  function updateModalFocus(interactables) {
+    if (!interactables || interactables.length === 0) return;
+    modalFocusIndex = (modalFocusIndex + interactables.length) % interactables.length;
+    interactables.forEach((el, idx) => {
+      if (idx === modalFocusIndex) {
+        el.classList.add('kb-focus');
+        if (typeof el.focus === 'function' && el.tagName !== 'DIV') {
+          el.focus();
+        }
+      } else {
+        el.classList.remove('kb-focus');
+      }
+    });
+  }
+
+  // Navegação por teclado (Enter, W/S/A/D/Setas e ESC)
   window.addEventListener('keydown', (e) => {
     if (activeModalsStack.length > 0) {
       if (e.code === 'Escape') {
         e.preventDefault();
         closeTopModal();
+        return;
+      }
+
+      const topModalId = activeModalsStack[activeModalsStack.length - 1];
+      const interactables = getModalInteractables(topModalId);
+      if (interactables.length === 0) return;
+
+      if (e.code === 'ArrowDown' || e.code === 'ArrowRight' || e.code === 'KeyS' || e.code === 'KeyD') {
+        e.preventDefault();
+        modalFocusIndex = (modalFocusIndex + 1) % interactables.length;
+        updateModalFocus(interactables);
+        return;
+      }
+
+      if (e.code === 'ArrowUp' || e.code === 'ArrowLeft' || e.code === 'KeyW' || e.code === 'KeyA') {
+        e.preventDefault();
+        modalFocusIndex = (modalFocusIndex - 1 + interactables.length) % interactables.length;
+        updateModalFocus(interactables);
+        return;
+      }
+
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        const currentEl = interactables[modalFocusIndex];
+        if (currentEl) {
+          if (currentEl.type === 'checkbox') {
+            currentEl.checked = !currentEl.checked;
+            currentEl.dispatchEvent(new Event('change'));
+          } else {
+            currentEl.click();
+            // Se foi uma aba, atualiza interactables disponíveis
+            if (currentEl.classList.contains('arcade-tab-btn')) {
+              setTimeout(() => {
+                const refreshed = getModalInteractables(topModalId);
+                updateModalFocus(refreshed);
+              }, 60);
+            }
+          }
+        }
+        return;
       }
       return;
     }
@@ -236,6 +356,7 @@ window.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         setFocus(focusIndex + 1);
         break;
+      case 'ArrowRight':
       case 'Enter':
       case 'Space':
         e.preventDefault();
@@ -940,7 +1061,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // FUNCIONALIDADE 4: MODAL DE CONFIGURAÇÕES & ACESSIBILIDADE
   // ==========================================================================
   function refreshOptionsModal() {
-    const audio = window.AudioManager ? window.AudioManager.settings : { musicVolume: 10, sfxVolume: 100, isMuted: false };
+    const audio = window.AudioManager ? window.AudioManager.settings : { musicVolume: 10, sfxVolume: 10, isMuted: false };
     const scanlines = localStorage.getItem('munch_option_scanlines') !== 'false';
     const shake = localStorage.getItem('munch_option_shake') || '100';
     const reduceFlashes = localStorage.getItem('munch_option_reduce_flashes') === 'true';
@@ -1014,7 +1135,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (window.AudioManager) {
         window.AudioManager.setMasterMute(false, false);
         window.AudioManager.setMusicVolume(10);
-        window.AudioManager.setSfxVolume(100);
+        window.AudioManager.setSfxVolume(10);
       }
 
       // 2. Gráficos & Acessibilidade
@@ -1278,11 +1399,89 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ==========================================================================
+
+  // POEIRA CÓSMICA FLUTUANTE DINÂMICA (PARTÍCULAS VIVAS NO ESPAÇO)
+
+  // ==========================================================================
+
+  const cosmicDustContainer = document.querySelector('.cosmic-dust');
+
+  if (cosmicDustContainer) {
+
+    cosmicDustContainer.innerHTML = '';
+
+    const particleCount = 28;
+
+    const colors = [
+
+      'rgba(255, 255, 255, 0.85)',
+
+      'rgba(0, 229, 255, 0.9)',
+
+      'rgba(255, 230, 0, 0.85)',
+
+      'rgba(255, 0, 128, 0.8)'
+
+    ];
+
+
+
+    for (let i = 0; i < particleCount; i++) {
+
+      const p = document.createElement('div');
+
+      p.className = 'floating-dust-mote';
+
+      const size = 2 + Math.random() * 3.5;
+
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      const duration = 12 + Math.random() * 16;
+
+      const delay = -(Math.random() * duration);
+
+      const left = Math.random() * 98;
+
+      const driftX = (Math.random() - 0.5) * 80;
+
+      const maxOp = 0.35 + Math.random() * 0.45;
+
+
+
+      p.style.left = left + '%';
+
+      p.style.width = size + 'px';
+
+      p.style.height = size + 'px';
+
+      p.style.backgroundColor = color;
+
+      p.style.boxShadow = '0 0 ' + (size * 2.5) + 'px ' + color;
+
+      p.style.animationDuration = duration + 's';
+
+      p.style.animationDelay = delay + 's';
+
+      p.style.setProperty('--drift-x', driftX + 'px');
+
+      p.style.setProperty('--max-op', maxOp.toString());
+
+
+
+      cosmicDustContainer.appendChild(p);
+
+    }
+
+  }
+
+
+
   // Animação de rastro de bolinhas comidas pelo slime decorativo no rodapé
   const dotsContainer = document.querySelector('.dots-trail');
   const chaseGroup = document.querySelector('.chase-group');
   const runnerTrack = document.querySelector('.runner-track');
-  const DOT_SPACING = 32;
+  const DOT_SPACING = 68;
   let dots = [];
 
   function createDots() {
@@ -1338,25 +1537,28 @@ window.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updateDots);
 
-  // Partículas de poeira otimizadas
+  // Partículas de poeira sincronizadas no impacto do pulo com o chão
   const slimeWrapper = document.querySelector('.slime-wrapper');
+  const slimeCharacter = document.querySelector('.slime-character');
 
   function spawnDustBurst() {
     if (!slimeWrapper || !runnerTrack) return;
-    const trackWidth = runnerTrack.offsetWidth || window.innerWidth;
-    const elapsed = (performance.now() - animStart) % 12000;
-    const progress = elapsed / 12000;
-    const groupX = -320 + progress * (trackWidth + 770);
+    const trackRect = runnerTrack.getBoundingClientRect();
+    const slimeRect = slimeWrapper.getBoundingClientRect();
 
-    const baseX = groupX + 32;
-    const baseY = 80;
+    // Apenas solta poeira se o slime estiver visível na tela
+    if (slimeRect.right < trackRect.left || slimeRect.left > trackRect.right) return;
+
+    // O slime corre para a direita -> a parte de trás dele fica em slimeRect.left
+    const baseX = (slimeRect.left - trackRect.left) + 8;
+    const baseY = (slimeRect.bottom - trackRect.top) - 8;
 
     for (let i = 0; i < 3; i++) {
       const p = document.createElement('div');
       p.className = 'dust-particle-track';
-      const side = i < 2 ? -1 : 1;
-      const dx = (4 + Math.random() * 8) * side;
-      const dy = -(3 + Math.random() * 6);
+      // As partículas sopram estritamente para trás (dx negativo) e sobem levemente
+      const dx = -(8 + Math.random() * 12);
+      const dy = -(3 + Math.random() * 7);
 
       p.style.left = baseX + 'px';
       p.style.top = baseY + 'px';
@@ -1366,11 +1568,18 @@ window.addEventListener('DOMContentLoaded', () => {
       runnerTrack.appendChild(p);
 
       requestAnimationFrame(() => p.classList.add('burst'));
-      setTimeout(() => p.remove(), 350);
+      setTimeout(() => p.remove(), 400);
     }
   }
 
-  setInterval(spawnDustBurst, 600);
+  // Aciona perfeitamente no momento exato em que o slime toca o chão (0%/100% de cada pulo)
+  if (slimeCharacter) {
+    slimeCharacter.addEventListener('animationiteration', (e) => {
+      if (e.animationName === 'slime-jump') {
+        spawnDustBurst();
+      }
+    });
+  }
 
   // Inicialização da Meta-Progressão no Menu
   refreshDeckModal();
